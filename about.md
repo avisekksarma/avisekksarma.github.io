@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: home
 title: About
 permalink: /about/
 ---
@@ -13,11 +13,11 @@ I enjoy solving problems at the intersection of **system design, performance opt
 ## 🎓 Education
 
 - **Bachelor in Computer Engineering** — IOE Pulchowk Campus, Lalitpur (2019 – 2024)  
-  Full scholarship, *Rank 34 out of 14,000+ students* in IOE entrance.  
+  *Rank 34 out of 14,000+ students* (Top 0.25%) in IOE entrance. Awarded the **Golden Jubilee Scholarship** (Embassy of India).  
   Overall: **76% average**
 
 - **+2 Science (Mathematics)** — SOSHGS, Gandaki, Pokhara (2017 – 2019)  
-  Topper with **3.85 GPA**
+  **All Nepal Second Rank** with **3.85 GPA** in Grade 12.
 
 ---
 
@@ -27,3 +27,10 @@ I enjoy solving problems at the intersection of **system design, performance opt
 - Applied AI (LLMs, Computer Vision, NLP for low-resource languages)  
 - System Optimization & Reliability  
 - Teaching and community engagement
+
+---
+
+## 📬 Contact & Links
+
+- **GitHub:** [avisekksarma](https://github.com/avisekksarma)
+- **Email:** [abhishek.work1710@gmail.com](mailto:abhishek.work1710@gmail.com)
