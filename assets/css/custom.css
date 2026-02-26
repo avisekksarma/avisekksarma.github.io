@@ -115,6 +115,50 @@ header {
     transform: translateY(-2px);
 }
 
+/* Impact Grid Styles */
+.impact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.impact-card {
+    padding: 24px;
+    border: 1px solid #333;
+    border-radius: 12px;
+    background: #111;
+    /* Deeper black for more contrast */
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.impact-card:hover {
+    transform: translateY(-5px);
+    border-color: #00FF00;
+    box-shadow: 0 10px 30px rgba(0, 255, 0, 0.05);
+}
+
+.impact-card .icon {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.impact-card h3 {
+    margin-top: 0;
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+    color: #eee;
+}
+
+.impact-card p {
+    margin: 0;
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
 .card p {
     margin: 0;
     color: #ccc;

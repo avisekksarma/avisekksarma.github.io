@@ -26,7 +26,7 @@ permalink: /
 
   <section style="margin-bottom: 50px; line-height: 1.7;">
     <p style="font-size: 1.1rem;">
-      I build scalable backend systems that blend seamlessly with AI. My work focuses on high-performance infrastructure, intelligent automation, and solving complex architectural challenges.
+      I work on architecting robust backend infrastructures and leveraging AI-driven automation in production. I am particularly interested in how scalable system design can be used to deploy and maintain intelligent services at scale, along with integrating AI to solve real-world problems.
     </p>
   </section>
 
