@@ -59,73 +59,73 @@ permalink: /
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 250;
+    camera.position.set(0, 120, 180);
+    camera.lookAt(0, 0, 0);
 
-    const particlesCount = 100;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particlesCount * 3);
-    const velocities = new Float32Array(particlesCount * 3);
+    // Flowing Topography Grid
+    const size = 800;
+    const divisions = 70;
+    const geometry = new THREE.PlaneGeometry(size, size, divisions, divisions);
+    const material = new THREE.PointsMaterial({ 
+      color: 0x00FF00, 
+      size: 1.0, 
+      transparent: true, 
+      opacity: 0.3 
+    });
+    
+    const count = geometry.attributes.position.count;
+    const grid = new THREE.Points(geometry, material);
+    grid.rotation.x = -Math.PI / 2.2;
+    scene.add(grid);
 
-    for (let i = 0; i < particlesCount * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 600;
-      velocities[i] = (Math.random() - 0.5) * 0.2;
-    }
+    // Interaction Tools
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(-100, -100); // Start off-screen
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const pointOfIntersection = new THREE.Vector3();
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ size: 2, color: 0x00FF00, transparent: true, opacity: 0.8 });
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
-
-    // Lines
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0.35 });
-    let linesMesh;
-
-    function createLines() {
-      if (linesMesh) scene.remove(linesMesh);
-      const linePositions = [];
-      const currentPos = geometry.attributes.position.array;
-
-      for (let i = 0; i < particlesCount; i++) {
-        for (let j = i + 1; j < particlesCount; j++) {
-          const dx = currentPos[i * 3] - currentPos[j * 3];
-          const dy = currentPos[i * 3 + 1] - currentPos[j * 3 + 1];
-          const dz = currentPos[i * 3 + 2] - currentPos[j * 3 + 2];
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-          if (dist < 80) {
-            linePositions.push(currentPos[i * 3], currentPos[i * 3 + 1], currentPos[i * 3 + 2]);
-            linePositions.push(currentPos[j * 3], currentPos[j * 3 + 1], currentPos[j * 3 + 2]);
-          }
-        }
-      }
-
-      const lineGeometry = new THREE.BufferGeometry();
-      lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-      linesMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
-      scene.add(linesMesh);
-    }
-
-    let mouseX = 0, mouseY = 0;
     document.addEventListener('mousemove', (e) => {
-      mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
-      mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     });
 
+    let time = 0;
     function animate() {
       requestAnimationFrame(animate);
-      
-      const pos = geometry.attributes.position.array;
-      for (let i = 0; i < particlesCount * 3; i++) {
-        pos[i] += velocities[i];
-        if (pos[i] > 300 || pos[i] < -300) velocities[i] *= -1;
-      }
-      geometry.attributes.position.needsUpdate = true;
-      
-      createLines();
+      time += 0.01;
 
-      camera.position.x += (mouseX - camera.position.x) * 0.05;
-      camera.position.y += (-mouseY - camera.position.y) * 0.05;
-      camera.lookAt(scene.position);
+      // Project mouse to 3D space
+      raycaster.setFromCamera(mouse, camera);
+      raycaster.ray.intersectPlane(plane, pointOfIntersection);
+      
+      // We need to account for grid rotation to find local intersection
+      const localPoint = pointOfIntersection.clone().applyMatrix4(grid.matrixWorld.invert());
+
+      const positions = geometry.attributes.position;
+      for (let i = 0; i < count; i++) {
+        const x = positions.getX(i);
+        const y = positions.getY(i);
+        
+        // Base topography wave
+        let z = Math.sin(x / 50 + time) * 12 + 
+                Math.cos(y / 50 + time) * 12 + 
+                Math.sin((x + y) / 80 + time) * 8;
+        
+        // Mouse displacement effect
+        const dx = x - localPoint.x;
+        const dy = y - localPoint.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 60) {
+          z += (60 - dist) * 0.8; // "Push" effect
+        }
+        
+        positions.setZ(i, z);
+      }
+      positions.needsUpdate = true;
+
+      // Subtle interaction sway
+      grid.rotation.z += (mouse.x * 0.05 - grid.rotation.z) * 0.05;
+      grid.position.y += (-mouse.y * 10 - grid.position.y) * 0.05;
 
       renderer.render(scene, camera);
     }
