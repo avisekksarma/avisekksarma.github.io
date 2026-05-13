@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "The Database Skills Every Backend Engineer Must Have — Part 1: Foundations"
+title: "Database Skills Every Software Engineer Must Have — Part 1: Foundations"
 subtitle: "A practical, no-fluff guide to relational databases — the kind of depth that actually shows up in senior engineering interviews."
-date: 2024-01-01
+date: 2026-05-13
 categories: [Tech, databases, backend, series]
 tags: [postgresql, sql, relational-databases, backend-engineering, database-design]
 series: "Database Engineering: From Good to Great"
@@ -389,5 +389,5 @@ These are the topics that show up in senior engineering interviews and productio
 
 ---
 
-*This post is part of the **Database Engineering: From Good to Great** series. Part 2 covers indexes, query planning, and transactions. Part 3 covers advanced production patterns.*
+*This post is part of the **Database Engineering: From Good to Great** series. [Part 2](/tech/databases/backend/series/2026/05/13/database-skills-part-2-internals.html) covers indexes, query planning, and transactions. Part 3 covers advanced production patterns.*
 ----
