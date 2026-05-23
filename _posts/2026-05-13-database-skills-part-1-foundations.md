@@ -389,5 +389,5 @@ These are the topics that show up in senior engineering interviews and productio
 
 ---
 
-*This post is part of the **Database Engineering: From Good to Great** series. [Part 2](/tech/databases/backend/series/2026/05/13/database-skills-part-2-internals.html) covers indexes, query planning, and transactions. Part 3 covers advanced production patterns.*
+*This post is part of the **Database Engineering: From Good to Great** series. [Part 2](/tech/databases/backend/series/2026/05/13/database-skills-part-2-internals.html) covers indexes, query planning, and transactions. [Part 3](/tech/databases/backend/series/2026/05/13/database-skills-part-3-production.html) covers advanced production patterns.*
 ----

@@ -615,4 +615,4 @@ These are the topics that live in runbooks, postmortems, and the institutional k
 
 ---
 
-*This post is part of the **Database Engineering: From Good to Great** series. [Part 1](/tech/databases/backend/series/2026/05/13/database-skills-part-1-foundations.html) covers the relational model, schema design, and SQL fundamentals. Part 3 covers production-grade database engineering.*
+*This post is part of the **Database Engineering: From Good to Great** series. [Part 1](/tech/databases/backend/series/2026/05/13/database-skills-part-1-foundations.html) covers the relational model, schema design, and SQL fundamentals. [Part 3](/tech/databases/backend/series/2026/05/13/database-skills-part-3-production.html) covers production-grade database engineering.*
