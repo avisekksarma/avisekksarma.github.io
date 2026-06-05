@@ -2,7 +2,7 @@
 layout: post
 title: "ACID Properties Demystified: What Every Backend Engineer Must Know"
 subtitle: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
-date: 2024-01-22
+date: 2026-05-01
 categories: [Tech, databases, backend]
 tags: [postgresql, sql, acid, transactions, isolation-levels, backend-engineering]
 reading_time: 14

@@ -15,9 +15,20 @@ permalink: /posts/
 
 <br>
 
-## 🧠 Thinking
+<!-- ## 🧠 Thinking
 <ul>
   {% for post in site.categories.Thinking %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a> – {{ post.date | date: "%b %d, %Y" }}
+    </li>
+  {% endfor %}
+</ul> -->
+
+<br>
+
+## 🧬 Neuroscience
+<ul>
+  {% for post in site.categories.Neuroscience %}
     <li>
       <a href="{{ post.url }}">{{ post.title }}</a> – {{ post.date | date: "%b %d, %Y" }}
     </li>

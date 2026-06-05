@@ -16,7 +16,7 @@ permalink: /
     </div>
     <div style="flex: 2;">
       <h1 style="font-size: 2.2rem; margin-bottom: 5px;">Abhishek Sharma</h1>
-      <p style="font-size: 1.1rem; color: #666; font-weight: 300; margin-bottom: 15px;">
+      <p style="font-size: 1.1rem; color: var(--muted-color); font-weight: 300; margin-bottom: 15px;">
         Architecting Backend Systems · Driving AI Integration
       </p>
       <div class="social-links">
@@ -43,8 +43,8 @@ permalink: /
     </div>
   </div>
 
-  <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-    <p style="text-align: center; color: #888; font-style: italic; font-size: 0.95rem;">
+  <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+    <p style="text-align: center; color: var(--muted-color); font-style: italic; font-size: 0.95rem;">
       Explore my <a href="/experience/">Professional Path</a>, view my <a href="/projects/">Impactful Projects</a>, or <a href="/about/">Get to know me</a>.
     </p>
   </div>
