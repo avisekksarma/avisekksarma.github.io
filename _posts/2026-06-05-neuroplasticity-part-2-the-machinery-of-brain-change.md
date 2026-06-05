@@ -108,7 +108,7 @@ That means change can start from many places:
 - sleep,
 - attention,
 - emotion,
-- relationships,
+- social environment,
 - therapy,
 - exercise,
 - nutrition,
@@ -395,7 +395,7 @@ Because plasticity also depends on:
 
 A better phrase would be:
 
-> Neurons that fire together under meaningful biological conditions are more likely to change their future relationship.
+> Neurons that fire together under meaningful biological conditions are more likely to change their future connection.
 
 Less catchy.
 
@@ -433,7 +433,7 @@ If you expect a basketball shot to go in but it falls short, your motor system u
 
 If you expect someone to laugh at you but they respond kindly, your social prediction can update.
 
-If you expect a coding solution to work but the test fails, your mental model updates.
+If you expect a puzzle solution to work but it fails, your mental model updates.
 
 Plasticity is often driven by surprise.
 
@@ -547,12 +547,12 @@ Often, they are about escaping discomfort.
 
 You can use reward prediction in a healthy way.
 
-For example, when learning coding:
+For example, when learning problem-solving:
 
 ```text
 Expected: I cannot solve this.
 Actual: I solved part of it.
-Prediction error: maybe I am improving.
+Prediction error: improvement may be happening.
 Brain update: continue.
 ```
 
@@ -1157,10 +1157,10 @@ The brain may learn:
 
 ```text
 The world is unsafe.
-My body is unsafe.
+The body is unsafe.
 People are unsafe.
-I cannot escape.
-I must stay alert.
+Escape is not possible.
+Constant alertness is necessary.
 ```
 
 A trauma response can involve:
@@ -1245,7 +1245,7 @@ Practical implications:
 - create friction around the old behavior,
 - build alternative rewards,
 - treat stress and sleep seriously,
-- repair relationships and meaning,
+- restore safety, support, and meaning,
 - use professional support when needed,
 - expect cravings to be waves, not commands.
 
@@ -1439,7 +1439,7 @@ Identity is a prediction system.
 When you say:
 
 ```text
-I am not disciplined.
+This person is not disciplined.
 ```
 
 your brain may be summarizing years of evidence.
@@ -1530,19 +1530,19 @@ I want to improve my life.
 Good:
 
 ```text
-I want to practice 30 minutes of IELTS speaking every morning.
+Practice one short presentation every morning.
 ```
 
 Bad:
 
 ```text
-I want to stop being anxious.
+I want to respond more calmly under pressure.
 ```
 
 Good:
 
 ```text
-When I feel anxiety before speaking, I will breathe, speak for 60 seconds anyway, and record what actually happened.
+When pressure appears before speaking, breathe, speak for 60 seconds anyway, and record what actually happened.
 ```
 
 Plasticity needs specificity.
@@ -1612,12 +1612,12 @@ Correction: practice linking phrases.
 Next repetition: answer the same prompt again.
 ```
 
-Example: coding.
+Example: problem-solving.
 
 ```text
-Mistake: I misunderstood edge cases.
-Correction: write test cases first.
-Next repetition: solve similar problem.
+Mistake: I missed an important constraint.
+Correction: list constraints before starting.
+Next repetition: solve a similar problem.
 ```
 
 Example: emotional regulation.
@@ -1673,7 +1673,7 @@ I should stop ruminating.
 Stronger:
 
 ```text
-I am becoming someone who does not donate hours of life to old pain.
+I am becoming someone who does not donate hours of life to unhelpful loops.
 ```
 
 Meaning gives repetition emotional weight.
@@ -1788,7 +1788,7 @@ Which ingredient is missing?
 
 ## 41. How to build a new skill
 
-Use this for coding, writing, guitar, speaking, sports, design, math, or anything else.
+Use this for writing, music, speaking, sports, design, math, or anything else.
 
 ### Step 1: Choose one subskill
 
@@ -1885,7 +1885,7 @@ To weaken the old pathway:
 Example: late-night scrolling.
 
 ```text
-Cue: loneliness or boredom at night
+Cue: boredom or restlessness at night
 Old routine: scroll
 Reward: stimulation and escape
 
@@ -1993,7 +1993,7 @@ This is a mental loop.
 Ask:
 
 ```text
-Where is this in my body?
+Where is this showing up physically?
 Chest?
 Throat?
 Stomach?
@@ -2026,7 +2026,7 @@ One.
 Send email.
 Open book.
 Cook food.
-Apply to job.
+Send one useful message.
 Practice speaking.
 Clean desk.
 ```
@@ -2046,7 +2046,7 @@ Trigger can lead to action.
 
 Emotional regulation is not suppressing emotion.
 
-It is changing your relationship with emotion.
+It is changing your response to emotion.
 
 Old pathway:
 
@@ -2071,11 +2071,11 @@ flowchart LR
 Practice:
 
 ```text
-I am angry.
-My chest is tight.
-I want to attack.
-I will wait 10 minutes.
-Then I will respond from self-respect, not impulse.
+Emotion: anger.
+Body signal: tension.
+Impulse: react immediately.
+New action: wait 10 minutes.
+Response: values first, impulse second.
 ```
 
 Every pause is a repetition.
@@ -2123,9 +2123,9 @@ Examples:
 - speak for 60 seconds,
 - solve one problem,
 - go to the gym,
-- apply to one job,
+- send one useful message,
 - publish one article,
-- have one honest conversation,
+- complete one useful task,
 - keep one promise.
 
 The brain believes patterns.
@@ -2161,7 +2161,7 @@ Example:
 ```text
 Pattern: phone during study
 Cue: difficult task
-Current routine: Instagram
+Current routine: distracting app
 Reward: relief
 New routine: 3 breaths + next tiny step
 New reward: mark one clean repetition
@@ -2279,7 +2279,7 @@ Am I sleeping and recovering enough to consolidate change?
 ### Meaning
 
 ```text
-Why does this matter to the person I am becoming?
+Why does this matter?
 ```
 
 ---
@@ -2409,7 +2409,7 @@ What am I training?
 Do not ask only:
 
 ```text
-What is wrong with me?
+What is keeping this pattern active?
 ```
 
 Ask:

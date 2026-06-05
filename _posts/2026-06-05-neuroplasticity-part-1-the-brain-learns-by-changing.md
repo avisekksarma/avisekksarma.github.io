@@ -34,7 +34,7 @@ This is why a pianist’s fingers become fast.
 
 This is why a driver starts changing gears without thinking.
 
-This is why heartbreak can become a mental loop.
+This is why emotional pain can become a mental loop.
 
 This is why fear can grow.
 
@@ -226,7 +226,7 @@ It often asks:
 
 > “What has been repeated, rewarded, feared, or emotionally marked?”
 
-That is why neuroplasticity can help you learn guitar, but it can also make you better at overthinking.
+That is why neuroplasticity can help you learn guitar, but it can also make you better at rumination.
 
 The brain adapts to what you train.
 
@@ -258,8 +258,8 @@ Examples:
 - Every time you avoid a difficult conversation, you train avoidance.
 - Every time you sit down and write even when you do not feel like it, you train creative discipline.
 - Every time you breathe and respond instead of reacting, you train emotional regulation.
-- Every time you replay an old painful event for one hour, you train the replay circuit.
-- Every time you solve a hard coding problem carefully, you train problem-solving circuits.
+- Every time you replay a stressful event for one hour, you train the replay circuit.
+- Every time you solve a hard puzzle carefully, you train problem-solving circuits.
 
 Your brain does not care whether you call it practice.
 
@@ -290,7 +290,7 @@ The brain and spinal cord form the **central nervous system**.
 
 The nerves running through the body form the **peripheral nervous system**.
 
-When you touch a hot pan, move your hand, feel fear, remember a song, write code, speak English, or miss someone, your nervous system is involved.
+When you touch a hot pan, move your hand, feel fear, remember a song, solve a puzzle, speak a language, or recall an old memory, your nervous system is involved.
 
 ---
 
@@ -896,7 +896,7 @@ One person thinks:
 
 Another thinks:
 
-> “I failed. I am worthless.”
+> “I failed. This needs a better strategy.”
 
 The event is similar.
 
@@ -1041,7 +1041,7 @@ Example:
 
 ```text
 Cue: boredom
-Routine: open Instagram
+Routine: open distracting app
 Reward: novelty and relief
 ```
 
@@ -1055,11 +1055,11 @@ The behavior starts feeling automatic.
 
 You may say:
 
-> “I have no discipline.”
+> “This is a discipline problem.”
 
 But the brain says:
 
-> “I am doing exactly what I was trained to do.”
+> “This is the pattern that has been trained.”
 
 A habit is not just behavior.
 
@@ -1125,17 +1125,17 @@ The important point:
 
 ## 24. Rumination as neuroplasticity
 
-Rumination is repetitive thinking that feels like problem-solving but usually becomes emotional replay.
+Rumination is rumination that feels like problem-solving but usually becomes emotional replay.
 
 Example:
 
 ```text
 Why did this happen?
 What did they mean?
-What if I had said something else?
-How could they do this?
-Will they regret it?
-What does this say about me?
+What if I had handled it differently?
+Why did the situation go that way?
+What will happen next?
+What should I learn from this?
 ```
 
 The brain treats repetition as importance.
@@ -1320,12 +1320,12 @@ Boredom → phone → relief
 
 You may know:
 
-> “I should not overthink that person.”
+> “I should not replay that situation.”
 
 But the wiring says:
 
 ```text
-Loneliness → memory → rumination → emotional stimulation
+Trigger → memory → rumination → emotional stimulation
 ```
 
 You may know:
@@ -1384,19 +1384,19 @@ I want to become better.
 Good:
 
 ```text
-I want to speak for two minutes without stopping in English.
+Explain one idea clearly for two minutes.
 ```
 
 Bad:
 
 ```text
-I want to stop overthinking.
+Reduce repetitive stressful thoughts.
 ```
 
 Good:
 
 ```text
-When the memory comes, I will label it "rumination", stand up, breathe for 60 seconds, and do one useful action.
+When the thought loop starts, I will label it "rumination", stand up, breathe for 60 seconds, and do one useful action.
 ```
 
 ### Repetition
@@ -1461,7 +1461,7 @@ Examples:
 
 ## 30. Neuroplasticity in daily life: five real examples
 
-### Example 1: Learning IELTS speaking
+### Example 1: Practicing clear speaking
 
 Weak method:
 
@@ -1535,7 +1535,7 @@ Small workout.
 Repeatable difficulty.
 Track completion.
 Increase slowly.
-Reward identity: "I am someone who shows up."
+Reward identity: "This is a completed repetition."
 ```
 
 Plasticity logic:
@@ -1578,7 +1578,7 @@ Confidence is remembered evidence.
 Weak method:
 
 ```text
-Repeat: I am confident.
+Repeat: confidence is already present.
 ```
 
 Better method:
@@ -1604,7 +1604,7 @@ Use this as a practical experiment.
 
 Pick one thing:
 
-- IELTS speaking,
+- clear speaking,
 - coding,
 - guitar,
 - fitness,
@@ -1664,8 +1664,8 @@ What adjustment would make tomorrow easier?
 Connect the behavior to identity.
 
 ```text
-I am not just studying English.
-I am becoming someone who can speak clearly under pressure.
+I am not just practicing a skill.
+I am becoming someone who can communicate clearly under pressure.
 ```
 
 ### Day 5: Protect sleep
@@ -1716,7 +1716,7 @@ You can understand everything in this article and still not change if you do not
 
 The brain changes better with focused signals.
 
-Trying to fix sleep, diet, coding, social life, exercise, meditation, language, and emotional healing all in one week usually creates overload.
+Trying to fix sleep, diet, focus, communication, exercise, meditation, and emotional regulation all in one week usually creates overload.
 
 Pick one main circuit.
 
@@ -1887,7 +1887,7 @@ When you practice calm action, you train calm action.
 
 So the question is not:
 
-> “Is my brain changing?”
+> “Is the brain changing?”
 
 It is.
 
@@ -1901,13 +1901,13 @@ The better question is:
 
 Use these questions after reading.
 
-### 1. What am I accidentally training?
+### 1. What is being accidentally trained?
 
 ```text
-A repeated thought I have:
-A repeated emotional reaction I have:
-A repeated behavior I have:
-A repeated avoidance pattern I have:
+A repeated thought:
+A repeated emotional reaction:
+A repeated behavior:
+A repeated avoidance pattern:
 ```
 
 ### 2. What pathway do I want to build?
@@ -1942,7 +1942,7 @@ Example:
 
 ```text
 When I feel the urge to check my phone during study,
-instead of opening Instagram,
+instead of opening a distracting app,
 I will stand up, take 3 breaths, write the next tiny task,
 then I will reward it by marking one clean repetition.
 ```
@@ -1993,4 +1993,3 @@ Part 2 opens the engine.
 [^6]: Cardoso, S. V., et al. *Therapeutic Importance of Exercise in Neuroplasticity*. 2024. https://pmc.ncbi.nlm.nih.gov/articles/PMC11385284/
 
 [^7]: McEwen, B. S., et al. Research on stress and structural plasticity shows that chronic stress can remodel dendrites and synaptic connectivity in brain systems involved in memory and emotion. See: *Stress and the brain: individual variability and the inverted-U*. https://pmc.ncbi.nlm.nih.gov/articles/PMC3753223/
-
