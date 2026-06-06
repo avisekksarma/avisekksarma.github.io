@@ -4,11 +4,13 @@ title: Posts
 permalink: /posts/
 ---
 
-## 💻 Tech Articles
+## 💻 Tech
 <ul>
-  {% for post in site.categories.Tech %}
+  {% assign tech_posts = site.categories.Tech | sort: "path" %}
+  {% for post in tech_posts %}
+    {% assign display_title = post.title | split: ":" | first %}
     <li>
-      <a href="{{ post.url }}">{{ post.title }}</a> – {{ post.date | date: "%b %d, %Y" }}
+      <a href="{{ post.url }}">{{ display_title }}</a> – {{ post.date | date: "%b %d, %Y" }}
     </li>
   {% endfor %}
 </ul>
@@ -28,9 +30,11 @@ permalink: /posts/
 
 ## 🧬 Neuroscience
 <ul>
-  {% for post in site.categories.Neuroscience %}
+  {% assign neuroscience_posts = site.categories.Neuroscience | sort: "path" %}
+  {% for post in neuroscience_posts %}
+    {% assign display_title = post.title | split: ":" | first %}
     <li>
-      <a href="{{ post.url }}">{{ post.title }}</a> – {{ post.date | date: "%b %d, %Y" }}
+      <a href="{{ post.url }}">{{ display_title }}</a> – {{ post.date | date: "%b %d, %Y" }}
     </li>
   {% endfor %}
 </ul>

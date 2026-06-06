@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "The Database Skills Every Backend Engineer Must Have — Part 3: Production-Grade Engineering"
+title: "Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering"
 subtitle: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them."
 date: 2026-05-13
 categories: [Tech, databases, backend, series]
