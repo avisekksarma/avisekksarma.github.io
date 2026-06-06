@@ -8,8 +8,6 @@ tags: [rumination, default-mode-network, DMN, overthinking, anxiety, depression,
 mermaid: true
 ---
 
-# Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets Stuck
-
 There is a strange kind of thinking that feels useful while it is happening, but leaves you more tired, more emotional, and no closer to a solution.
 
 You replay the same conversation.
@@ -44,7 +42,7 @@ It starts from zero, goes into neuroscience, and then turns that knowledge into 
 
 ---
 
-## What you will learn
+### What you will learn
 
 By the end, you should understand:
 
@@ -60,7 +58,7 @@ By the end, you should understand:
 
 ---
 
-# 1. Rumination in one sentence
+## 1. Rumination in one sentence
 
 **Rumination is repetitive, passive, self-focused thinking about distress, its causes, its meaning, or its consequences.**
 
@@ -97,7 +95,7 @@ Rumination usually preserves them.
 
 ---
 
-# 2. Rumination is not the same as thinking
+## 2. Rumination is not the same as thinking
 
 Thinking is broad.
 
@@ -117,7 +115,7 @@ flowchart TD
 
 Let’s break that down.
 
-## Repetitive
+### Repetitive
 
 The same mental content keeps returning.
 
@@ -125,11 +123,11 @@ Not once.
 
 Again and again.
 
-## Negative or distress-focused
+### Negative or distress-focused
 
 Rumination usually focuses on pain, failure, rejection, uncertainty, regret, shame, unfairness, or fear.
 
-## Self-referential
+### Self-referential
 
 It often becomes about the self:
 
@@ -141,7 +139,7 @@ Am I behind?
 Am I doomed?
 ```
 
-## Low action
+### Low action
 
 Rumination often feels like problem-solving, but it does not produce useful next steps.
 
@@ -149,7 +147,7 @@ It creates heat, not light.
 
 ---
 
-# 3. Rumination vs reflection vs problem-solving vs worry
+## 3. Rumination vs reflection vs problem-solving vs worry
 
 These words overlap, but they are not the same.
 
@@ -160,7 +158,7 @@ These words overlap, but they are not the same.
 | Worry | Future | Threat-focused | Preparation or anxiety |
 | Rumination | Past/present/self | Repetitive, negative, stuck | Distress without resolution |
 
-## Reflection
+### Reflection
 
 Reflection asks:
 
@@ -172,7 +170,7 @@ What will I do differently?
 
 Reflection ends with insight or action.
 
-## Problem-solving
+### Problem-solving
 
 Problem-solving asks:
 
@@ -184,7 +182,7 @@ What is the next step?
 
 Problem-solving ends with a plan.
 
-## Worry
+### Worry
 
 Worry is usually future-focused:
 
@@ -196,7 +194,7 @@ Sometimes worry helps you prepare.
 
 Often it becomes repetitive anxiety.
 
-## Rumination
+### Rumination
 
 Rumination asks:
 
@@ -213,7 +211,7 @@ But with more emotional exhaustion.
 
 ---
 
-# 4. The simplest test: is this thought moving?
+## 4. The simplest test: is this thought moving?
 
 A thought is not bad just because it is negative.
 
@@ -248,7 +246,7 @@ If the answer is no, and the thought keeps repeating, it may be rumination.
 
 ---
 
-# 5. Why rumination feels useful
+## 5. Why rumination feels useful
 
 Rumination is sticky because it gives the illusion of control.
 
@@ -300,7 +298,7 @@ It is a protection strategy that became too repetitive.
 
 ---
 
-# 6. What is the Default Mode Network?
+## 6. What is the Default Mode Network?
 
 The **Default Mode Network**, or **DMN**, is a large-scale brain network that tends to be active when the mind is not focused on an external task.
 
@@ -330,7 +328,7 @@ It is part of how humans reflect, remember, imagine, plan, and understand themse
 
 ---
 
-# 7. Main regions of the Default Mode Network
+## 7. Main regions of the Default Mode Network
 
 Different papers divide the DMN in different ways, but common regions include:
 
@@ -372,7 +370,7 @@ It is also where rumination can get trapped.
 
 ---
 
-# 8. The DMN is not the enemy
+## 8. The DMN is not the enemy
 
 Many internet explanations say:
 
@@ -434,7 +432,7 @@ The problem is getting stuck in one mode.
 
 ---
 
-# 9. Default mode vs task-positive mode
+## 9. Default mode vs task-positive mode
 
 When you focus on an external task, other networks become more active.
 
@@ -481,7 +479,7 @@ flowchart TD
 
 ---
 
-# 10. The DMN and depression
+## 10. The DMN and depression
 
 Rumination is strongly connected to depression.
 
@@ -518,7 +516,7 @@ It is repeated negative self-modeling.
 
 ---
 
-# 11. The DMN and anxiety
+## 11. The DMN and anxiety
 
 Rumination is usually past/present-focused.
 
@@ -569,7 +567,7 @@ The result can become a mental courtroom where the future is constantly on trial
 
 ---
 
-# 12. The neuroscience loop of rumination
+## 12. The neuroscience loop of rumination
 
 A simplified rumination loop may involve several systems:
 
@@ -606,7 +604,7 @@ It is a network pattern.
 
 ---
 
-# 13. The self-story machine
+## 13. The self-story machine
 
 The DMN helps create continuity of self.
 
@@ -666,7 +664,7 @@ But the self-story determines whether the mind learns or loops.
 
 ---
 
-# 14. Why the brain replays social pain
+## 14. Why the brain replays social pain
 
 Humans are social animals.
 
@@ -722,7 +720,7 @@ extract lesson → regulate emotion → choose boundary/action → stop replay
 
 ---
 
-# 15. Rumination and the body
+## 15. Rumination and the body
 
 Rumination feels mental, but it is embodied.
 
@@ -759,7 +757,7 @@ This is why getting out of rumination often requires changing body state, not on
 
 ---
 
-# 16. Rumination and sleep
+## 16. Rumination and sleep
 
 Rumination loves the night.
 
@@ -799,7 +797,7 @@ Return to them in daylight.
 
 ---
 
-# 17. Rumination and identity
+## 17. Rumination and identity
 
 Rumination becomes especially powerful when it attaches to identity.
 
@@ -856,7 +854,7 @@ So one key anti-rumination skill is making thoughts more concrete.
 
 ---
 
-# 18. Abstract vs concrete thinking
+## 18. Abstract vs concrete thinking
 
 Rumination is often abstract.
 
@@ -900,7 +898,7 @@ Practical translation:
 
 ---
 
-# 19. The three types of inner time travel
+## 19. The three types of inner time travel
 
 The DMN lets you mentally time travel.
 
@@ -936,7 +934,7 @@ The goal is to travel intentionally.
 
 ---
 
-# 20. The difference between useful and harmful mind-wandering
+## 20. The difference between useful and harmful mind-wandering
 
 Mind-wandering is not always bad.
 
@@ -990,7 +988,7 @@ A trapped mind is.
 
 ---
 
-# 21. Why “stop thinking” usually fails
+## 21. Why “stop thinking” usually fails
 
 Trying to force thoughts away often makes them louder.
 
@@ -1039,7 +1037,7 @@ You are the system noticing the thought.
 
 ---
 
-# 22. Metacognition: thinking about thinking
+## 22. Metacognition: thinking about thinking
 
 **Metacognition** means awareness of your own thinking.
 
@@ -1087,7 +1085,7 @@ To escape, you must learn:
 
 ---
 
-# 23. Rumination is sometimes an avoidance strategy
+## 23. Rumination is sometimes an avoidance strategy
 
 This sounds strange.
 
@@ -1145,9 +1143,9 @@ Because it exits the false-work loop.
 
 ---
 
-# 24. The rumination loop in everyday examples
+## 24. The rumination loop in everyday examples
 
-## Example 1: Relationship uncertainty
+### Example 1: Relationship uncertainty
 
 ```text
 They replied differently today.
@@ -1177,7 +1175,7 @@ I will return to the present task.
 If a conversation is needed, I will have it directly later.
 ```
 
-## Example 2: Exam failure
+### Example 2: Exam failure
 
 ```text
 I failed.
@@ -1194,7 +1192,7 @@ Preparation? Sleep? Method? Timing?
 What is the next practice unit?
 ```
 
-## Example 3: Career uncertainty
+### Example 3: Career uncertainty
 
 ```text
 What if I choose the wrong field?
@@ -1210,7 +1208,7 @@ I will run a 30-day experiment in one direction.
 Evidence beats endless simulation.
 ```
 
-## Example 4: Social embarrassment
+### Example 4: Social embarrassment
 
 ```text
 Why did I say that?
@@ -1226,7 +1224,7 @@ What would I tell a friend?
 Do I need repair, or only self-forgiveness?
 ```
 
-## Example 5: Health worry
+### Example 5: Health worry
 
 ```text
 What if this sensation means something serious?
@@ -1243,7 +1241,7 @@ If this is repeated reassurance-seeking, checking may be feeding the loop.
 
 ---
 
-# 25. The practical principle: switch networks
+## 25. The practical principle: switch networks
 
 Rumination is often internally focused and self-referential.
 
@@ -1283,18 +1281,18 @@ The key is deliberate attentional switching.
 
 ---
 
-# 26. The 90-second de-loop protocol
+## 26. The 90-second de-loop protocol
 
 Use this when you notice rumination starting.
 
-## Step 1: Label
+### Step 1: Label
 
 ```text
 This is rumination.
 This is a loop, not a solution.
 ```
 
-## Step 2: Name the theme
+### Step 2: Name the theme
 
 Choose one:
 
@@ -1309,7 +1307,7 @@ fear
 control
 ```
 
-## Step 3: Locate it in the body
+### Step 3: Locate it in the body
 
 ```text
 Where do I feel it?
@@ -1320,7 +1318,7 @@ Forehead?
 Hands?
 ```
 
-## Step 4: Exhale and orient
+### Step 4: Exhale and orient
 
 Take 5 slow exhales.
 
@@ -1328,7 +1326,7 @@ Look around the room.
 
 Name 5 things you see.
 
-## Step 5: Choose the next external action
+### Step 5: Choose the next external action
 
 ```text
 I will now do ______ for 10 minutes.
@@ -1351,7 +1349,7 @@ The goal is to interrupt repetition.
 
 ---
 
-# 27. The rumination triage question
+## 27. The rumination triage question
 
 When a thought repeats, ask:
 
@@ -1389,7 +1387,7 @@ Different states need different responses.
 
 ---
 
-# 28. Problem-solving mode
+## 28. Problem-solving mode
 
 Use this when there is a real problem you can influence.
 
@@ -1427,7 +1425,7 @@ If thinking does not produce an action, it is probably not problem-solving.
 
 ---
 
-# 29. Feeling mode
+## 29. Feeling mode
 
 Use this when there is no immediate solution, but there is emotional pain.
 
@@ -1465,7 +1463,7 @@ Emotions move better when felt clearly than when converted into mental loops.
 
 ---
 
-# 30. Uncertainty mode
+## 30. Uncertainty mode
 
 Use this when the mind wants certainty that is not currently available.
 
@@ -1516,7 +1514,7 @@ Freedom often means not getting the answer immediately.
 
 ---
 
-# 31. The “one page, one action” journaling method
+## 31. The “one page, one action” journaling method
 
 Journaling can help.
 
@@ -1524,13 +1522,13 @@ But journaling can also become written rumination.
 
 To prevent that, use structure.
 
-## Page 1: Dump
+### Page 1: Dump
 
 Write freely for 5 minutes.
 
 No editing.
 
-## Page 2: Sort
+### Page 2: Sort
 
 Label each thought:
 
@@ -1542,7 +1540,7 @@ memory
 self-attack
 ```
 
-## Page 3: Act
+### Page 3: Act
 
 Choose one action.
 
@@ -1569,7 +1567,7 @@ If it ends with more chaos, change the method.
 
 ---
 
-# 32. Mindfulness: training non-fusion
+## 32. Mindfulness: training non-fusion
 
 Mindfulness is often misunderstood as “empty your mind.”
 
@@ -1610,11 +1608,11 @@ You need to stop treating every thought as a command.
 
 ---
 
-# 33. A simple mindfulness practice for rumination
+## 33. A simple mindfulness practice for rumination
 
 Set a timer for 5 minutes.
 
-## Step 1: Anchor
+### Step 1: Anchor
 
 Focus on breathing or body contact.
 
@@ -1625,7 +1623,7 @@ breath at nostrils
 chest rising
 ```
 
-## Step 2: Notice thought
+### Step 2: Notice thought
 
 When the mind wanders, say:
 
@@ -1638,7 +1636,7 @@ worrying
 replaying
 ```
 
-## Step 3: Return
+### Step 3: Return
 
 Gently return to the anchor.
 
@@ -1646,7 +1644,7 @@ No drama.
 
 No self-attack.
 
-## Step 4: Repeat
+### Step 4: Repeat
 
 The repetition is the training.
 
@@ -1665,7 +1663,7 @@ The goal is attention flexibility.
 
 ---
 
-# 34. Attention training: strengthening the switch
+## 34. Attention training: strengthening the switch
 
 Rumination is partly an attention problem.
 
@@ -1704,7 +1702,7 @@ The skill is small but powerful.
 
 ---
 
-# 35. Behavioral activation: action before mood
+## 35. Behavioral activation: action before mood
 
 Rumination says:
 
@@ -1753,7 +1751,7 @@ The action must be small enough to start.
 
 ---
 
-# 36. The anti-rumination action menu
+## 36. The anti-rumination action menu
 
 When stuck, do not ask:
 
@@ -1787,13 +1785,13 @@ Do not stay alone inside the story forever.
 
 ---
 
-# 37. The “two chairs” method
+## 37. The “two chairs” method
 
 This is a simple way to separate rumination from wise reflection.
 
 Use two physical chairs or two positions.
 
-## Chair 1: The ruminator
+### Chair 1: The ruminator
 
 Say everything the loop says.
 
@@ -1803,7 +1801,7 @@ What if everything is ruined?
 I should have done better.
 ```
 
-## Chair 2: The wise observer
+### Chair 2: The wise observer
 
 Respond with clarity.
 
@@ -1833,7 +1831,7 @@ But it should not drive forever.
 
 ---
 
-# 38. The “scheduled rumination” paradox
+## 38. The “scheduled rumination” paradox
 
 For some people, setting a specific worry/rumination time helps.
 
@@ -1878,7 +1876,7 @@ We are not ignoring this. We are containing it.
 
 ---
 
-# 39. Rumination and social media
+## 39. Rumination and social media
 
 Social media can feed rumination because it provides:
 
@@ -1920,7 +1918,7 @@ The issue is that it can keep the DMN fed with emotionally loaded self-compariso
 
 ---
 
-# 40. Rumination and creativity
+## 40. Rumination and creativity
 
 There is a fine line between deep creative thought and rumination.
 
@@ -1965,7 +1963,7 @@ A threatened wandering mind often ruminates.
 
 ---
 
-# 41. Rumination and trauma
+## 41. Rumination and trauma
 
 After traumatic or highly stressful experiences, the mind may replay events as part of trying to understand danger.
 
@@ -2005,7 +2003,7 @@ If rumination includes suicidal thoughts, self-harm urges, severe functional imp
 
 ---
 
-# 42. When rumination needs professional help
+## 42. When rumination needs professional help
 
 Self-help tools are useful, but they are not always enough.
 
@@ -2036,13 +2034,13 @@ It is using trained support for a trained loop.
 
 ---
 
-# 43. The 7-day rumination reset
+## 43. The 7-day rumination reset
 
 This is a practical experiment.
 
 Do it for one week.
 
-## Day 1: Map the loop
+### Day 1: Map the loop
 
 Write:
 
@@ -2054,7 +2052,7 @@ My usual behavior:
 The cost:
 ```
 
-## Day 2: Label the loop
+### Day 2: Label the loop
 
 Every time it appears, say:
 
@@ -2067,7 +2065,7 @@ Do not try to fix it.
 
 Just label.
 
-## Day 3: Body exit
+### Day 3: Body exit
 
 When the loop starts:
 
@@ -2077,7 +2075,7 @@ stand up
 walk for 5 minutes
 ```
 
-## Day 4: Sort the thought
+### Day 4: Sort the thought
 
 Ask:
 
@@ -2087,7 +2085,7 @@ Problem, feeling, or uncertainty?
 
 Respond accordingly.
 
-## Day 5: External action
+### Day 5: External action
 
 Use a 10-minute task.
 
@@ -2101,7 +2099,7 @@ send one email
 practice one skill
 ```
 
-## Day 6: Mindfulness repetition
+### Day 6: Mindfulness repetition
 
 Practice 5 minutes:
 
@@ -2109,7 +2107,7 @@ Practice 5 minutes:
 anchor → thought → label → return
 ```
 
-## Day 7: Review
+### Day 7: Review
 
 Write:
 
@@ -2123,25 +2121,25 @@ What is my plan for next week?
 
 ---
 
-# 44. The 30-day DMN flexibility protocol
+## 44. The 30-day DMN flexibility protocol
 
 The goal is not less thinking.
 
 The goal is better switching.
 
-## Daily: 5 minutes attention training
+### Daily: 5 minutes attention training
 
 ```text
 breath → sound → body → vision → task
 ```
 
-## Daily: one external action after rumination
+### Daily: one external action after rumination
 
 ```text
 When I notice a loop, I do one physical or task-based action.
 ```
 
-## 3 times/week: structured reflection
+### 3 times/week: structured reflection
 
 Use:
 
@@ -2153,15 +2151,15 @@ What is the next action?
 What must I stop replaying?
 ```
 
-## Weekly: digital trigger cleanup
+### Weekly: digital trigger cleanup
 
 Remove one cue that feeds repetitive self-comparison or checking.
 
-## Weekly: long walk without phone
+### Weekly: long walk without phone
 
 Let the mind wander, but if it becomes rumination, label and return to sensory experience.
 
-## Monthly: identity review
+### Monthly: identity review
 
 Ask:
 
@@ -2188,7 +2186,7 @@ flowchart TD
 
 ---
 
-# 45. The ultimate anti-rumination framework: L.E.A.V.E.
+## 45. The ultimate anti-rumination framework: L.E.A.V.E.
 
 When a thought starts looping, use **L.E.A.V.E.**
 
@@ -2224,9 +2222,9 @@ It is leadership.
 
 ---
 
-# 46. Common myths about rumination and the DMN
+## 46. Common myths about rumination and the DMN
 
-## Myth 1: Rumination means you are deep
+### Myth 1: Rumination means you are deep
 
 Depth produces insight.
 
@@ -2234,13 +2232,13 @@ Rumination produces repetition.
 
 A thought is not deep because it is painful.
 
-## Myth 2: The DMN is bad
+### Myth 2: The DMN is bad
 
 The DMN supports memory, identity, future planning, social imagination, and meaning.
 
 The problem is rigidity, not the network itself.
 
-## Myth 3: You must solve every thought
+### Myth 3: You must solve every thought
 
 Some thoughts need action.
 
@@ -2248,23 +2246,23 @@ Some need emotional processing.
 
 Some need to be left unanswered.
 
-## Myth 4: Distraction is always avoidance
+### Myth 4: Distraction is always avoidance
 
 Mindless distraction can be avoidance.
 
 Deliberate attention switching can be regulation.
 
-## Myth 5: If a thought feels urgent, it must be important
+### Myth 5: If a thought feels urgent, it must be important
 
 Emotional intensity is not the same as truth.
 
 The brain can mark a thought as urgent because it is threatening, not because it is useful.
 
-## Myth 6: Mindfulness means no thoughts
+### Myth 6: Mindfulness means no thoughts
 
 Mindfulness means noticing thoughts without automatically becoming them.
 
-## Myth 7: Rumination can be beaten by one insight
+### Myth 7: Rumination can be beaten by one insight
 
 Rumination is a habit loop.
 
@@ -2272,7 +2270,7 @@ It changes through repeated interruption, regulation, action, and new learning.
 
 ---
 
-# 47. Final model: rumination as a stuck self-simulation loop
+## 47. Final model: rumination as a stuck self-simulation loop
 
 Here is the complete model.
 
@@ -2318,7 +2316,7 @@ think → think → think → collapse
 
 ---
 
-# 48. Final summary
+## 48. Final summary
 
 The Default Mode Network helps create your inner world.
 
@@ -2358,11 +2356,11 @@ That is the real goal:
 
 ---
 
-# Practical worksheet
+## Practical worksheet
 
 Copy this into your notes.
 
-## 1. My rumination map
+### 1. My rumination map
 
 ```text
 The topic I repeat most:
@@ -2373,7 +2371,7 @@ The behavior that keeps it going:
 The cost:
 ```
 
-## 2. Is it solving or looping?
+### 2. Is it solving or looping?
 
 ```text
 Did this thought produce new information?
@@ -2383,7 +2381,7 @@ Did it increase distress?
 Have I thought this same thing before?
 ```
 
-## 3. Problem, feeling, or uncertainty?
+### 3. Problem, feeling, or uncertainty?
 
 ```text
 This is mainly:
@@ -2392,7 +2390,7 @@ This is mainly:
 [ ] Uncertainty to tolerate
 ```
 
-## 4. My replacement loop
+### 4. My replacement loop
 
 ```text
 When I notice rumination,
@@ -2402,7 +2400,7 @@ I will do this external action:
 I will return to the issue at this scheduled time if needed:
 ```
 
-## 5. My DMN flexibility practice
+### 5. My DMN flexibility practice
 
 ```text
 Daily attention practice:
@@ -2412,31 +2410,7 @@ Person I can talk to without co-ruminating:
 One value-based action:
 ```
 
----
-
-# Jekyll Mermaid setup note
-
-This post uses Mermaid diagrams.
-
-If your Jekyll theme does not already support Mermaid, add something like this to your layout:
-
-{% raw %}
-```liquid
-{% if page.mermaid %}
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: "default"
-  });
-</script>
-{% endif %}
-```
-{% endraw %}
-
----
-
-# References
+## References
 
 [^1]: Raichle, M. E., MacLeod, A. M., Snyder, A. Z., et al. *A default mode of brain function*. Proceedings of the National Academy of Sciences, 2001. https://pmc.ncbi.nlm.nih.gov/articles/PMC14647/
 
