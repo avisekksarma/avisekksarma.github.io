@@ -2,14 +2,11 @@
 layout: page
 permalink: /teaching/
 title: teaching
-description: Course materials, schedules, and resources for classes taught.
+description: Instruction, workshops, and mentoring in computer science and machine learning.
 nav: true
-nav_order: 6
-calendar: true
+nav_order: 4
 ---
 
-This page displays a collection of courses with detailed schedules, materials, and resources. You can organize your courses by years, terms, or topics.
-
-{% include calendar.liquid calendar_id='test@gmail.com' timezone='Asia/Shanghai' %}
+I have taught and mentored undergraduate students through fellowship programs and campus technical communities at IOE Pulchowk Campus, with an emphasis on foundational machine learning, web systems, and software engineering practice.
 
 {% include courses.liquid %}

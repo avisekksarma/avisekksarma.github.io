@@ -1,189 +1,261 @@
 cv:
-  name: Albert Einstein
-  label: Scientist
-  email: einstein@example.com
-  location: Princeton, NJ
+  name: Abhishek Sharma
+  label: Software Engineer
+  email: abhishek.work1710@gmail.com
+  phone: "+977 986-635-0452"
+  location: Kathmandu, Nepal
   image: ""
-  summary: A German-born theoretical physicist, widely ranked among the greatest and most influential scientists of all time
+  summary: Software engineer specializing in backend systems and applied machine learning, with experience in compliance automation, document AI, and NLP for low-resource languages.
 
   social_networks:
-    - network: X
-      username: AlbertEinstein
     - network: GitHub
-      username: example
+      username: avisekksarma
     - network: LinkedIn
-      username: example
-
-  address:
-    street: 2712 Broadway St
-    city: San Francisco
-    region: California
-    postalCode: CA 94115
-    countryCode: US
+      username: aviseksarma
 
   sections:
     Education:
-      - institution: University of Zurich
-        location: Zurich, Switzerland
-        url: https://www.uzh.ch/
-        area: Physics
-        studyType: PhD
-        start_date: 1900
-        end_date: 1905
-        score: ""
-        courses: "Theory of Relativity"
+      - institution: IOE Pulchowk Campus
+        location: Lalitpur, Nepal
+        url: https://pcampus.edu.np/
+        area: Computer Engineering
+        studyType: Bachelor
+        start_date: 2019-11
+        end_date: 2024-04
+        score: "76% average"
         highlights:
-          - Description 1.
-          - Description 2.
+          - Rank 34 in the IOE entrance examination among 14,000+ candidates.
+          - Recipient of the Golden Jubilee Scholarship, Embassy of India.
 
-      - institution: Eidgenössische Technische Hochschule
-        location: Zurich, Switzerland
-        area: Physics
-        studyType: Federal teaching diploma
-        start_date: 1896
-        end_date: 1900
+      - institution: SOSHGS, Gandaki
+        location: Pokhara, Nepal
+        area: Mathematics
+        studyType: "+2"
+        start_date: 2017
+        end_date: 2019
+        score: "3.85 GPA (CGPA 3.72)"
         highlights:
-          - Description 1.
-          - Description 2.
+          - College topper in the Grade 12 board examination.
+          - Entrance topper at the +2 level among 3,000+ students.
 
     Experience:
-      - company: Institute for Advanced Study, Princeton University
-        position: Professor of Theoretical Physics
-        location: Princeton University, NJ
-        start_date: 1933
-        end_date: 1955
-        summary: Teaching at Palmer Physical Laboratory (now 302 Frist Campus Center). While not a professor at Princeton, I associated with the physics professors and continued to give lectures on campus.
+      - company: ZeroTB
+        position: Founding Software Engineer
+        location: San Francisco, California
+        start_date: 2025-04
+        end_date: present
+        summary: Early-stage startup building compliance automation systems.
         highlights:
-          - Relativity
-          - Description 2.
+          - Built core backend infrastructure and APIs from the ground up, contributing to system architecture and scalability decisions.
+          - Engineered scalable database structure, optimized database performance, and executed large-scale data migrations and third-party integrations for production systems.
+          - Developed AI-powered workflows using RAG and LLM orchestration frameworks (LangChain, LlamaIndex) to enhance automation and intelligent data processing.
+          - Collaborated across product and engineering teams to rapidly prototype and ship backend features in a fast-paced startup setting.
 
-      - company: California Institute of Technology
-        position: Visiting Professor
-        location: Pasadena, California, US
-        start_date: 1933
-        end_date: 1933
+      - company: Docsumo
+        position: Associate Software Engineer (ML)
+        location: Chabahil, Kathmandu
+        start_date: 2024-04
+        end_date: 2025-04
+        summary: Document AI and production ML systems for enterprise extraction workloads.
         highlights:
-          - Description 1.
-          - Description 2.
-
-      - company: Kaiser Wilhelm Institute for Physics
-        position: Director
-        location: Berlin, Germany
-        start_date: 1917
-        end_date: 1933
-
-      - company: Karl-Ferdinand University
-        position: Professor of Theoretical Physics
-        location: Prague, Czechoslovakia
-        start_date: 1911
-        end_date: 1917
-
-      - company: University of Zurich
-        position: Associate Professor of Theoretical Physics
-        location: Zurich, Switzerland
-        start_date: 1909
-        end_date: 1911
-
-    Volunteer:
-      - company: People's Climate March
-        position: Lead Organizer
-        location: Zurich, Switzerland
-        start_date: 2014-04-01
-        end_date: 2015-07-01
-        summary: Lead organizer for the New York City branch of the People's Climate March, the largest climate march in history.
-        highlights:
-          - "Awarded 'Climate Hero' award by Greenpeace for my efforts organizing the march."
-          - "Men of the year 2014 by Time magazine"
-
-    Awards:
-      - title: Nobel Prize in Physics
-        authors:
-          - "Royal Swedish Academy of Sciences"
-        date: 1921-11-01
-        awarder: Royal Swedish Academy of Sciences
-        url: https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/
-        summary: The Nobel Prizes are five separate prizes that, according to Alfred Nobel's will of 1895, are awarded to 'those who, during the preceding year, have conferred the greatest benefit to humankind.'
-
-      - title: Max Planck Medal
-        authors:
-          - "German Physical Society"
-        date: 2029
-        awarder: German Physical Society
-        summary: Awarded for outstanding scientific achievement
-
-    Publications:
-      - title: Zur Elektrodynamik bewegter Körper
-        authors:
-          - Albert Einstein
-        publisher: Annalen der Physik
-        releaseDate: 1905-06-30
-        url: https://en.wikisource.org/wiki/Translation:On_the_Electrodynamics_of_Moving_Bodies
-        summary: It concerned an interpretation of the Michelson–Morley experiment and the properties of light and time. Special relativity incorporates the principle that the speed of light is the same for all inertial observers regardless of the state of motion of the source.
-
-      - title: Über einen die Erzeugung und Verwandlung des Lichtes betreffenden heuristischen Gesichtspunkt
-        authors:
-          - Albert Einstein
-        publisher: Annalen der Physik
-        releaseDate: 1905-03-18
-        url: https://de.wikisource.org/wiki/Über_einen_die_Erzeugung_und_Verwandlung_des_Lichtes_betreffenden_heuristischen_Gesichtspunkt
-        summary: In the second paper, he applied the quantum theory to light to explain the photoelectric effect. In particular, he used the idea of light quanta (photons) to explain experimental results, but stressed the importance of the experimental results. The importance of his work on the photoelectric effect earned him the Nobel Prize in Physics in 1921.
-
-      - title: Die Grundlage der allgemeinen Relativitätstheorie
-        authors:
-          - Albert Einstein
-        publisher: Annalen der Physik
-        releaseDate: 1916-03-20
-        url: https://de.wikisource.org/wiki/Die_Grundlage_der_allgemeinen_Relativitätstheorie
-        summary: The publication of the theory of general relativity made him internationally famous. He was professor of physics at the universities of Zurich (1909–1911) and Prague (1911–1912), before he returned to ETH Zurich (1912–1914).
-
-    Skills:
-      - name: Physics
-        level: Master
-        icon: fa-solid fa-hashtag
-        keywords: "Quantum Mechanics, Quantum Computing, Quantum Information, Quantum Cryptography, Quantum Communication, Quantum Teleportation"
-
-    Languages:
-      - name: German
-        summary: "Native speaker"
-
-      - name: English
-        summary: "Fluent"
-
-    Interests:
-      - name: Physics
-        icon: fa-solid fa-tag
-        keywords: "Quantum Mechanics, Quantum Computing, Quantum Information, Quantum Cryptography, Quantum Communication, Quantum Teleportation"
-
-    Certificates:
-      - name: Machine Learning
-        date: 2018-01-01
-        issuer: Stanford University
-        icon: fa-solid fa-location-dot
-
-      - name: Quantum Computing
-        date: 2018-01-01
-        issuer: Stanford University
-        icon: fa-solid fa-tag
-
-      - name: Quantum Information
-        date: 2018-01-01
-        issuer: Stanford University
-        icon: fa-solid fa-envelope
+          - Contributed to the core document extraction pipeline for key-value and OMR systems, including research, implementation, optimization, and refactoring of production APIs.
+          - Performed critical performance analysis on the key-value extraction pipeline and reduced extraction latency by approximately 27% (7–8 seconds), improving throughput and user experience.
+          - Worked with the SRE team to improve reliability and scalability of distributed systems using GCP, Kubernetes, Docker, and Redis.
+          - Built and maintained scalable backend services and APIs using Flask and MongoDB for high-volume document processing workflows.
 
     Projects:
-      - name: Quantum Computing
-        summary: Quantum computing is the use of quantum-mechanical phenomena such as superposition and entanglement to perform computation. Computers that perform quantum computations are known as quantum computers.
+      - name: Topic Modeling for Nepali Political News
+        summary: Comparative study of probabilistic, algebraic, and transformer-based topic modeling (LDA, BERTopic, and related methods) for Nepali, a low-resource language. Scraped and cleaned news data from online portals. Paper accepted at ICICT 2025 (IEEE Xplore).
         highlights:
-          - Quantum Teleportation
-          - Quantum Cryptography
-        start_date: 2018-01-01
-        end_date: 2018-01-01
+          - LDA, BERTopic, nltk, Pandas, spaCy, gensim
+        url: https://ieeexplore.ieee.org/document/11004776
+        start_date: 2024
+        end_date: 2025
 
-    References:
-      - name: Professor John Doe
-        icon: fa-solid fa-laptop
-        reference: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam condimentum, diam quis convallis euismod, arcu mi ullamcorper lorem, a vestibulum nunc magna at sem. Sed in risus ac felis varius blandit.
+      - name: Videolize — Text Script to Video Generator
+        summary: Deep learning system converting sequential scripts to video using Stable Diffusion, Microsoft text-to-audio, and the Gemini API. Scene images are interpolated with spherical interpolation for smooth transitions. First prize, GenAI category, LOCUS Hack-A-Week 2023.
+        highlights:
+          - PyTorch, HuggingFace, Stable Diffusion, Gemini API
+        start_date: 2023
+        end_date: 2023
 
-      - name: Professor Jane Smith
-        icon: fa-solid fa-thumbtack
-        reference: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam condimentum, diam quis convallis euismod, arcu mi ullamcorper lorem, a vestibulum nunc magna at sem. Sed in risus ac felis varius blandit.
+      - name: Information Extraction from Invoices using LLMs
+        summary: Invoice table and key-value extraction combining GPT-4 Vision with locally fine-tuned table transformers and YOLO for object detection. First prize, LLM category, Kathmandu University AI Competition 2023.
+        highlights:
+          - LLMs, YOLO, GPT-4 API, Table Transformers
+        start_date: 2023
+        end_date: 2023
+
+      - name: University Network Infrastructure Design
+        summary: Campus network topology design across multiple departments, including subnetting, VLANs, web and DNS servers, and OSPF dynamic routing (Cisco Packet Tracer).
+        highlights:
+          - Cisco Packet Tracer, OSPF, VLANs
+        start_date: 2023
+        end_date: 2023
+
+      - name: Checkers with AI
+        summary: Object-oriented Checkers implementation in C++ with an adversarial AI using Minimax and alpha–beta pruning (SFML, CMake).
+        highlights:
+          - C++, Minimax, Alpha–beta pruning, SFML
+        start_date: 2022
+        end_date: 2022
+
+      - name: Procedural Terrain Generator
+        summary: Procedural hill terrain generation using Perlin noise, with controllable randomness, clipping, and wireframe rendering (C++, CMake).
+        highlights:
+          - C++, Perlin noise, CMake
+        start_date: 2022
+        end_date: 2022
+
+    Skills:
+      - name: Languages
+        level: ""
+        icon: fa-solid fa-code
+        keywords: "Python, C/C++, JavaScript, SQL, Dart, HTML/CSS"
+
+      - name: Frameworks
+        level: ""
+        icon: fa-solid fa-cubes
+        keywords: "Flask, FastAPI, Django, PyTorch, Node.js, Express.js, Flutter"
+
+      - name: Machine learning & NLP
+        level: ""
+        icon: fa-solid fa-brain
+        keywords: "Computer vision (YOLO, CNN, ResNets, U-Net), NLP (RNNs, LSTMs, Transformers), linear algebra, probability and statistics, DSA"
+
+      - name: Libraries
+        level: ""
+        icon: fa-solid fa-book
+        keywords: "gensim, spaCy, NLTK, scikit-learn, NumPy, Matplotlib, seaborn, Pandas"
+
+      - name: Databases
+        level: ""
+        icon: fa-solid fa-database
+        keywords: "PostgreSQL, MySQL, SQLite, MongoDB"
+
+      - name: Cloud & infrastructure
+        level: ""
+        icon: fa-solid fa-cloud
+        keywords: "GCP, AWS (S3, EC2, Lambda), Docker, Kubernetes, Linux/Unix, Git, Redis"
+
+      - name: Developer tools
+        level: ""
+        icon: fa-solid fa-wrench
+        keywords: "Git, Docker, Selenium, Postman, VS Code, Visual Studio, Cisco Packet Tracer"
+
+    Awards:
+      - title: Winner — LLM Category
+        date: 2023-12
+        awarder: Kathmandu University AI Competition
+        summary: First place for invoice information extraction using LLMs, YOLO, and table transformers.
+
+      - title: Winner — Generative AI Category
+        date: 2024-01
+        awarder: LOCUS Hack-A-Week
+        summary: First place for Videolize, a text-to-video generation system.
+
+      - title: Full Undergraduate Scholarship — IOE Entrance Rank 34
+        date: 2019
+        awarder: Institute of Engineering
+        summary: Ranked 34 among 14,000+ candidates in the IOE entrance examination.
+
+      - title: Rank 1 — Electronics Department Entrance
+        date: 2019
+        awarder: Kathmandu University
+        summary: Top rank in the entrance examination of the Electronics Department.
+
+      - title: Golden Jubilee Scholarship
+        date: 2020
+        awarder: Embassy of India, Kathmandu
+        summary: Undergraduate scholarship awarded by the Embassy of India in Nepal.
+
+      - title: Position Holder — Budanilkantha Math League
+        date: 2018
+        awarder: Budanilkantha School
+        summary: National-level mathematics competition.
+
+      - title: Entrance Topper — +2 Level
+        date: 2017
+        awarder: +2 entrance examination
+        summary: Topped the +2 level entrance examination among 3,000+ students.
+
+      - title: College Topper — Grade 12 Board Examination
+        date: 2019
+        awarder: SOSHGS, Gandaki
+        summary: 3.85 GPA in the Grade 12 board examination.
+
+      - title: School Topper — SEE
+        date: 2017
+        awarder: Secondary Education Examination
+        summary: 3.8 GPA at the SEE level.
+
+    Certificates:
+      - name: Machine Learning Specialization
+        date: 2023
+        issuer: Coursera & DeepLearning.AI
+        icon: fa-solid fa-certificate
+
+      - name: Deep Learning Specialization
+        date: 2023
+        issuer: Coursera & DeepLearning.AI
+        icon: fa-solid fa-certificate
+
+      - name: Annual Nepal AI School
+        date: 2023
+        issuer: NAAMII, Nepal
+        icon: fa-solid fa-certificate
+
+      - name: AWS Academy Cloud Architecting
+        date: 2023
+        issuer: AWS Academy
+        icon: fa-brands fa-aws
+
+      - name: AWS Academy Data Engineering
+        date: 2023
+        issuer: AWS Academy
+        icon: fa-brands fa-aws
+
+    Volunteer:
+      - company: IT Club, Pulchowk Campus
+        position: Secretary
+        location: Lalitpur, Nepal
+        start_date: 2022-01
+        end_date: 2023-05
+        summary: Department representative for Electronics and Computer Engineering; organized campus tech events including Git and design workshops, expanding participation beyond Pulchowk.
+
+      - company: LOCUS, Pulchowk Campus
+        position: Instructor
+        location: Lalitpur, Nepal
+        start_date: 2023
+        end_date: 2023
+        summary: Contributed to curriculum design for the Software Fellowship; taught mathematical foundations of machine learning and algorithm implementation (from scratch and with libraries) to 100+ students.
+
+      - company: IT Club & PDSC, Pulchowk Campus
+        position: Software Programming Instructor
+        location: Lalitpur, Nepal
+        start_date: 2021
+        end_date: 2022
+        summary: Instructed 250+ students in a Django web framework workshop (PDSC) and 40+ students in an in-person Git and GitHub workshop (IT Club).
+
+    Languages:
+      - name: Nepali
+        summary: Native
+
+      - name: English
+        summary: Professional proficiency
+
+      - name: Hindi
+        summary: Professional proficiency
+
+    Interests:
+      - name: Backend systems & data infrastructure
+        icon: fa-solid fa-server
+        keywords: "APIs, databases, reliability, scalability"
+
+      - name: Applied machine learning
+        icon: fa-solid fa-robot
+        keywords: "document AI, LLMs, RAG, production ML"
+
+      - name: Low-resource NLP
+        icon: fa-solid fa-language
+        keywords: "Nepali, topic modeling, information extraction"
