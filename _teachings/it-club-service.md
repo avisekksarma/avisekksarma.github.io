@@ -3,7 +3,7 @@ layout: page
 title: IT Club Technical Programs
 description: Campus technical community leadership and programming outreach
 importance: 3
-category: service
+category: Service
 ---
 
 **IT Club, Pulchowk Campus · Jan 2022 – May 2023** · Secretary

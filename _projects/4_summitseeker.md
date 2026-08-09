@@ -3,7 +3,7 @@ layout: page
 title: SummitSeeker
 description: Backend platform for a tourism application with cloud CI/CD
 importance: 4
-category: engineering
+category: Engineering
 ---
 
 Backend services for a tourism application supporting itinerary and destination workflows.

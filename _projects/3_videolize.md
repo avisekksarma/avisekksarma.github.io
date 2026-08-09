@@ -3,7 +3,7 @@ layout: page
 title: Videolize
 description: Text-to-video generation with diffusion models and large language models
 importance: 3
-category: research
+category: Research
 ---
 
 A generative system that converts textual scripts into short videos by coordinating language understanding with image and video synthesis.

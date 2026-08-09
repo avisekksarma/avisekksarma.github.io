@@ -63,6 +63,19 @@ cv:
           - Worked with the SRE team to improve reliability and scalability of distributed systems using GCP, Kubernetes, Docker, and Redis.
           - Built and maintained scalable backend services and APIs using Flask and MongoDB for high-volume document processing workflows.
 
+    Publications:
+      - title: Topic Modeling for Nepali Political News Using Probabilistic, Algebraic and Transformer-Based Methods
+        authors:
+          - Abhishek Sharma
+          - Aashish Adhikari
+          - Manoj Khatri
+          - Hrishav Khadka
+          - Aman Shakya
+        publisher: IEEE International Conference on Inventive Computation Technologies (ICICT)
+        releaseDate: 2025-04
+        url: https://ieeexplore.ieee.org/document/11004776
+        summary: Comparative evaluation of LDA, NMF, LSA, and BERTopic on Nepali political news. Findings favor classical probabilistic methods for this low-resource language setting.
+
     Projects:
       - name: Topic Modeling for Nepali Political News
         summary: Comparative study of probabilistic, algebraic, and transformer-based topic modeling (LDA, BERTopic, and related methods) for Nepali, a low-resource language. Scraped and cleaned news data from online portals. Paper accepted at ICICT 2025 (IEEE Xplore).

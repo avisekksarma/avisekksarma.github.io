@@ -1,9 +1,9 @@
 ---
 layout: page
 permalink: /repositories/
-title: repositories
+title: Repositories
 description: Selected open-source activity and public repositories.
-nav: true
+nav: false
 nav_order: 5
 ---
 

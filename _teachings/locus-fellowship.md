@@ -3,7 +3,7 @@ layout: page
 title: Mathematical Foundations of Machine Learning
 description: LOCUS Fellowship instructor — core ML mathematics and algorithms
 importance: 1
-category: instruction
+category: Instruction
 ---
 
 **LOCUS Fellowship, 2023** · Instructor

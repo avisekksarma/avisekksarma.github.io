@@ -1,7 +1,7 @@
 ---
 layout: page
 permalink: /teaching/
-title: teaching
+title: Teaching
 description: Instruction, workshops, and mentoring in computer science and machine learning.
 nav: true
 nav_order: 4

@@ -3,7 +3,7 @@ layout: page
 title: Adversarial Search for Checkers
 description: Game-playing agent with Minimax search and alpha–beta pruning
 importance: 5
-category: engineering
+category: Engineering
 ---
 
 A checkers engine implemented in **C++**, featuring adversarial search with **Minimax** and **alpha–beta pruning**.

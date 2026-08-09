@@ -3,7 +3,7 @@ layout: page
 title: Campus Network Design
 description: Hierarchical network design with VLANs, subnetting, and OSPF
 importance: 7
-category: engineering
+category: Engineering
 ---
 
 A campus-scale network design exercise covering addressing, segmentation, and dynamic routing.

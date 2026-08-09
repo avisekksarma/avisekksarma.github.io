@@ -3,7 +3,7 @@ layout: page
 title: Topic Modeling for Nepali Political News
 description: Comparative evaluation of classical and neural topic models for low-resource Nepali text
 importance: 1
-category: research
+category: Research
 related_publications: true
 ---
 
