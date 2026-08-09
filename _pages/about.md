@@ -18,9 +18,7 @@ selected_papers: true
 social: true
 
 announcements:
-  enabled: true
-  scrollable: true
-  limit: 5
+  enabled: false
 
 latest_posts:
   enabled: true
@@ -32,13 +30,12 @@ I am a software engineer working on scalable backend systems and applied machine
 
 I currently contribute as a **founding software engineer** at **ZeroTB**, where I design backend infrastructure for compliance automation—including database architecture, service integrations, and AI-powered workflows with RAG and LLM orchestration. Previously, at **Docsumo**, I worked as an associate software engineer (ML) on document understanding systems—production inference services, extraction pipelines, and latency-sensitive APIs.
 
-Alongside industry work, I study natural language processing for low-resource languages. Our comparative evaluation of topic modeling methods for Nepali political news appeared at [IEEE ICICT 2025](https://ieeexplore.ieee.org/document/11004776).
+During my undergraduate studies, I also completed a research project on [topic modeling for Nepali political news](/projects/1_nepali-topic-modeling/), later published at IEEE ICICT 2025.
 
 I received a B.E. in Computer Engineering from [IOE Pulchowk Campus](https://pcampus.edu.np/) (2019–2024), where I was awarded the Golden Jubilee Scholarship by the Embassy of India.
 
-### Research interests
+### Interests
 
 - Backend systems: APIs, databases, performance, and reliability
 - Applied AI: large language models, document intelligence, and production ML systems
-- NLP for low-resource languages, with a focus on Nepali
-- Engineering education and technical mentorship
+- Teaching and technical mentorship

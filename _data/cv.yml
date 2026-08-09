@@ -5,7 +5,7 @@ cv:
   phone: "+977 986-635-0452"
   location: Kathmandu, Nepal
   image: ""
-  summary: Software engineer specializing in backend systems and applied machine learning, with experience in compliance automation, document AI, and NLP for low-resource languages.
+  summary: Software engineer specializing in backend systems and applied machine learning, with experience in compliance automation and document AI.
 
   social_networks:
     - network: GitHub
@@ -73,15 +73,15 @@ cv:
           - Aman Shakya
         publisher: IEEE International Conference on Inventive Computation Technologies (ICICT)
         releaseDate: 2025-04
-        url: https://ieeexplore.ieee.org/document/11004776
-        summary: Comparative evaluation of LDA, NMF, LSA, and BERTopic on Nepali political news. Findings favor classical probabilistic methods for this low-resource language setting.
+        url: /projects/1_nepali-topic-modeling/
+        summary: Undergraduate research project on topic modeling for Nepali political news.
 
     Projects:
       - name: Topic Modeling for Nepali Political News
-        summary: Comparative study of probabilistic, algebraic, and transformer-based topic modeling (LDA, BERTopic, and related methods) for Nepali, a low-resource language. Scraped and cleaned news data from online portals. Paper accepted at ICICT 2025 (IEEE Xplore).
+        summary: Undergraduate research project comparing probabilistic, algebraic, and transformer-based topic modeling methods on Nepali news. Paper published at ICICT 2025.
         highlights:
           - LDA, BERTopic, nltk, Pandas, spaCy, gensim
-        url: https://ieeexplore.ieee.org/document/11004776
+        url: /projects/1_nepali-topic-modeling/
         start_date: 2024
         end_date: 2025
 
@@ -269,6 +269,6 @@ cv:
         icon: fa-solid fa-robot
         keywords: "document AI, LLMs, RAG, production ML"
 
-      - name: Low-resource NLP
-        icon: fa-solid fa-language
-        keywords: "Nepali, topic modeling, information extraction"
+      - name: Teaching & mentorship
+        icon: fa-solid fa-chalkboard-user
+        keywords: "workshops, curriculum, community"

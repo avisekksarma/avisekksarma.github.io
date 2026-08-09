@@ -9,11 +9,11 @@ last_name: Sharma
 contact_note: >
   Please reach out via email for research or professional inquiries.
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
-  Personal academic and professional site of Abhishek Sharma — software engineer working on backend systems, applied machine learning, and NLP for low-resource languages.
+  Personal site of Abhishek Sharma — software engineer working on backend systems and applied machine learning.
 footer_text: >
   Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
   Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
-keywords: Abhishek Sharma, software engineering, backend systems, machine learning, NLP, low-resource languages, Nepali, portfolio # add your own keywords or leave empty
+keywords: Abhishek Sharma, software engineering, backend systems, machine learning, portfolio # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: ⚛️ # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
 apple_touch_icon: # image name in /assets/img/ (or a rooted path / absolute URL) used for iOS home-screen bookmarks; needs a real 180x180 PNG, since Safari ignores the emoji favicon above. Left empty, iOS falls back to a screenshot of the page.
@@ -234,6 +234,7 @@ exclude:
   - package.json
   - package-lock.json
   - _pages/about_einstein.md
+  - _pages/news.md
   - assets/jupyter/
   - purgecss.config.js
   - README.md
@@ -339,7 +340,7 @@ jekyll-archives:
   books:
     enabled: [year, tags, categories] # enables year, tag and category archives (remove if you need to disable one of them).
 
-display_tags: ["postgresql", "backend-engineering", "neuroplasticity", "neuroscience"] # these tags will be displayed on the front page of your blog
+display_tags: ["PostgreSQL", "Backend Engineering", "Neuroplasticity", "Neuroscience"] # these tags will be displayed on the front page of your blog
 display_categories: ["Tech", "Neuroscience"] # these categories will be displayed on the front page of your blog
 
 # -----------------------------------------------------------------------------
