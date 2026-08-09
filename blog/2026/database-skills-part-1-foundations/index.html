@@ -1,0 +1,405 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Database Skills Every Software Engineer Must Have — Part 1: Foundations | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="A practical, no-fluff guide to relational databases — the kind of depth that actually shows up in senior engineering interviews."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, NLP, low-resource languages, Nepali, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://avisekksarma.github.io/blog/2026/database-skills-part-1-foundations/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Abhishek Sharma </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/">teaching </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Database Skills Every Software Engineer Must Have — Part 1: Foundations</h1> <p class="post-meta"> Created on May 13, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/postgresql"> <i class="fa-solid fa-hashtag fa-sm"></i> postgresql</a>   <a href="/blog/tag/sql"> <i class="fa-solid fa-hashtag fa-sm"></i> sql</a>   <a href="/blog/tag/relational-databases"> <i class="fa-solid fa-hashtag fa-sm"></i> relational-databases</a>   <a href="/blog/tag/backend-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> backend-engineering</a>   <a href="/blog/tag/database-design"> <i class="fa-solid fa-hashtag fa-sm"></i> database-design</a>   ·   <a href="/blog/category/tech"> <i class="fa-solid fa-tag fa-sm"></i> Tech</a>   <a href="/blog/category/databases"> <i class="fa-solid fa-tag fa-sm"></i> databases</a>   <a href="/blog/category/backend"> <i class="fa-solid fa-tag fa-sm"></i> backend</a>   <a href="/blog/category/series"> <i class="fa-solid fa-tag fa-sm"></i> series</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>There’s a pattern I’ve noticed in engineering teams. Backend engineers who “know databases” usually know just enough to not break things — they write queries that work, add a foreign key when the PR reviewer asks, maybe throw an index on a column and call it a day.</p> <p>But database engineering done <em>well</em> is a different skill set entirely. It’s the difference between a schema that holds up at 10x traffic and one that becomes a liability. Between a query that scans 2 million rows and one that touches 300. Between data that’s trustworthy and data that <em>might</em> be right.</p> <p>This is Part 1 of a three-part series:</p> <ul> <li> <strong>Part 1 (this post):</strong> Relational foundations, schema design, joins, constraints — the bedrock</li> <li> <strong>Part 2:</strong> Indexes, query planning, transactions, ACID, concurrency — the internals that matter</li> <li> <strong>Part 3:</strong> Advanced patterns, performance tuning, partitioning, replication — production-grade engineering</li> </ul> <p>We’re using PostgreSQL throughout, because that’s what the industry mostly runs on, and because Postgres rewards engineers who understand it deeply.</p> <hr> <h2 id="why-relational-databases-are-still-the-default">Why Relational Databases Are Still the Default</h2> <p>NoSQL had its moment. Document stores, wide-column databases, graph databases — they all have legitimate use cases. But for most backend systems, the relational model remains the dominant choice for good reason:</p> <p><strong>Structured data with relationships is the default reality.</strong> Users have orders. Orders have items. Items belong to products. This is a graph of related entities — and the relational model is purpose-built for it.</p> <p><strong>ACID guarantees are hard to give up.</strong> More on this in Part 2, but when correctness matters — financial data, inventory, user records — the transactional guarantees of a relational DB are invaluable.</p> <p><strong>SQL is a universal skill.</strong> No matter what ORM, language, or framework you use, understanding SQL means you can work with any relational system.</p> <hr> <h2 id="the-relational-model-what-it-actually-means">The Relational Model: What It Actually Means</h2> <p>A relational database stores data in <strong>tables</strong> (formally called <em>relations</em>). Each table has:</p> <ul> <li> <strong>Columns</strong> — the schema, defined once (name, data type, constraints)</li> <li> <strong>Rows</strong> — individual records</li> </ul> <p>The “relational” in the name comes from the mathematical concept of a <em>relation</em> from set theory — a set of tuples with defined attributes. The key philosophical insight of the model: <strong>data is linked by values, not by pointers</strong>.</p> <p>In a file system or object graph, relationships are pointers — one object literally holds a reference to another. In a relational database, table <code class="language-plaintext highlighter-rouge">orders</code> references table <code class="language-plaintext highlighter-rouge">users</code> by <em>storing the user’s ID as a value</em>. The database engine enforces that this value is valid. This is simultaneously simpler and more powerful than pointer-based systems.</p> <hr> <h2 id="building-a-real-schema">Building a Real Schema</h2> <p>Let’s build something concrete. A minimal e-commerce backend: users, orders, order items.</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">users</span> <span class="p">(</span>
+    <span class="n">id</span>          <span class="nb">SERIAL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">email</span>       <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">UNIQUE</span><span class="p">,</span>
+    <span class="n">full_name</span>   <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">created_at</span>  <span class="n">TIMESTAMPTZ</span>  <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="n">NOW</span><span class="p">()</span>
+<span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="p">(</span>
+    <span class="n">id</span>          <span class="nb">SERIAL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">user_id</span>     <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+    <span class="n">status</span>      <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>  <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="s1">'pending'</span><span class="p">,</span>
+    <span class="n">total_cents</span> <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> <span class="p">(</span><span class="n">total_cents</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="n">created_at</span>  <span class="n">TIMESTAMPTZ</span>  <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="n">NOW</span><span class="p">(),</span>
+    <span class="n">updated_at</span>  <span class="n">TIMESTAMPTZ</span>  <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="n">NOW</span><span class="p">()</span>
+<span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">order_items</span> <span class="p">(</span>
+    <span class="n">id</span>           <span class="nb">SERIAL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">order_id</span>     <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="n">orders</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+    <span class="n">product_name</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">quantity</span>     <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> <span class="p">(</span><span class="n">quantity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="n">price_cents</span>  <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> <span class="p">(</span><span class="n">price_cents</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div></div> <p>This looks simple, but every decision is deliberate. Let’s unpack each one.</p> <hr> <h2 id="the-decisions-that-matter-in-schema-design">The Decisions That Matter in Schema Design</h2> <h3 id="never-store-money-as-a-float">Never Store Money as a Float</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- ❌ Wrong</span>
+<span class="n">price</span> <span class="nb">FLOAT</span>
+
+<span class="c1">-- ✅ Correct</span>
+<span class="n">price_cents</span> <span class="nb">INT</span>
+</code></pre></div></div> <p>Floating point numbers cannot represent most decimal fractions exactly. <code class="language-plaintext highlighter-rouge">0.1 + 0.2</code> in IEEE 754 floating point equals <code class="language-plaintext highlighter-rouge">0.30000000000000004</code>. For money, this is unacceptable. Store prices as integers in the smallest currency unit (cents, pence, etc.) and convert to decimals only in your presentation layer.</p> <p>If you need arbitrary precision (for exchange rates, for example), PostgreSQL’s <code class="language-plaintext highlighter-rouge">NUMERIC(precision, scale)</code> type is exact — but slower than integers. For most money use cases, cents as <code class="language-plaintext highlighter-rouge">INT</code> or <code class="language-plaintext highlighter-rouge">BIGINT</code> is the right call.</p> <h3 id="always-use-timestamptz-never-timestamp">Always Use TIMESTAMPTZ, Never TIMESTAMP</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- ❌ Wrong — stores no timezone information</span>
+<span class="n">created_at</span> <span class="nb">TIMESTAMP</span>
+
+<span class="c1">-- ✅ Correct — stores as UTC, displays in session timezone</span>
+<span class="n">created_at</span> <span class="n">TIMESTAMPTZ</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">TIMESTAMP</code> stores a naive datetime with no timezone context. If your servers are in different regions, or your team changes deployment regions, or daylight saving time enters the picture, naive timestamps become ambiguous.</p> <p><code class="language-plaintext highlighter-rouge">TIMESTAMPTZ</code> (timestamp with time zone) stores values as UTC internally and converts to the session’s timezone on retrieval. Always use it. You will thank yourself when dealing with international users or server migrations.</p> <h3 id="not-null-everywhere-reasonable">NOT NULL Everywhere Reasonable</h3> <p><code class="language-plaintext highlighter-rouge">NULL</code> in SQL is a three-valued logic trap. <code class="language-plaintext highlighter-rouge">NULL = NULL</code> is <code class="language-plaintext highlighter-rouge">NULL</code> (not <code class="language-plaintext highlighter-rouge">TRUE</code>). <code class="language-plaintext highlighter-rouge">NULL != NULL</code> is also <code class="language-plaintext highlighter-rouge">NULL</code>. Aggregate functions silently skip NULLs. Joins on nullable columns have surprising behavior.</p> <p>Apply <code class="language-plaintext highlighter-rouge">NOT NULL</code> to every column unless the absence of a value is genuinely meaningful for your domain. If you’re unsure, lean toward <code class="language-plaintext highlighter-rouge">NOT NULL</code> and use a sentinel value (empty string, 0, or a dedicated status column) to represent “not applicable.”</p> <h3 id="constraints-are-your-safety-net">Constraints Are Your Safety Net</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CHECK</span> <span class="p">(</span><span class="n">total_cents</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">CHECK</span> <span class="p">(</span><span class="n">quantity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">UNIQUE</span> <span class="p">(</span><span class="n">email</span><span class="p">)</span>
+<span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></div> <p>Every constraint you add is a bug your application <em>cannot</em> introduce, regardless of how broken your code gets. Constraints are enforced by the database engine on every write — no exceptions, no race conditions, no way to bypass them through a misconfigured service.</p> <p>This is the key mindset shift: <strong>the database is not just a dumb store. It is a co-enforcer of your domain invariants.</strong></p> <hr> <h2 id="keys-and-relationships">Keys and Relationships</h2> <h3 id="primary-keys">Primary Keys</h3> <p>A primary key uniquely identifies every row. No two rows can share a PK value, and it cannot be NULL.</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Single-column PK (most common)</span>
+<span class="n">id</span> <span class="nb">SERIAL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>
+
+<span class="c1">-- Composite PK — useful for junction tables</span>
+<span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">role_id</span><span class="p">)</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">SERIAL</code> in Postgres is syntactic sugar for an auto-incrementing integer sequence. For new projects, consider <code class="language-plaintext highlighter-rouge">BIGSERIAL</code> (8-byte integer) instead of <code class="language-plaintext highlighter-rouge">SERIAL</code> (4-byte) — you’re unlikely to exceed 2 billion rows, but it costs nothing to be safe.</p> <p>A growing school of thought prefers <strong>UUIDs</strong> as primary keys (<code class="language-plaintext highlighter-rouge">gen_random_uuid()</code> in Postgres 13+) for distributed systems, where auto-increment sequences would require coordination across nodes. The tradeoff: UUIDs are larger (16 bytes vs 4-8), and random UUIDs cause index fragmentation due to non-sequential inserts. ULIDs and UUIDv7 (time-ordered) are worth exploring if you go this route.</p> <h3 id="foreign-keys-and-referential-integrity">Foreign Keys and Referential Integrity</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">user_id</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div></div> <p>This foreign key constraint tells Postgres:</p> <ol> <li> <strong>On insert/update:</strong> reject any <code class="language-plaintext highlighter-rouge">user_id</code> value that doesn’t exist in <code class="language-plaintext highlighter-rouge">users.id</code> </li> <li> <strong>On delete of a user:</strong> reject the delete (default behavior) unless you specify otherwise</li> </ol> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Options for what happens when the referenced row is deleted:</span>
+<span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span> <span class="k">ON</span> <span class="k">DELETE</span> <span class="k">RESTRICT</span>    <span class="c1">-- default; reject the delete</span>
+<span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span> <span class="k">ON</span> <span class="k">DELETE</span> <span class="k">CASCADE</span>     <span class="c1">-- delete orders too</span>
+<span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span> <span class="k">ON</span> <span class="k">DELETE</span> <span class="k">SET</span> <span class="k">NULL</span>    <span class="c1">-- set user_id to NULL</span>
+<span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span> <span class="k">ON</span> <span class="k">DELETE</span> <span class="k">SET</span> <span class="k">DEFAULT</span> <span class="c1">-- set to column default</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">CASCADE</code> feels convenient but use it carefully. Cascading deletes can propagate through multiple tables and delete far more data than intended. For most production systems, prefer <code class="language-plaintext highlighter-rouge">RESTRICT</code> and handle deletions explicitly in your application (soft deletes, archiving, etc.).</p> <hr> <h2 id="sql-fundamentals-beyond-basic-crud">SQL Fundamentals: Beyond Basic CRUD</h2> <h3 id="the-mental-model-for-joins">The Mental Model for Joins</h3> <p>Joins are where most engineers plateau. The key mental model: <strong>start with a set of rows from the first table. For each row, find matching rows in the second table based on the condition. Combine them.</strong></p> <p>What you do with non-matching rows distinguishes join types:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INNER JOIN  — keep only rows that matched on both sides
+LEFT JOIN   — keep all rows from left; NULLs where right didn't match
+RIGHT JOIN  — keep all rows from right (rarely used; just flip the table order)
+FULL JOIN   — keep all rows from both sides
+</code></pre></div></div> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- INNER JOIN: only users who have at least one order</span>
+<span class="k">SELECT</span> <span class="n">u</span><span class="p">.</span><span class="n">email</span><span class="p">,</span> <span class="n">o</span><span class="p">.</span><span class="n">id</span> <span class="k">AS</span> <span class="n">order_id</span><span class="p">,</span> <span class="n">o</span><span class="p">.</span><span class="n">status</span>
+<span class="k">FROM</span> <span class="n">users</span> <span class="n">u</span>
+<span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">orders</span> <span class="n">o</span> <span class="k">ON</span> <span class="n">o</span><span class="p">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">u</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+
+<span class="c1">-- LEFT JOIN: ALL users, with order data if it exists</span>
+<span class="k">SELECT</span> <span class="n">u</span><span class="p">.</span><span class="n">email</span><span class="p">,</span> <span class="k">COUNT</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">id</span><span class="p">)</span> <span class="k">AS</span> <span class="n">order_count</span>
+<span class="k">FROM</span> <span class="n">users</span> <span class="n">u</span>
+<span class="k">LEFT</span> <span class="k">JOIN</span> <span class="n">orders</span> <span class="n">o</span> <span class="k">ON</span> <span class="n">o</span><span class="p">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">u</span><span class="p">.</span><span class="n">id</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">u</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">u</span><span class="p">.</span><span class="n">email</span><span class="p">;</span>
+</code></pre></div></div> <h3 id="multi-table-joins">Multi-Table Joins</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Full order details with user info</span>
+<span class="k">SELECT</span>
+    <span class="n">u</span><span class="p">.</span><span class="n">email</span><span class="p">,</span>
+    <span class="n">o</span><span class="p">.</span><span class="n">id</span>           <span class="k">AS</span> <span class="n">order_id</span><span class="p">,</span>
+    <span class="n">o</span><span class="p">.</span><span class="n">status</span><span class="p">,</span>
+    <span class="n">o</span><span class="p">.</span><span class="n">created_at</span>   <span class="k">AS</span> <span class="n">ordered_at</span><span class="p">,</span>
+    <span class="n">oi</span><span class="p">.</span><span class="n">product_name</span><span class="p">,</span>
+    <span class="n">oi</span><span class="p">.</span><span class="n">quantity</span><span class="p">,</span>
+    <span class="n">oi</span><span class="p">.</span><span class="n">price_cents</span>
+<span class="k">FROM</span> <span class="n">users</span> <span class="n">u</span>
+<span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">orders</span>      <span class="n">o</span>  <span class="k">ON</span> <span class="n">o</span><span class="p">.</span><span class="n">user_id</span>  <span class="o">=</span> <span class="n">u</span><span class="p">.</span><span class="n">id</span>
+<span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">order_items</span> <span class="n">oi</span> <span class="k">ON</span> <span class="n">oi</span><span class="p">.</span><span class="n">order_id</span> <span class="o">=</span> <span class="n">o</span><span class="p">.</span><span class="n">id</span>
+<span class="k">WHERE</span> <span class="n">u</span><span class="p">.</span><span class="n">email</span> <span class="o">=</span> <span class="s1">'alice@example.com'</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">o</span><span class="p">.</span><span class="n">created_at</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <p>Read this left to right: start with users, join to their orders, join to the items in those orders. Each join narrows or expands the working set.</p> <h3 id="aggregations-done-right">Aggregations Done Right</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Revenue breakdown per user</span>
+<span class="k">SELECT</span>
+    <span class="n">u</span><span class="p">.</span><span class="n">email</span><span class="p">,</span>
+    <span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span> <span class="n">o</span><span class="p">.</span><span class="n">id</span><span class="p">)</span>             <span class="k">AS</span> <span class="n">total_orders</span><span class="p">,</span>
+    <span class="k">SUM</span><span class="p">(</span><span class="n">oi</span><span class="p">.</span><span class="n">price_cents</span> <span class="o">*</span> <span class="n">oi</span><span class="p">.</span><span class="n">quantity</span><span class="p">)</span> <span class="k">AS</span> <span class="n">total_spent_cents</span><span class="p">,</span>
+    <span class="k">AVG</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">total_cents</span><span class="p">)</span>               <span class="k">AS</span> <span class="n">avg_order_value_cents</span>
+<span class="k">FROM</span> <span class="n">users</span> <span class="n">u</span>
+<span class="k">LEFT</span> <span class="k">JOIN</span> <span class="n">orders</span>      <span class="n">o</span>  <span class="k">ON</span> <span class="n">o</span><span class="p">.</span><span class="n">user_id</span>  <span class="o">=</span> <span class="n">u</span><span class="p">.</span><span class="n">id</span>
+<span class="k">LEFT</span> <span class="k">JOIN</span> <span class="n">order_items</span> <span class="n">oi</span> <span class="k">ON</span> <span class="n">oi</span><span class="p">.</span><span class="n">order_id</span> <span class="o">=</span> <span class="n">o</span><span class="p">.</span><span class="n">id</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">u</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">u</span><span class="p">.</span><span class="n">email</span>
+<span class="k">HAVING</span> <span class="k">SUM</span><span class="p">(</span><span class="n">oi</span><span class="p">.</span><span class="n">price_cents</span> <span class="o">*</span> <span class="n">oi</span><span class="p">.</span><span class="n">quantity</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">total_spent_cents</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <p>Key rules that trip people up:</p> <ul> <li> <strong>Every column in SELECT must be in GROUP BY or be an aggregate.</strong> Postgres enforces this strictly (unlike MySQL, which will silently return arbitrary values for non-grouped columns).</li> <li> <strong>WHERE filters rows before grouping. HAVING filters groups after aggregation.</strong> You cannot use a column alias defined in SELECT inside a HAVING clause in standard SQL.</li> <li> <strong><code class="language-plaintext highlighter-rouge">COUNT(column)</code> vs <code class="language-plaintext highlighter-rouge">COUNT(*)</code>:</strong> <code class="language-plaintext highlighter-rouge">COUNT(column)</code> ignores NULL values. <code class="language-plaintext highlighter-rouge">COUNT(*)</code> counts all rows including those with NULLs. This distinction matters when counting optional relationships.</li> <li> <strong><code class="language-plaintext highlighter-rouge">COUNT(DISTINCT column)</code>:</strong> counts unique non-null values. Essential when your join produces duplicate rows.</li> </ul> <hr> <h2 id="null-the-billion-dollar-mistake">NULL: The Billion-Dollar Mistake</h2> <p>Tony Hoare, who invented the null reference, called it his “billion-dollar mistake.” SQL NULL is similarly problematic if you don’t understand it.</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- NULL comparisons don't work as expected</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">users</span> <span class="k">WHERE</span> <span class="n">full_name</span> <span class="o">=</span> <span class="k">NULL</span><span class="p">;</span>    <span class="c1">-- ❌ returns nothing</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">users</span> <span class="k">WHERE</span> <span class="n">full_name</span> <span class="k">IS</span> <span class="k">NULL</span><span class="p">;</span>   <span class="c1">-- ✅ correct</span>
+
+<span class="c1">-- NULL in boolean logic</span>
+<span class="k">SELECT</span> <span class="k">NULL</span> <span class="o">=</span> <span class="k">NULL</span><span class="p">;</span>   <span class="c1">-- NULL (not TRUE)</span>
+<span class="k">SELECT</span> <span class="k">NULL</span> <span class="o">!=</span> <span class="k">NULL</span><span class="p">;</span>  <span class="c1">-- NULL (not TRUE)</span>
+<span class="k">SELECT</span> <span class="k">NULL</span> <span class="k">OR</span> <span class="k">TRUE</span><span class="p">;</span>  <span class="c1">-- TRUE</span>
+<span class="k">SELECT</span> <span class="k">NULL</span> <span class="k">AND</span> <span class="k">TRUE</span><span class="p">;</span> <span class="c1">-- NULL</span>
+<span class="k">SELECT</span> <span class="k">NULL</span> <span class="k">AND</span> <span class="k">FALSE</span><span class="p">;</span> <span class="c1">-- FALSE</span>
+</code></pre></div></div> <p>NULL represents <em>unknown</em>, not <em>absent</em> or <em>false</em>. This is three-valued logic (TRUE, FALSE, UNKNOWN), and it behaves consistently once you internalize it — but it will catch you off guard repeatedly until you do.</p> <p>Practical takeaway: use <code class="language-plaintext highlighter-rouge">IS NULL</code> / <code class="language-plaintext highlighter-rouge">IS NOT NULL</code> for null checks, never <code class="language-plaintext highlighter-rouge">= NULL</code>. And again — declare columns <code class="language-plaintext highlighter-rouge">NOT NULL</code> wherever the value should always exist.</p> <hr> <h2 id="data-type-discipline">Data Type Discipline</h2> <p>Choosing the right data type isn’t pedantry — it affects storage, performance, and correctness.</p> <table> <thead> <tr> <th>Use Case</th> <th>Recommended Type</th> <th>Avoid</th> </tr> </thead> <tbody> <tr> <td>Auto-increment ID</td> <td><code class="language-plaintext highlighter-rouge">BIGSERIAL</code></td> <td> <code class="language-plaintext highlighter-rouge">SERIAL</code> for large tables</td> </tr> <tr> <td>Money</td> <td> <code class="language-plaintext highlighter-rouge">INT</code> (cents) or <code class="language-plaintext highlighter-rouge">NUMERIC(12,2)</code> </td> <td> <code class="language-plaintext highlighter-rouge">FLOAT</code>, <code class="language-plaintext highlighter-rouge">REAL</code> </td> </tr> <tr> <td>Datetime</td> <td><code class="language-plaintext highlighter-rouge">TIMESTAMPTZ</code></td> <td><code class="language-plaintext highlighter-rouge">TIMESTAMP</code></td> </tr> <tr> <td>Date only</td> <td><code class="language-plaintext highlighter-rouge">DATE</code></td> <td><code class="language-plaintext highlighter-rouge">TIMESTAMP</code></td> </tr> <tr> <td>Short text</td> <td><code class="language-plaintext highlighter-rouge">VARCHAR(n)</code></td> <td> <code class="language-plaintext highlighter-rouge">TEXT</code> for bounded strings</td> </tr> <tr> <td>Unlimited text</td> <td><code class="language-plaintext highlighter-rouge">TEXT</code></td> <td> <code class="language-plaintext highlighter-rouge">VARCHAR</code> without bound</td> </tr> <tr> <td>True/false</td> <td><code class="language-plaintext highlighter-rouge">BOOLEAN</code></td> <td> <code class="language-plaintext highlighter-rouge">INT</code> (0/1)</td> </tr> <tr> <td>Enum-like</td> <td> <code class="language-plaintext highlighter-rouge">VARCHAR</code> + CHECK or Postgres <code class="language-plaintext highlighter-rouge">ENUM</code> </td> <td>Magic integers</td> </tr> <tr> <td>JSON data</td> <td><code class="language-plaintext highlighter-rouge">JSONB</code></td> <td> <code class="language-plaintext highlighter-rouge">JSON</code> (JSONB is binary, indexed)</td> </tr> <tr> <td>IP addresses</td> <td><code class="language-plaintext highlighter-rouge">INET</code></td> <td><code class="language-plaintext highlighter-rouge">VARCHAR</code></td> </tr> <tr> <td>UUIDs</td> <td><code class="language-plaintext highlighter-rouge">UUID</code></td> <td><code class="language-plaintext highlighter-rouge">VARCHAR(36)</code></td> </tr> </tbody> </table> <p>A note on <code class="language-plaintext highlighter-rouge">JSONB</code>: Postgres’s <code class="language-plaintext highlighter-rouge">JSONB</code> type is genuinely powerful — it supports indexing, querying, and operators. It’s appropriate for truly dynamic or semi-structured data. But don’t reach for it just because your ORM makes it easy. If data has known structure and you’ll query on its fields, model it as proper columns. JSONB is an escape hatch, not a default.</p> <hr> <h2 id="normalization-the-principle-behind-schema-design">Normalization: The Principle Behind Schema Design</h2> <p>Normalization is the process of organizing a schema to reduce redundancy and improve integrity. There are formal forms (1NF, 2NF, 3NF, BCNF), but the engineering intuition is:</p> <p><strong>Every fact should be stored in exactly one place.</strong></p> <p>If a user’s email appears in 5 places, you have 5 places to update it and 5 chances to get them out of sync.</p> <p>A quick practical guide:</p> <p><strong>First Normal Form (1NF):</strong> No repeating groups; every column holds atomic values.</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- ❌ Violates 1NF — multiple values in one column</span>
+<span class="n">phone_numbers</span> <span class="nb">VARCHAR</span> <span class="c1">-- "555-1234, 555-5678"</span>
+
+<span class="c1">-- ✅ Correct — separate table</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">user_phones</span> <span class="p">(</span>
+    <span class="n">user_id</span> <span class="nb">INT</span> <span class="k">REFERENCES</span> <span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+    <span class="n">phone</span>   <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span>
+<span class="p">);</span>
+</code></pre></div></div> <p><strong>Second Normal Form (2NF):</strong> Every non-key column depends on the <em>whole</em> primary key (relevant for composite keys).</p> <p><strong>Third Normal Form (3NF):</strong> No non-key column depends on another non-key column (eliminate transitive dependencies).</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- ❌ Violates 3NF — zip_code determines city; city is in the orders table</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="p">(</span>
+    <span class="n">id</span>       <span class="nb">SERIAL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">zip_code</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">city</span>     <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>  <span class="c1">-- derived from zip_code; store it separately</span>
+<span class="p">);</span>
+
+<span class="c1">-- ✅ Better — city lives with zip_code in its own table</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">zip_codes</span> <span class="p">(</span>
+    <span class="n">zip_code</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">city</span>     <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="k">state</span>    <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>  <span class="k">NOT</span> <span class="k">NULL</span>
+<span class="p">);</span>
+</code></pre></div></div> <p>The practical heuristic: <strong>if you find yourself updating the same fact in multiple rows, you’ve probably violated normalization.</strong> That’s when bugs creep in.</p> <blockquote> <p><strong>Note:</strong> Normalization is not always the final answer. At scale, <em>denormalization</em> — intentionally duplicating data to avoid expensive joins — is a valid performance strategy. But you denormalize consciously and deliberately, after profiling. The default should always be normalized.</p> </blockquote> <hr> <h2 id="the-schema-review-checklist">The Schema Review Checklist</h2> <p>Before shipping any new table or migration, run through this:</p> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Every column that should always have a value is <code class="language-plaintext highlighter-rouge">NOT NULL</code> </li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Money is stored as integers (cents), not floats</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Timestamps use <code class="language-plaintext highlighter-rouge">TIMESTAMPTZ</code>, not <code class="language-plaintext highlighter-rouge">TIMESTAMP</code> </li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Foreign keys are declared and indexed</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled><code class="language-plaintext highlighter-rouge">CHECK</code> constraints exist for any column with business rules (positive quantity, valid status values, etc.)</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>No repeated facts — each piece of information lives in exactly one place</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>IDs use <code class="language-plaintext highlighter-rouge">BIGSERIAL</code> or <code class="language-plaintext highlighter-rouge">UUID</code>, not <code class="language-plaintext highlighter-rouge">SERIAL</code> </li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Column names are consistent across the schema (<code class="language-plaintext highlighter-rouge">user_id</code> everywhere, not <code class="language-plaintext highlighter-rouge">userId</code> sometimes and <code class="language-plaintext highlighter-rouge">user_id</code> other times)</li> </ul> <hr> <h2 id="practice-build-this-schema">Practice: Build This Schema</h2> <p>The best way to internalize this is to build and query it yourself. Spin up a local Postgres instance (or use the free tier at <a href="https://neon.tech" rel="external nofollow noopener" target="_blank">neon.tech</a>) and:</p> <ol> <li>Create the <code class="language-plaintext highlighter-rouge">users</code>, <code class="language-plaintext highlighter-rouge">orders</code>, and <code class="language-plaintext highlighter-rouge">order_items</code> tables from this post</li> <li>Insert 5 users, give 3 of them 1-3 orders each, populate the order items</li> <li>Write these queries without looking at examples: <ul> <li>All orders placed in the last 30 days, with the user’s email</li> <li>Total revenue per user, ordered highest to lowest, including users with zero orders</li> <li>The single most expensive order item ever placed</li> <li>Count of orders per status (<code class="language-plaintext highlighter-rouge">pending</code>, <code class="language-plaintext highlighter-rouge">shipped</code>, etc.)</li> </ul> </li> <li>Try inserting an order with a <code class="language-plaintext highlighter-rouge">user_id</code> that doesn’t exist and observe the error</li> </ol> <p>Deliberately breaking constraints teaches you what they actually protect against.</p> <hr> <h2 id="whats-next">What’s Next</h2> <p>We’ve covered the foundation: the relational model, schema design principles, data types, keys, constraints, joins, and aggregations. This is the bedrock everything else builds on.</p> <p>In <strong>Part 2</strong>, we go deeper into the internals that separate good engineers from great ones:</p> <ul> <li> <strong>Indexes:</strong> how B-trees work, when indexes help (and when they hurt), partial and composite indexes, the <code class="language-plaintext highlighter-rouge">EXPLAIN ANALYZE</code> command</li> <li> <strong>Transactions &amp; ACID:</strong> what atomicity, consistency, isolation, and durability actually guarantee — and what they don’t</li> <li> <strong>Concurrency:</strong> locks, deadlocks, isolation levels, and the bugs each level protects against</li> <li> <strong>Query planning:</strong> how Postgres decides to execute your query, and how to steer it when it gets it wrong</li> </ul> <p>These are the topics that show up in senior engineering interviews and production incidents. Part 2 is where the real leverage is.</p> <hr> <h2 id="this-post-is-part-of-the-database-engineering-from-good-to-great-series-part-2-covers-indexes-query-planning-and-transactions-part-3-covers-advanced-production-patterns"><em>This post is part of the <strong>Database Engineering: From Good to Great</strong> series. <a href="/blog/2026/database-skills-part-2-internals/">Part 2</a> covers indexes, query planning, and transactions. <a href="/blog/2026/database-skills-part-3-production/">Part 3</a> covers advanced production patterns.</em></h2> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/rumination-and-default-mode-network/">Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets Stuck</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/">Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/">Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode to Self-Control</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/">Neuroplasticity, Part 2: The Machinery of Brain Change</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/">Neuroplasticity, Part 1: The Brain Learns by Changing</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-3-production/">Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-2-internals/">Database Skills Every Software Engineer Must Have — Part 2: Internals That Actually Matter</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/acid-properties-demystified/">ACID Properties Demystified: What Every Backend Engineer Must Know</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Abhishek Sharma. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-publications",
+          title: "publications",
+          description: "Peer-reviewed and conference publications, listed in reverse chronological order.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/publications/";
+          },
+        },{id: "nav-projects",
+          title: "projects",
+          description: "Selected research and engineering projects.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/projects/";
+          },
+        },{id: "nav-cv",
+          title: "CV",
+          description: "Curriculum vitae — education, experience, teaching, awards, and selected work.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-teaching",
+          title: "teaching",
+          description: "Instruction, workshops, and mentoring in computer science and machine learning.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/teaching/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Selected open-source activity and public repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "post-rumination-and-the-default-mode-network-why-the-mind-replays-worries-and-gets-stuck",
+        
+          title: "Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets...",
+        
+        description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rumination-and-default-mode-network/";
+          
+        },
+      },{id: "post-dopamine-and-motivation-the-neuroscience-of-wanting-effort-reward-and-drive",
+        
+          title: "Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive",
+        
+        description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/";
+          
+        },
+      },{id: "post-stress-the-amygdala-and-the-prefrontal-cortex-a-complete-guide-from-survival-mode-to-self-control",
+        
+          title: "Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode...",
+        
+        description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/";
+          
+        },
+      },{id: "post-neuroplasticity-part-2-the-machinery-of-brain-change",
+        
+          title: "Neuroplasticity, Part 2: The Machinery of Brain Change",
+        
+        description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/";
+          
+        },
+      },{id: "post-neuroplasticity-part-1-the-brain-learns-by-changing",
+        
+          title: "Neuroplasticity, Part 1: The Brain Learns by Changing",
+        
+        description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-3-production-grade-engineering",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering",
+        
+        description: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-3-production/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-2-internals-that-actually-matter",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 2: Internals That Actually...",
+        
+        description: "Indexes, query planning, transactions, window functions, N+1, connection pooling, and locks. The intermediate layer that separates engineers who write queries from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-2-internals/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-1-foundations",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 1: Foundations",
+        
+        description: "A practical, no-fluff guide to relational databases — the kind of depth that actually shows up in senior engineering interviews.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-1-foundations/";
+          
+        },
+      },{id: "post-acid-properties-demystified-what-every-backend-engineer-must-know",
+        
+          title: "ACID Properties Demystified: What Every Backend Engineer Must Know",
+        
+        description: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/acid-properties-demystified/";
+          
+        },
+      },{id: "books-the-godfather",
+          title: 'The Godfather',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_godfather/";
+            },},{id: "news-joined-docsumo-as-associate-software-engineer-ml-focusing-on-document-extraction-pipelines-and-production-inference-systems",
+          title: 'Joined **Docsumo** as Associate Software Engineer (ML), focusing on document extraction pipelines and...',
+          description: "",
+          section: "News",},{id: "news-joined-zerotb-as-founding-software-engineer-working-on-backend-infrastructure-and-ai-powered-workflows-for-compliance-automation",
+          title: 'Joined **ZeroTB** as Founding Software Engineer, working on backend infrastructure and AI-powered workflows...',
+          description: "",
+          section: "News",},{id: "news-our-paper-on-topic-modeling-for-nepali-political-news-has-been-published-at-ieee-icict-2025-https-ieeexplore-ieee-org-document-11004776",
+          title: 'Our paper on topic modeling for Nepali political news has been published at...',
+          description: "",
+          section: "News",},{id: "projects-topic-modeling-for-nepali-political-news",
+          title: 'Topic Modeling for Nepali Political News',
+          description: "Comparative evaluation of classical and neural topic models for low-resource Nepali text",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/1_nepali-topic-modeling/";
+            },},{id: "projects-invoice-information-extraction",
+          title: 'Invoice Information Extraction',
+          description: "Multimodal document understanding for structured invoice data extraction",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/2_invoice-extraction/";
+            },},{id: "projects-videolize",
+          title: 'Videolize',
+          description: "Text-to-video generation with diffusion models and large language models",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/3_videolize/";
+            },},{id: "projects-summitseeker",
+          title: 'SummitSeeker',
+          description: "Backend platform for a tourism application with cloud CI/CD",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/4_summitseeker/";
+            },},{id: "projects-adversarial-search-for-checkers",
+          title: 'Adversarial Search for Checkers',
+          description: "Game-playing agent with Minimax search and alpha–beta pruning",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/5_checkers-ai/";
+            },},{id: "projects-procedural-terrain-generation",
+          title: 'Procedural Terrain Generation',
+          description: "Perlin-noise terrain synthesis in C++",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/6_procedural-terrain/";
+            },},{id: "projects-campus-network-design",
+          title: 'Campus Network Design',
+          description: "Hierarchical network design with VLANs, subnetting, and OSPF",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/7_university-network/";
+            },},{id: "teachings-web-development-with-django",
+          title: 'Web Development with Django',
+          description: "Large-scale workshop series on Django application development",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/django-workshop/";
+            },},{id: "teachings-it-club-technical-programs",
+          title: 'IT Club Technical Programs',
+          description: "Campus technical community leadership and programming outreach",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/it-club-service/";
+            },},{id: "teachings-mathematical-foundations-of-machine-learning",
+          title: 'Mathematical Foundations of Machine Learning',
+          description: "LOCUS Fellowship instructor — core ML mathematics and algorithms",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/locus-fellowship/";
+            },},{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%61%62%68%69%73%68%65%6B.%77%6F%72%6B%31%37%31%30@%67%6D%61%69%6C.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/avisekksarma", "_blank");
+        },
+      },{
+        id: 'social-linkedin',
+        title: 'LinkedIn',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.linkedin.com/in/aviseksarma", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

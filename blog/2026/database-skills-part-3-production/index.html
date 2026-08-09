@@ -1,0 +1,568 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, NLP, low-resource languages, Nepali, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://avisekksarma.github.io/blog/2026/database-skills-part-3-production/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Abhishek Sharma </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/">teaching </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering</h1> <p class="post-meta"> Created on May 13, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/postgresql"> <i class="fa-solid fa-hashtag fa-sm"></i> postgresql</a>   <a href="/blog/tag/sql"> <i class="fa-solid fa-hashtag fa-sm"></i> sql</a>   <a href="/blog/tag/performance"> <i class="fa-solid fa-hashtag fa-sm"></i> performance</a>   <a href="/blog/tag/partitioning"> <i class="fa-solid fa-hashtag fa-sm"></i> partitioning</a>   <a href="/blog/tag/replication"> <i class="fa-solid fa-hashtag fa-sm"></i> replication</a>   <a href="/blog/tag/migrations"> <i class="fa-solid fa-hashtag fa-sm"></i> migrations</a>   <a href="/blog/tag/backend-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> backend-engineering</a>   ·   <a href="/blog/category/tech"> <i class="fa-solid fa-tag fa-sm"></i> Tech</a>   <a href="/blog/category/databases"> <i class="fa-solid fa-tag fa-sm"></i> databases</a>   <a href="/blog/category/backend"> <i class="fa-solid fa-tag fa-sm"></i> backend</a>   <a href="/blog/category/series"> <i class="fa-solid fa-tag fa-sm"></i> series</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p><a href="/blog/2026/database-skills-part-1-foundations/">Part 1</a> gave you the relational foundation. <a href="/blog/2026/database-skills-part-2-internals/">Part 2</a> gave you the internals — indexes, query planning, transactions, locks. Both of those posts make you a competent database engineer.</p> <p>This post is about something different.</p> <p>Production databases are not development databases. They have hundreds of millions of rows, live traffic that never stops, schema changes that can’t afford downtime, replicas that drift, autovacuum processes that fall behind, and query patterns you didn’t anticipate when you designed the schema. The gap between “works in development” and “works in production at scale” is where most database incidents live.</p> <p>This post covers the advanced topics that engineers learn either from deep study or from being paged at 2am:</p> <ul> <li> <strong>MVCC</strong> — how Postgres versions data, and what table bloat actually is</li> <li> <strong>Table partitioning</strong> — splitting very large tables and why it matters</li> <li> <strong>Zero-downtime migrations</strong> — schema changes on live production tables</li> <li> <strong>Cursor-based pagination</strong> — why OFFSET fails at scale</li> <li> <strong>Read replicas and replication lag</strong> — scaling reads and the consistency traps</li> <li> <strong>Covering indexes and index-only scans</strong> — the optimization most engineers miss</li> <li> <strong>Production monitoring</strong> — the queries that tell you your database is sick before it fails</li> </ul> <hr> <h2 id="how-postgres-actually-stores-data-the-heap-and-mvcc">How Postgres Actually Stores Data: The Heap and MVCC</h2> <p>To understand bloat, vacuuming, and why reads don’t block writes in Postgres, you need to understand how data is physically stored.</p> <p>Every table in Postgres is stored as a <strong>heap file</strong> — a collection of 8KB pages on disk. Rows are written to pages roughly in insertion order, with no inherent sorting. A sequential scan reads these pages from start to end. An index scan jumps to specific pages via pointers.</p> <p>What makes Postgres different from most databases is <strong>MVCC — Multi-Version Concurrency Control</strong>. Instead of locking a row when updating it, Postgres keeps multiple versions of the row simultaneously.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before UPDATE:
+[id=1, balance=1000, xmin=100, xmax=null]   ← live row
+
+After UPDATE by transaction 200:
+[id=1, balance=1000, xmin=100, xmax=200]    ← dead version (updated by txn 200)
+[id=1, balance=500,  xmin=200, xmax=null]   ← live version
+</code></pre></div></div> <p>Every row version carries two hidden system columns:</p> <ul> <li> <strong><code class="language-plaintext highlighter-rouge">xmin</code></strong> — the transaction ID that created this row version</li> <li> <strong><code class="language-plaintext highlighter-rouge">xmax</code></strong> — the transaction ID that deleted or superseded it (null means still live)</li> </ul> <p>When Transaction A reads a row while Transaction B is in the middle of updating it, Transaction A sees the version that was current when A started — the old <code class="language-plaintext highlighter-rouge">xmin</code>. Transaction B’s new version has a higher <code class="language-plaintext highlighter-rouge">xmin</code> and is invisible to A until B commits. <strong>No locking required. No waiting. Reads never block writes.</strong></p> <p>This is why Postgres handles concurrent reads so gracefully. It’s one of the most important architectural decisions in the system.</p> <h3 id="the-cost-bloat-and-vacuum">The Cost: Bloat and VACUUM</h3> <p>Dead row versions don’t disappear on their own. They accumulate on disk, taking up space in the heap and slowing down sequential scans — Postgres reads past them even though they’re invisible to queries. This accumulation is called <strong>table bloat</strong>.</p> <p>Postgres has a background process called <strong>autovacuum</strong> that periodically cleans dead row versions and reclaims space. On most tables it runs transparently and you never think about it. But on high-write tables — tables with constant <code class="language-plaintext highlighter-rouge">UPDATE</code> and <code class="language-plaintext highlighter-rouge">DELETE</code> traffic — autovacuum can fall behind, leading to significant bloat and degraded performance.</p> <p>The more severe consequence of neglected vacuuming is <strong>transaction ID wraparound</strong>. Postgres uses 32-bit transaction IDs, which wrap around after about 2 billion transactions. To prevent data from becoming invisible after a wraparound, Postgres will begin refusing all writes to the database and emit warnings like:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>WARNING: database "production" must be vacuumed within 11,225,000 transactions
+</code></pre></div></div> <p>At that point you have a serious production emergency on your hands. Autovacuum is supposed to prevent this automatically, but aggressive write loads and misconfigured autovacuum settings can let it happen.</p> <p><strong>Practical monitoring for bloat:</strong></p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
+    <span class="n">tablename</span><span class="p">,</span>
+    <span class="n">n_live_tup</span><span class="p">,</span>
+    <span class="n">n_dead_tup</span><span class="p">,</span>
+    <span class="n">ROUND</span><span class="p">(</span>
+        <span class="mi">100</span> <span class="o">*</span> <span class="n">n_dead_tup</span><span class="p">::</span><span class="nb">numeric</span> <span class="o">/</span> <span class="k">NULLIF</span><span class="p">(</span><span class="n">n_live_tup</span> <span class="o">+</span> <span class="n">n_dead_tup</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">dead_pct</span><span class="p">,</span>
+    <span class="n">last_autovacuum</span><span class="p">,</span>
+    <span class="n">last_autoanalyze</span>
+<span class="k">FROM</span> <span class="n">pg_stat_user_tables</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">dead_pct</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <p>If <code class="language-plaintext highlighter-rouge">dead_pct</code> is above 10–20% on a large table and <code class="language-plaintext highlighter-rouge">last_autovacuum</code> is old, autovacuum isn’t keeping up. You can trigger a manual vacuum without blocking reads:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">VACUUM</span> <span class="k">ANALYZE</span> <span class="n">orders</span><span class="p">;</span>        <span class="c1">-- reclaims dead rows, refreshes statistics</span>
+<span class="k">VACUUM</span> <span class="k">FULL</span> <span class="n">orders</span><span class="p">;</span>           <span class="c1">-- full rewrite, reclaims disk space — BLOCKS ALL ACCESS</span>
+</code></pre></div></div> <p>Use <code class="language-plaintext highlighter-rouge">VACUUM FULL</code> only during maintenance windows. Regular <code class="language-plaintext highlighter-rouge">VACUUM</code> (without FULL) is safe to run on a live table.</p> <hr> <h2 id="covering-indexes-and-index-only-scans">Covering Indexes and Index-Only Scans</h2> <p>This is the optimization most engineers don’t reach for, but it’s one of the highest-leverage improvements you can make on read-heavy query paths.</p> <p>A standard index lookup works in two steps:</p> <ol> <li>Traverse the B-tree to find matching keys and their <code class="language-plaintext highlighter-rouge">ctid</code> pointers</li> <li>Follow each pointer to the heap to fetch the actual row</li> </ol> <p>Step 2 is a random I/O operation. If you’re fetching thousands of rows, thousands of random page reads add up — especially when the data isn’t cached.</p> <p>A <strong>covering index</strong> includes all the columns a query needs, so Postgres never has to touch the heap at all:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Query that needs email and full_name</span>
+<span class="k">SELECT</span> <span class="n">email</span><span class="p">,</span> <span class="n">full_name</span> <span class="k">FROM</span> <span class="n">users</span> <span class="k">WHERE</span> <span class="n">email</span> <span class="o">=</span> <span class="s1">'alice@example.com'</span><span class="p">;</span>
+
+<span class="c1">-- Regular index — finds the row, then hits the heap for full_name</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_users_email</span> <span class="k">ON</span> <span class="n">users</span><span class="p">(</span><span class="n">email</span><span class="p">);</span>
+
+<span class="c1">-- Covering index — everything needed is in the index itself</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_users_email_covering</span> <span class="k">ON</span> <span class="n">users</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">full_name</span><span class="p">);</span>
+</code></pre></div></div> <p>With the covering index, EXPLAIN shows <code class="language-plaintext highlighter-rouge">Index Only Scan</code> instead of <code class="language-plaintext highlighter-rouge">Index Scan</code> — the heap is never touched. For queries on hot read paths with stable access patterns, this can cut query time significantly.</p> <h3 id="the-include-clause">The INCLUDE Clause</h3> <p>Postgres 11 introduced <code class="language-plaintext highlighter-rouge">INCLUDE</code> for covering indexes — a cleaner way to add payload columns without affecting the index sort order:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- email is the search key; full_name and created_at are just carried along</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_users_email</span> <span class="k">ON</span> <span class="n">users</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+<span class="n">INCLUDE</span> <span class="p">(</span><span class="n">full_name</span><span class="p">,</span> <span class="n">created_at</span><span class="p">);</span>
+</code></pre></div></div> <p>The difference from putting all columns in the key: <code class="language-plaintext highlighter-rouge">INCLUDE</code> columns are stored only in leaf nodes and don’t affect index ordering. This keeps the index smaller and the tree shallower while still enabling index-only scans for queries that need those columns.</p> <p>Design covering indexes for your most performance-critical read paths — the queries that run thousands of times per minute on your hottest tables.</p> <hr> <h2 id="table-partitioning">Table Partitioning</h2> <p>When a table grows into the hundreds of millions of rows, the economics change. Even well-indexed queries slow down because indexes get larger, sequential scans cover more ground, vacuuming takes longer, and query planning itself gets slower.</p> <p><strong>Partitioning</strong> splits a large logical table into smaller physical sub-tables called partitions. From your application’s perspective, you query a single table. Under the hood, Postgres routes reads and writes to the appropriate partition automatically.</p> <h3 id="range-partitioning">Range Partitioning</h3> <p>The most common pattern — partition by a date or numeric range:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="p">(</span>
+    <span class="n">id</span>          <span class="n">BIGSERIAL</span><span class="p">,</span>
+    <span class="n">user_id</span>     <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">total_cents</span> <span class="nb">INT</span>          <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">status</span>      <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>  <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="s1">'pending'</span><span class="p">,</span>
+    <span class="n">created_at</span>  <span class="n">TIMESTAMPTZ</span>  <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="n">NOW</span><span class="p">()</span>
+<span class="p">)</span> <span class="k">PARTITION</span> <span class="k">BY</span> <span class="k">RANGE</span> <span class="p">(</span><span class="n">created_at</span><span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders_2023_q4</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">orders</span>
+    <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">FROM</span> <span class="p">(</span><span class="s1">'2023-10-01'</span><span class="p">)</span> <span class="k">TO</span> <span class="p">(</span><span class="s1">'2024-01-01'</span><span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders_2024_q1</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">orders</span>
+    <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">FROM</span> <span class="p">(</span><span class="s1">'2024-01-01'</span><span class="p">)</span> <span class="k">TO</span> <span class="p">(</span><span class="s1">'2024-04-01'</span><span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders_2024_q2</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">orders</span>
+    <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">FROM</span> <span class="p">(</span><span class="s1">'2024-04-01'</span><span class="p">)</span> <span class="k">TO</span> <span class="p">(</span><span class="s1">'2024-07-01'</span><span class="p">);</span>
+</code></pre></div></div> <p>When you query with a date filter, Postgres uses <strong>partition pruning</strong> — it identifies which partitions could contain matching rows and skips the rest entirely:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Only touches orders_2024_q1 — the other partitions are not scanned</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">orders</span>
+<span class="k">WHERE</span> <span class="n">created_at</span> <span class="k">BETWEEN</span> <span class="s1">'2024-01-01'</span> <span class="k">AND</span> <span class="s1">'2024-03-31'</span><span class="p">;</span>
+</code></pre></div></div> <p>Without partitioning, this query scans an index (or the table) across all historical data. With partitioning, it only ever touches one quarter’s worth of data.</p> <h3 id="list-and-hash-partitioning">List and Hash Partitioning</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- List partitioning — split by discrete values</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">events</span> <span class="p">(</span>
+    <span class="n">id</span>          <span class="n">BIGSERIAL</span><span class="p">,</span>
+    <span class="n">region</span>      <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">event_data</span>  <span class="n">JSONB</span>
+<span class="p">)</span> <span class="k">PARTITION</span> <span class="k">BY</span> <span class="n">LIST</span> <span class="p">(</span><span class="n">region</span><span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">events_us</span>   <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">events</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">IN</span> <span class="p">(</span><span class="s1">'us-east'</span><span class="p">,</span> <span class="s1">'us-west'</span><span class="p">);</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">events_eu</span>   <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">events</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">IN</span> <span class="p">(</span><span class="s1">'eu-west'</span><span class="p">,</span> <span class="s1">'eu-central'</span><span class="p">);</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">events_apac</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">events</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">IN</span> <span class="p">(</span><span class="s1">'ap-southeast'</span><span class="p">,</span> <span class="s1">'ap-northeast'</span><span class="p">);</span>
+
+<span class="c1">-- Hash partitioning — distribute rows evenly, no natural range key needed</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sessions</span> <span class="p">(</span>
+    <span class="n">id</span>      <span class="n">BIGSERIAL</span><span class="p">,</span>
+    <span class="n">user_id</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span>
+<span class="p">)</span> <span class="k">PARTITION</span> <span class="k">BY</span> <span class="n">HASH</span> <span class="p">(</span><span class="n">user_id</span><span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sessions_0</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">sessions</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">WITH</span> <span class="p">(</span><span class="n">MODULUS</span> <span class="mi">4</span><span class="p">,</span> <span class="n">REMAINDER</span> <span class="mi">0</span><span class="p">);</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sessions_1</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">sessions</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">WITH</span> <span class="p">(</span><span class="n">MODULUS</span> <span class="mi">4</span><span class="p">,</span> <span class="n">REMAINDER</span> <span class="mi">1</span><span class="p">);</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sessions_2</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">sessions</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">WITH</span> <span class="p">(</span><span class="n">MODULUS</span> <span class="mi">4</span><span class="p">,</span> <span class="n">REMAINDER</span> <span class="mi">2</span><span class="p">);</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sessions_3</span> <span class="k">PARTITION</span> <span class="k">OF</span> <span class="n">sessions</span> <span class="k">FOR</span> <span class="k">VALUES</span> <span class="k">WITH</span> <span class="p">(</span><span class="n">MODULUS</span> <span class="mi">4</span><span class="p">,</span> <span class="n">REMAINDER</span> <span class="mi">3</span><span class="p">);</span>
+</code></pre></div></div> <h3 id="what-partitioning-actually-solves">What Partitioning Actually Solves</h3> <p><strong>Query performance</strong> — smaller partitions mean less data scanned, smaller indexes to traverse, and faster vacuum cycles.</p> <p><strong>Data lifecycle management</strong> — this is arguably the biggest practical win. Dropping old data on a large table with <code class="language-plaintext highlighter-rouge">DELETE</code> is catastrophically slow — it locks rows, generates enormous WAL, and triggers a massive vacuum. Dropping a partition is instant:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Slow, disruptive — deletes millions of rows one by one</span>
+<span class="k">DELETE</span> <span class="k">FROM</span> <span class="n">orders</span> <span class="k">WHERE</span> <span class="n">created_at</span> <span class="o">&lt;</span> <span class="s1">'2022-01-01'</span><span class="p">;</span>
+
+<span class="c1">-- Instant — drops the physical partition file</span>
+<span class="k">DROP</span> <span class="k">TABLE</span> <span class="n">orders_2021_q4</span><span class="p">;</span>
+<span class="c1">-- Or detach it for archiving instead of deleting</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="n">DETACH</span> <span class="k">PARTITION</span> <span class="n">orders_2021_q4</span><span class="p">;</span>
+</code></pre></div></div> <p><strong>Maintenance isolation</strong> — you can <code class="language-plaintext highlighter-rouge">VACUUM</code>, <code class="language-plaintext highlighter-rouge">ANALYZE</code>, or reindex a single partition without touching the rest of the table.</p> <h3 id="what-partitioning-doesnt-solve">What Partitioning Doesn’t Solve</h3> <p>Partitioning is not a substitute for indexes. If a query doesn’t filter on the partition key, Postgres scans all partitions — potentially worse than a single unpartitioned table. Partition on columns you <em>consistently filter on</em> in your heaviest queries.</p> <p>Cross-partition queries (aggregations, sorts, joins that span multiple partitions) have coordination overhead. Partitioning works best when most queries naturally stay within a single partition.</p> <hr> <h2 id="zero-downtime-migrations">Zero-Downtime Migrations</h2> <p>This is one of the most important practical skills for any engineer who operates a production database. The problem is straightforward: almost every DDL operation in Postgres acquires a lock that blocks reads and writes. On a table that serves live traffic, even a one-second lock can cause a visible outage.</p> <p>The good news: every dangerous migration has a safe alternative pattern. You just have to know them.</p> <h3 id="the-lock-hierarchy">The Lock Hierarchy</h3> <p>Understanding which operations block what is the starting point:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- These acquire ACCESS EXCLUSIVE — blocks ALL reads and writes</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ADD</span> <span class="k">COLUMN</span> <span class="n">notes</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="s1">'x'</span><span class="p">;</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">DROP</span> <span class="k">COLUMN</span> <span class="n">notes</span><span class="p">;</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ALTER</span> <span class="k">COLUMN</span> <span class="n">status</span> <span class="k">TYPE</span> <span class="nb">INT</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_orders_status</span> <span class="k">ON</span> <span class="n">orders</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+
+<span class="c1">-- These are safe on a live table</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">CONCURRENTLY</span> <span class="n">idx_orders_status</span> <span class="k">ON</span> <span class="n">orders</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ADD</span> <span class="k">COLUMN</span> <span class="n">notes</span> <span class="nb">TEXT</span><span class="p">;</span>  <span class="c1">-- nullable, no default</span>
+</code></pre></div></div> <h3 id="adding-a-column-safely">Adding a Column Safely</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- ❌ Dangerous — rewrites entire table with lock held</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ADD</span> <span class="k">COLUMN</span> <span class="n">notes</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="s1">''</span><span class="p">;</span>
+
+<span class="c1">-- ✅ Safe — three steps</span>
+<span class="c1">-- Step 1: Add nullable column (near-instant, no table rewrite)</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ADD</span> <span class="k">COLUMN</span> <span class="n">notes</span> <span class="nb">TEXT</span><span class="p">;</span>
+
+<span class="c1">-- Step 2: Backfill in batches from application code</span>
+<span class="c1">-- Never do one giant UPDATE — it locks rows and generates huge WAL</span>
+<span class="c1">-- Do small batches with short sleeps between them</span>
+<span class="k">UPDATE</span> <span class="n">orders</span> <span class="k">SET</span> <span class="n">notes</span> <span class="o">=</span> <span class="s1">''</span> <span class="k">WHERE</span> <span class="n">id</span> <span class="k">BETWEEN</span> <span class="mi">1</span>      <span class="k">AND</span> <span class="mi">10000</span><span class="p">;</span>
+<span class="k">UPDATE</span> <span class="n">orders</span> <span class="k">SET</span> <span class="n">notes</span> <span class="o">=</span> <span class="s1">''</span> <span class="k">WHERE</span> <span class="n">id</span> <span class="k">BETWEEN</span> <span class="mi">10001</span>  <span class="k">AND</span> <span class="mi">20000</span><span class="p">;</span>
+<span class="c1">-- continue until all rows are backfilled...</span>
+
+<span class="c1">-- Step 3: Add the NOT NULL constraint</span>
+<span class="c1">-- Postgres 12+: uses a table scan to verify but doesn't rewrite</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ALTER</span> <span class="k">COLUMN</span> <span class="n">notes</span> <span class="k">SET</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">;</span>
+</code></pre></div></div> <p>Why does adding a column with a non-null default cause a full table rewrite in older Postgres versions? Because Postgres has to physically write the default value into every existing row. From Postgres 11 onwards, stored defaults are handled without a full rewrite for most types — but the nullable-then-backfill pattern remains safest for large tables.</p> <h3 id="adding-an-index-safely">Adding an Index Safely</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- ❌ Blocks all writes for the duration of the index build</span>
+<span class="c1">-- On a 100M row table, this could be minutes</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_orders_status</span> <span class="k">ON</span> <span class="n">orders</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+
+<span class="c1">-- ✅ Builds the index without blocking writes</span>
+<span class="c1">-- Takes longer (multiple passes), cannot run inside a transaction</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">CONCURRENTLY</span> <span class="n">idx_orders_status</span> <span class="k">ON</span> <span class="n">orders</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">CREATE INDEX CONCURRENTLY</code> is one of Postgres’s most important production operations features. It builds the index in multiple passes while the table remains fully readable and writable. The cost: it takes 2–3x longer and cannot be wrapped in a transaction (so if it fails partway through, you need to clean up the partial index manually with <code class="language-plaintext highlighter-rouge">DROP INDEX CONCURRENTLY</code>).</p> <p>Always use <code class="language-plaintext highlighter-rouge">CONCURRENTLY</code> for index creation on production tables.</p> <h3 id="changing-a-column-type">Changing a Column Type</h3> <p>This is the most dangerous migration and there is no shortcut. <code class="language-plaintext highlighter-rouge">ALTER COLUMN TYPE</code> rewrites the entire table with an exclusive lock. On a large production table, this is not an option.</p> <p>The safe pattern is <strong>expand-contract</strong>:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Goal: change orders.status from VARCHAR to an ENUM type</span>
+
+<span class="c1">-- Phase 1: Expand — add new column alongside the old</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">ADD</span> <span class="k">COLUMN</span> <span class="n">status_new</span> <span class="n">order_status_enum</span><span class="p">;</span>
+
+<span class="c1">-- Phase 2: Dual-write — deploy application code that writes to both columns</span>
+<span class="c1">-- Backfill the new column from the old</span>
+<span class="k">UPDATE</span> <span class="n">orders</span> <span class="k">SET</span> <span class="n">status_new</span> <span class="o">=</span> <span class="n">status</span><span class="p">::</span><span class="n">order_status_enum</span>
+<span class="k">WHERE</span> <span class="n">id</span> <span class="k">BETWEEN</span> <span class="mi">1</span> <span class="k">AND</span> <span class="mi">10000</span><span class="p">;</span>
+<span class="c1">-- ... batch through all rows</span>
+
+<span class="c1">-- Phase 3: Switch reads — deploy code that reads from the new column</span>
+<span class="c1">-- Keep writing to both during this phase for safe rollback</span>
+
+<span class="c1">-- Phase 4: Contract — once confident, drop the old column</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">DROP</span> <span class="k">COLUMN</span> <span class="n">status</span><span class="p">;</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">orders</span> <span class="k">RENAME</span> <span class="k">COLUMN</span> <span class="n">status_new</span> <span class="k">TO</span> <span class="n">status</span><span class="p">;</span>
+</code></pre></div></div> <p>This takes multiple deployments and careful coordination. It’s the right answer. Trying to do it in one <code class="language-plaintext highlighter-rouge">ALTER TABLE</code> on a live table with significant traffic is how you cause an outage.</p> <h3 id="the-expand-contract-mental-model">The Expand-Contract Mental Model</h3> <p>Every breaking schema change in production should follow this pattern:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. Expand:   add new thing alongside old (new column, new table, new index)
+2. Migrate:  move data over gradually; dual-write during transition
+3. Contract: remove the old thing once nothing depends on it
+</code></pre></div></div> <p>Never remove or rename a column in the same deployment that stops using it. Code deploys and schema changes are not atomic across your application fleet — at the moment of deploy, some servers are running the old code and some the new. If you remove a column at the same time your application stops reading it, the servers still running the old code will start throwing errors.</p> <p>Always deprecate in one deploy, remove in a subsequent one.</p> <hr> <h2 id="cursor-based-pagination">Cursor-Based Pagination</h2> <p><code class="language-plaintext highlighter-rouge">OFFSET</code>-based pagination is the default because ORMs make it trivial. It’s also fundamentally broken at scale, and knowing why — and what to use instead — is a real differentiator.</p> <h3 id="why-offset-fails">Why OFFSET Fails</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Page 1 — fast</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">orders</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">created_at</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">20</span> <span class="k">OFFSET</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">-- Page 500 — scans and discards 9,980 rows to return 20</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">orders</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">created_at</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">20</span> <span class="k">OFFSET</span> <span class="mi">9980</span><span class="p">;</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">OFFSET N</code> doesn’t mean “jump to position N efficiently.” It means <strong>scan the first N rows and throw them away</strong>, then return the next page. The work grows linearly with page depth. At page 500, your database is doing 99.8% wasted work for every query.</p> <p>There’s also a correctness problem: if new rows are inserted between a user’s page 1 and page 2 requests, all rows shift by one — the user sees duplicates or skips items entirely.</p> <h3 id="cursor-based-pagination-1">Cursor-Based Pagination</h3> <p>Instead of “give me rows at position N,” cursor pagination asks “give me rows after this specific row”:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- First page — no cursor, just take the first batch</span>
+<span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">total_cents</span><span class="p">,</span> <span class="n">created_at</span>
+<span class="k">FROM</span> <span class="n">orders</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">created_at</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">id</span> <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="mi">20</span><span class="p">;</span>
+
+<span class="c1">-- Client receives last row: created_at='2024-03-15 14:22:00', id=98234</span>
+<span class="c1">-- Next page — use those values as the cursor</span>
+<span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">total_cents</span><span class="p">,</span> <span class="n">created_at</span>
+<span class="k">FROM</span> <span class="n">orders</span>
+<span class="k">WHERE</span> <span class="p">(</span><span class="n">created_at</span><span class="p">,</span> <span class="n">id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="s1">'2024-03-15 14:22:00'</span><span class="p">,</span> <span class="mi">98234</span><span class="p">)</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">created_at</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">id</span> <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="mi">20</span><span class="p">;</span>
+</code></pre></div></div> <p>The <code class="language-plaintext highlighter-rouge">WHERE</code> clause filters to rows that come after the cursor. Combined with an index on <code class="language-plaintext highlighter-rouge">(created_at DESC, id DESC)</code>, Postgres jumps directly to the right position in the index — <strong>O(log n)</strong> regardless of how deep you are, compared to OFFSET’s O(n).</p> <p>Why the composite cursor <code class="language-plaintext highlighter-rouge">(created_at, id)</code> rather than just <code class="language-plaintext highlighter-rouge">created_at</code>? Because timestamps are not unique — multiple orders can have the same <code class="language-plaintext highlighter-rouge">created_at</code>. Without the <code class="language-plaintext highlighter-rouge">id</code> as a tiebreaker, the cursor is ambiguous and you can miss or duplicate rows at timestamp boundaries.</p> <p>The tradeoff: cursor pagination doesn’t support random page access (“jump to page 47”) or total page counts efficiently. For most product use cases — infinite scroll, API pagination, feeds — that’s fine. For admin interfaces where users need to jump to arbitrary pages, <code class="language-plaintext highlighter-rouge">OFFSET</code> is acceptable because usage is low-volume.</p> <h3 id="implementing-it-cleanly">Implementing It Cleanly</h3> <p>The pattern in your API:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_orders</span><span class="p">(</span><span class="n">cursor</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="bp">None</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">Order</span><span class="p">).</span><span class="nf">order_by</span><span class="p">(</span>
+        <span class="n">Order</span><span class="p">.</span><span class="n">created_at</span><span class="p">.</span><span class="nf">desc</span><span class="p">(),</span>
+        <span class="n">Order</span><span class="p">.</span><span class="nb">id</span><span class="p">.</span><span class="nf">desc</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cursor</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span>
+            <span class="nf">or_</span><span class="p">(</span>
+                <span class="n">Order</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&lt;</span> <span class="n">cursor</span><span class="p">[</span><span class="sh">'</span><span class="s">created_at</span><span class="sh">'</span><span class="p">],</span>
+                <span class="nf">and_</span><span class="p">(</span>
+                    <span class="n">Order</span><span class="p">.</span><span class="n">created_at</span> <span class="o">==</span> <span class="n">cursor</span><span class="p">[</span><span class="sh">'</span><span class="s">created_at</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="n">Order</span><span class="p">.</span><span class="nb">id</span> <span class="o">&lt;</span> <span class="n">cursor</span><span class="p">[</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">query</span><span class="p">.</span><span class="nf">limit</span><span class="p">(</span><span class="n">limit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">).</span><span class="nf">all</span><span class="p">()</span>  <span class="c1"># fetch one extra to check if next page exists
+</span>    <span class="n">has_more</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">limit</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+
+    <span class="n">next_cursor</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">has_more</span><span class="p">:</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">next_cursor</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">created_at</span><span class="sh">'</span><span class="p">:</span> <span class="n">last</span><span class="p">.</span><span class="n">created_at</span><span class="p">.</span><span class="nf">isoformat</span><span class="p">(),</span> <span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="n">last</span><span class="p">.</span><span class="nb">id</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">rows</span><span class="p">,</span> <span class="n">next_cursor</span>
+</code></pre></div></div> <p>Fetching <code class="language-plaintext highlighter-rouge">limit + 1</code> rows is a clean way to determine if a next page exists without running a separate <code class="language-plaintext highlighter-rouge">COUNT</code> query.</p> <hr> <h2 id="read-replicas-and-replication-lag">Read Replicas and Replication Lag</h2> <p>Most production Postgres setups run at minimum a <strong>primary</strong> (write node) and one <strong>replica</strong> (read-only copy). Understanding how replication works — and where it breaks — is essential for designing correct systems.</p> <h3 id="how-streaming-replication-works">How Streaming Replication Works</h3> <p>Postgres’s primary continuously writes all changes to the <strong>Write-Ahead Log (WAL)</strong>. Replicas connect to the primary and stream the WAL, applying changes in order:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Primary:  [writes] → WAL → committed to disk
+                             ↓
+Replica:  ← streams WAL ← applies changes → available for reads
+</code></pre></div></div> <p>Replicas are read-only — they reject writes. From a query perspective, they look exactly like the primary, just with a slight delay and potentially stale data.</p> <h3 id="the-routing-pattern">The Routing Pattern</h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Route by operation type
+</span><span class="k">def</span> <span class="nf">get_db_session</span><span class="p">(</span><span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sh">'</span><span class="s">read</span><span class="sh">'</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="sh">'</span><span class="s">write</span><span class="sh">'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">primary_session</span>
+    <span class="k">return</span> <span class="n">replica_session</span>
+
+<span class="c1"># Writes always go to primary
+</span><span class="k">with</span> <span class="nf">get_db_session</span><span class="p">(</span><span class="sh">'</span><span class="s">write</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
+    <span class="n">db</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">new_order</span><span class="p">)</span>
+    <span class="n">db</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+
+<span class="c1"># Reads that tolerate staleness go to replica
+</span><span class="k">with</span> <span class="nf">get_db_session</span><span class="p">(</span><span class="sh">'</span><span class="s">read</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
+    <span class="n">orders</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">Order</span><span class="p">).</span><span class="nf">filter_by</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="sh">'</span><span class="s">pending</span><span class="sh">'</span><span class="p">).</span><span class="nf">all</span><span class="p">()</span>
+</code></pre></div></div> <p>The replica offloads read traffic from the primary — critical for analytics queries, reporting, exports, and any read-heavy operations that would otherwise compete with writes for primary resources.</p> <h3 id="replication-lag-where-it-bites-you">Replication Lag: Where It Bites You</h3> <p>Replication lag is the delay between a change committing on the primary and becoming visible on a replica. Usually milliseconds. Under high write load, it can grow to seconds.</p> <p>The failure mode is <strong>reading your own write</strong> from a replica before replication catches up:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ❌ Classic bug
+</span><span class="k">def</span> <span class="nf">register_user</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="c1"># Write goes to primary
+</span>    <span class="n">user</span> <span class="o">=</span> <span class="nf">create_user</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">)</span>
+    <span class="n">db_primary</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+
+    <span class="c1"># Read hits replica — which may not have the user yet
+</span>    <span class="n">profile</span> <span class="o">=</span> <span class="n">db_replica</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">User</span><span class="p">).</span><span class="nf">filter_by</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">).</span><span class="nf">first</span><span class="p">()</span>
+    <span class="c1"># profile is None — replication lag
+</span>    <span class="nf">send_welcome_email</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>  <span class="c1"># NullPointerException in production
+</span></code></pre></div></div> <p>The rules:</p> <ul> <li><strong>Writes always go to the primary</strong></li> <li><strong>Reads that must see data just written go to the primary</strong></li> <li><strong>Reads that tolerate staleness go to replicas</strong></li> </ul> <p>The third category is larger than you might think: dashboards, analytics, search, recommendation feeds, most list views. The second category is narrower: the immediate response after a write, anything in the critical path of a just-completed transaction.</p> <h3 id="monitoring-replication-lag">Monitoring Replication Lag</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Run on the primary — shows lag per replica</span>
+<span class="k">SELECT</span>
+    <span class="n">client_addr</span><span class="p">,</span>
+    <span class="k">state</span><span class="p">,</span>
+    <span class="n">sent_lsn</span><span class="p">,</span>
+    <span class="n">write_lsn</span><span class="p">,</span>
+    <span class="n">flush_lsn</span><span class="p">,</span>
+    <span class="n">replay_lsn</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">sent_lsn</span> <span class="o">-</span> <span class="n">replay_lsn</span><span class="p">)</span> <span class="k">AS</span> <span class="n">replication_lag_bytes</span>
+<span class="k">FROM</span> <span class="n">pg_stat_replication</span><span class="p">;</span>
+</code></pre></div></div> <p>Alert when lag exceeds your application’s tolerance. For most applications, anything over a few seconds of lag warrants investigation.</p> <hr> <h2 id="the-production-monitoring-queries">The Production Monitoring Queries</h2> <p>These are the queries you bookmark, put in your runbook, and run when something is wrong. Knowing them separates engineers who react to incidents from engineers who prevent them.</p> <h3 id="slowest-queries--where-to-start-every-performance-investigation">Slowest Queries — Where to Start Every Performance Investigation</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
+    <span class="k">LEFT</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>              <span class="k">AS</span> <span class="n">query_preview</span><span class="p">,</span>
+    <span class="n">calls</span><span class="p">,</span>
+    <span class="n">ROUND</span><span class="p">(</span><span class="n">total_exec_time</span><span class="p">::</span><span class="nb">numeric</span> <span class="o">/</span> <span class="n">calls</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">avg_ms</span><span class="p">,</span>
+    <span class="n">ROUND</span><span class="p">(</span><span class="n">total_exec_time</span><span class="p">::</span><span class="nb">numeric</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>         <span class="k">AS</span> <span class="n">total_ms</span><span class="p">,</span>
+    <span class="n">ROUND</span><span class="p">(</span><span class="k">rows</span><span class="p">::</span><span class="nb">numeric</span> <span class="o">/</span> <span class="n">calls</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>            <span class="k">AS</span> <span class="n">avg_rows</span>
+<span class="k">FROM</span> <span class="n">pg_stat_statements</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">avg_ms</span> <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="mi">20</span><span class="p">;</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">pg_stat_statements</code> is an extension — enable it with <code class="language-plaintext highlighter-rouge">CREATE EXTENSION pg_stat_statements</code> and add it to <code class="language-plaintext highlighter-rouge">shared_preload_libraries</code> in <code class="language-plaintext highlighter-rouge">postgresql.conf</code>. It’s standard in managed Postgres services (RDS, Cloud SQL, Neon, Supabase). This view gives you a ranked list of slowest queries by average execution time, aggregated since the last stats reset. Start every performance investigation here.</p> <h3 id="tables-getting-too-many-sequential-scans">Tables Getting Too Many Sequential Scans</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
+    <span class="n">tablename</span><span class="p">,</span>
+    <span class="n">seq_scan</span><span class="p">,</span>
+    <span class="n">seq_tup_read</span><span class="p">,</span>
+    <span class="n">idx_scan</span><span class="p">,</span>
+    <span class="n">seq_scan</span> <span class="o">-</span> <span class="n">idx_scan</span>            <span class="k">AS</span> <span class="n">excess_seq_scans</span><span class="p">,</span>
+    <span class="n">pg_size_pretty</span><span class="p">(</span><span class="n">pg_total_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">))</span> <span class="k">AS</span> <span class="n">table_size</span>
+<span class="k">FROM</span> <span class="n">pg_stat_user_tables</span>
+<span class="k">WHERE</span> <span class="n">seq_scan</span> <span class="o">&gt;</span> <span class="n">idx_scan</span>
+  <span class="k">AND</span> <span class="n">pg_total_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">10</span>  <span class="c1">-- ignore small tables</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">excess_seq_scans</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <p>Tables appearing here are candidates for new indexes. A large table with high <code class="language-plaintext highlighter-rouge">seq_scan</code> and low <code class="language-plaintext highlighter-rouge">idx_scan</code> means queries are scanning the whole table repeatedly — one of the most impactful fixes you can make.</p> <h3 id="indexes-that-are-never-used">Indexes That Are Never Used</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
+    <span class="n">indexrelname</span>                                    <span class="k">AS</span> <span class="n">index_name</span><span class="p">,</span>
+    <span class="n">relname</span>                                         <span class="k">AS</span> <span class="k">table_name</span><span class="p">,</span>
+    <span class="n">idx_scan</span>                                        <span class="k">AS</span> <span class="n">times_used</span><span class="p">,</span>
+    <span class="n">pg_size_pretty</span><span class="p">(</span><span class="n">pg_relation_size</span><span class="p">(</span><span class="n">indexrelid</span><span class="p">))</span>    <span class="k">AS</span> <span class="n">index_size</span>
+<span class="k">FROM</span> <span class="n">pg_stat_user_indexes</span>
+<span class="k">JOIN</span> <span class="n">pg_index</span> <span class="k">USING</span> <span class="p">(</span><span class="n">indexrelid</span><span class="p">)</span>
+<span class="k">WHERE</span> <span class="n">idx_scan</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">AND</span> <span class="k">NOT</span> <span class="n">indisprimary</span>
+  <span class="k">AND</span> <span class="k">NOT</span> <span class="n">indisunique</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">pg_relation_size</span><span class="p">(</span><span class="n">indexrelid</span><span class="p">)</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <p>Every unused index is dead weight — it costs write performance and storage while providing zero read benefit. Drop these after confirming they’re genuinely unused (reset stats with <code class="language-plaintext highlighter-rouge">SELECT pg_stat_reset()</code> and let the system run for a few days first).</p> <h3 id="active-queries-and-lock-contention">Active Queries and Lock Contention</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- What's running right now, and how long has it been running</span>
+<span class="k">SELECT</span>
+    <span class="n">pid</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">query_start</span> <span class="k">AS</span> <span class="n">duration</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">,</span>
+    <span class="k">state</span><span class="p">,</span>
+    <span class="n">wait_event_type</span><span class="p">,</span>
+    <span class="n">wait_event</span>
+<span class="k">FROM</span> <span class="n">pg_stat_activity</span>
+<span class="k">WHERE</span> <span class="k">state</span> <span class="o">!=</span> <span class="s1">'idle'</span>
+  <span class="k">AND</span> <span class="n">query_start</span> <span class="o">&lt;</span> <span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">INTERVAL</span> <span class="s1">'5 seconds'</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">duration</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Who is blocking whom</span>
+<span class="k">SELECT</span>
+    <span class="n">blocked</span><span class="p">.</span><span class="n">pid</span>                <span class="k">AS</span> <span class="n">blocked_pid</span><span class="p">,</span>
+    <span class="n">blocked</span><span class="p">.</span><span class="n">query</span>              <span class="k">AS</span> <span class="n">blocked_query</span><span class="p">,</span>
+    <span class="n">blocking</span><span class="p">.</span><span class="n">pid</span>               <span class="k">AS</span> <span class="n">blocking_pid</span><span class="p">,</span>
+    <span class="n">blocking</span><span class="p">.</span><span class="n">query</span>             <span class="k">AS</span> <span class="n">blocking_query</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">blocked</span><span class="p">.</span><span class="n">query_start</span> <span class="k">AS</span> <span class="n">wait_duration</span>
+<span class="k">FROM</span> <span class="n">pg_stat_activity</span> <span class="n">blocked</span>
+<span class="k">JOIN</span> <span class="n">pg_stat_activity</span> <span class="n">blocking</span>
+    <span class="k">ON</span> <span class="n">blocking</span><span class="p">.</span><span class="n">pid</span> <span class="o">=</span> <span class="k">ANY</span><span class="p">(</span><span class="n">pg_blocking_pids</span><span class="p">(</span><span class="n">blocked</span><span class="p">.</span><span class="n">pid</span><span class="p">))</span>
+<span class="k">WHERE</span> <span class="n">blocked</span><span class="p">.</span><span class="n">wait_event_type</span> <span class="o">=</span> <span class="s1">'Lock'</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">wait_duration</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></div></div> <p>Run these when the application slows suddenly. The second query immediately shows you which transaction is holding a lock that others are waiting for, and what query it’s running. The fix is almost always to find the long-running transaction and terminate it:</p> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">pg_terminate_backend</span><span class="p">(</span><span class="n">blocking_pid</span><span class="p">);</span>
+</code></pre></div></div> <h3 id="table-and-index-sizes">Table and Index Sizes</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
+    <span class="n">tablename</span><span class="p">,</span>
+    <span class="n">pg_size_pretty</span><span class="p">(</span><span class="n">pg_total_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">))</span>     <span class="k">AS</span> <span class="n">total_size</span><span class="p">,</span>
+    <span class="n">pg_size_pretty</span><span class="p">(</span><span class="n">pg_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">))</span>            <span class="k">AS</span> <span class="n">table_size</span><span class="p">,</span>
+    <span class="n">pg_size_pretty</span><span class="p">(</span>
+        <span class="n">pg_total_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">)</span> <span class="o">-</span> <span class="n">pg_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">)</span>
+    <span class="p">)</span>                                                  <span class="k">AS</span> <span class="n">index_size</span>
+<span class="k">FROM</span> <span class="n">pg_stat_user_tables</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">pg_total_relation_size</span><span class="p">(</span><span class="n">relid</span><span class="p">)</span> <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="mi">20</span><span class="p">;</span>
+</code></pre></div></div> <p>Know your largest tables and their index overhead. A table where index size exceeds table size isn’t necessarily wrong, but it’s worth understanding — you may have indexes you don’t need.</p> <h3 id="cache-hit-ratio">Cache Hit Ratio</h3> <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
+    <span class="k">SUM</span><span class="p">(</span><span class="n">heap_blks_hit</span><span class="p">)</span> <span class="o">/</span> <span class="k">NULLIF</span><span class="p">(</span><span class="k">SUM</span><span class="p">(</span><span class="n">heap_blks_hit</span><span class="p">)</span> <span class="o">+</span> <span class="k">SUM</span><span class="p">(</span><span class="n">heap_blks_read</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="k">AS</span> <span class="n">cache_hit_ratio</span>
+<span class="k">FROM</span> <span class="n">pg_statio_user_tables</span><span class="p">;</span>
+</code></pre></div></div> <p>Postgres caches table data in <code class="language-plaintext highlighter-rouge">shared_buffers</code>. A cache hit ratio below 95% on a production system suggests either <code class="language-plaintext highlighter-rouge">shared_buffers</code> is too small, your working set is too large for the available memory, or you have queries doing large sequential scans that evict hot data from cache. This is a signal to investigate, not a number to chase blindly.</p> <hr> <h2 id="the-production-readiness-checklist">The Production Readiness Checklist</h2> <p>Before calling a database configuration production-ready at scale:</p> <p><strong>Schema and queries</strong></p> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Indexes exist on all foreign key columns</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Composite indexes designed for actual query access patterns</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Covering indexes on hottest read paths</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>No N+1 patterns in application code</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Pagination uses cursors, not OFFSET, for large or growing datasets</li> </ul> <p><strong>Migrations</strong></p> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>All index creation uses <code class="language-plaintext highlighter-rouge">CREATE INDEX CONCURRENTLY</code> </li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>No <code class="language-plaintext highlighter-rouge">ALTER TABLE ... NOT NULL DEFAULT value</code> on large tables without batched backfill</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Schema changes follow expand-contract for breaking changes</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Migrations tested for lock duration before running on production</li> </ul> <p><strong>Operations</strong></p> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled><code class="language-plaintext highlighter-rouge">pg_stat_statements</code> enabled</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Autovacuum settings tuned for high-write tables</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Replication lag monitored with alerting</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Read/write routing separates primary and replica traffic correctly</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Connection pool configured with <code class="language-plaintext highlighter-rouge">pool_pre_ping=True</code> </li> </ul> <p><strong>Incident readiness</strong></p> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Slow query monitoring dashboard exists</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Lock contention query bookmarked and accessible</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Process for identifying and terminating blocking queries</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>Runbook for common failure modes (bloat, lag, connection exhaustion)</li> </ul> <hr> <h2 id="closing-the-series">Closing the Series</h2> <p>Across these three posts, we’ve built a complete picture of what it means to genuinely own a relational database layer:</p> <p><strong>Part 1 — Foundations:</strong> The relational model, schema design, data types, constraints, keys, joins, aggregations, normalization. The bedrock everything else builds on.</p> <p><strong>Part 2 — Internals:</strong> How B-tree indexes work, reading query plans with EXPLAIN ANALYZE, ACID and what each guarantee means in practice, isolation levels and concurrency anomalies, window functions, N+1, connection pooling, locks and deadlocks. The layer that makes you effective in a production codebase.</p> <p><strong>Part 3 — Production:</strong> MVCC and table bloat, covering indexes, partitioning, zero-downtime migrations, cursor-based pagination, replication and lag, and the monitoring queries that tell you your database is healthy. The layer that distinguishes engineers who operate production systems from engineers who just write code that runs against them.</p> <p>None of this is exotic. Every concept in this series is something you’ll encounter — or already have encountered — in a real backend system. The difference is whether you encounter it reactively (in an incident, in a slow query that’s been hurting you for months, in a migration that took down production) or proactively, because you understood the system before the problem surfaced.</p> <p>That’s the goal. Not to memorize syntax, but to understand the system well enough that the right answer is obvious when the situation calls for it.</p> <hr> <p><em>This post is part of the <strong>Database Engineering: From Good to Great</strong> series. <a href="/blog/2026/database-skills-part-1-foundations/">Part 1</a> covers relational fundamentals and schema design. <a href="/blog/2026/database-skills-part-2-internals/">Part 2</a> covers indexes, query planning, transactions, and concurrency.</em></p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/rumination-and-default-mode-network/">Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets Stuck</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/">Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/">Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode to Self-Control</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/">Neuroplasticity, Part 2: The Machinery of Brain Change</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/">Neuroplasticity, Part 1: The Brain Learns by Changing</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-2-internals/">Database Skills Every Software Engineer Must Have — Part 2: Internals That Actually Matter</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-1-foundations/">Database Skills Every Software Engineer Must Have — Part 1: Foundations</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/acid-properties-demystified/">ACID Properties Demystified: What Every Backend Engineer Must Know</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Abhishek Sharma. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-publications",
+          title: "publications",
+          description: "Peer-reviewed and conference publications, listed in reverse chronological order.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/publications/";
+          },
+        },{id: "nav-projects",
+          title: "projects",
+          description: "Selected research and engineering projects.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/projects/";
+          },
+        },{id: "nav-cv",
+          title: "CV",
+          description: "Curriculum vitae — education, experience, teaching, awards, and selected work.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-teaching",
+          title: "teaching",
+          description: "Instruction, workshops, and mentoring in computer science and machine learning.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/teaching/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Selected open-source activity and public repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "post-rumination-and-the-default-mode-network-why-the-mind-replays-worries-and-gets-stuck",
+        
+          title: "Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets...",
+        
+        description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rumination-and-default-mode-network/";
+          
+        },
+      },{id: "post-dopamine-and-motivation-the-neuroscience-of-wanting-effort-reward-and-drive",
+        
+          title: "Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive",
+        
+        description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/";
+          
+        },
+      },{id: "post-stress-the-amygdala-and-the-prefrontal-cortex-a-complete-guide-from-survival-mode-to-self-control",
+        
+          title: "Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode...",
+        
+        description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/";
+          
+        },
+      },{id: "post-neuroplasticity-part-2-the-machinery-of-brain-change",
+        
+          title: "Neuroplasticity, Part 2: The Machinery of Brain Change",
+        
+        description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/";
+          
+        },
+      },{id: "post-neuroplasticity-part-1-the-brain-learns-by-changing",
+        
+          title: "Neuroplasticity, Part 1: The Brain Learns by Changing",
+        
+        description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-3-production-grade-engineering",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering",
+        
+        description: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-3-production/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-2-internals-that-actually-matter",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 2: Internals That Actually...",
+        
+        description: "Indexes, query planning, transactions, window functions, N+1, connection pooling, and locks. The intermediate layer that separates engineers who write queries from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-2-internals/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-1-foundations",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 1: Foundations",
+        
+        description: "A practical, no-fluff guide to relational databases — the kind of depth that actually shows up in senior engineering interviews.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-1-foundations/";
+          
+        },
+      },{id: "post-acid-properties-demystified-what-every-backend-engineer-must-know",
+        
+          title: "ACID Properties Demystified: What Every Backend Engineer Must Know",
+        
+        description: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/acid-properties-demystified/";
+          
+        },
+      },{id: "books-the-godfather",
+          title: 'The Godfather',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_godfather/";
+            },},{id: "news-joined-docsumo-as-associate-software-engineer-ml-focusing-on-document-extraction-pipelines-and-production-inference-systems",
+          title: 'Joined **Docsumo** as Associate Software Engineer (ML), focusing on document extraction pipelines and...',
+          description: "",
+          section: "News",},{id: "news-joined-zerotb-as-founding-software-engineer-working-on-backend-infrastructure-and-ai-powered-workflows-for-compliance-automation",
+          title: 'Joined **ZeroTB** as Founding Software Engineer, working on backend infrastructure and AI-powered workflows...',
+          description: "",
+          section: "News",},{id: "news-our-paper-on-topic-modeling-for-nepali-political-news-has-been-published-at-ieee-icict-2025-https-ieeexplore-ieee-org-document-11004776",
+          title: 'Our paper on topic modeling for Nepali political news has been published at...',
+          description: "",
+          section: "News",},{id: "projects-topic-modeling-for-nepali-political-news",
+          title: 'Topic Modeling for Nepali Political News',
+          description: "Comparative evaluation of classical and neural topic models for low-resource Nepali text",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/1_nepali-topic-modeling/";
+            },},{id: "projects-invoice-information-extraction",
+          title: 'Invoice Information Extraction',
+          description: "Multimodal document understanding for structured invoice data extraction",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/2_invoice-extraction/";
+            },},{id: "projects-videolize",
+          title: 'Videolize',
+          description: "Text-to-video generation with diffusion models and large language models",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/3_videolize/";
+            },},{id: "projects-summitseeker",
+          title: 'SummitSeeker',
+          description: "Backend platform for a tourism application with cloud CI/CD",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/4_summitseeker/";
+            },},{id: "projects-adversarial-search-for-checkers",
+          title: 'Adversarial Search for Checkers',
+          description: "Game-playing agent with Minimax search and alpha–beta pruning",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/5_checkers-ai/";
+            },},{id: "projects-procedural-terrain-generation",
+          title: 'Procedural Terrain Generation',
+          description: "Perlin-noise terrain synthesis in C++",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/6_procedural-terrain/";
+            },},{id: "projects-campus-network-design",
+          title: 'Campus Network Design',
+          description: "Hierarchical network design with VLANs, subnetting, and OSPF",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/7_university-network/";
+            },},{id: "teachings-web-development-with-django",
+          title: 'Web Development with Django',
+          description: "Large-scale workshop series on Django application development",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/django-workshop/";
+            },},{id: "teachings-it-club-technical-programs",
+          title: 'IT Club Technical Programs',
+          description: "Campus technical community leadership and programming outreach",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/it-club-service/";
+            },},{id: "teachings-mathematical-foundations-of-machine-learning",
+          title: 'Mathematical Foundations of Machine Learning',
+          description: "LOCUS Fellowship instructor — core ML mathematics and algorithms",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/locus-fellowship/";
+            },},{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%61%62%68%69%73%68%65%6B.%77%6F%72%6B%31%37%31%30@%67%6D%61%69%6C.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/avisekksarma", "_blank");
+        },
+      },{
+        id: 'social-linkedin',
+        title: 'LinkedIn',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.linkedin.com/in/aviseksarma", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
