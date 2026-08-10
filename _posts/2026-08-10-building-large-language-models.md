@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Building Large Language Models"
-subtitle: "Architecture is only one pillar — data, evaluation, and systems often dominate real progress. Notes from a Stanford CS229 guest lecture, expanded for self-contained reading."
+subtitle: "Architecture is only one pillar; data, evaluation, and systems often dominate real progress. Notes from a Stanford CS229 guest lecture, expanded for self-contained reading."
 date: 2026-08-10
 categories: [Tech, machine-learning, llm]
 tags: [llm, machine-learning, cs229, deep-learning, transformers, rlhf, scaling-laws]
@@ -9,7 +9,7 @@ mermaid:
   enabled: true
   zoomable: true
 reading_time: 45
-description: "A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency — based on Stanford CS229 guest lecture notes."
+description: "A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency. Based on Stanford CS229 guest lecture notes."
 featured: true
 ---
 > **The five pillars of training an LLM**

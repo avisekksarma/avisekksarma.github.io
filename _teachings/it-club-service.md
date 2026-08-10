@@ -6,6 +6,6 @@ importance: 3
 category: Service
 ---
 
-**IT Club, Pulchowk Campus · Jan 2022 – May 2023** · Secretary
+**IT Club, Pulchowk Campus · Jan 2022 - May 2023** · Secretary
 
 Department representative for Electronics and Computer Engineering. Coordinated technical workshops and programming sessions for the campus computing community, including Git and design workshops, with outreach that engaged students beyond Pulchowk.

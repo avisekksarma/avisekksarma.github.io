@@ -6,7 +6,7 @@ importance: 2
 category: Research
 ---
 
-An end-to-end system for extracting structured fields from invoices, combining layout-aware computer vision with vision–language models.
+An end-to-end system for extracting structured fields from invoices, combining layout-aware computer vision with vision-language models.
 
 ### Methods
 
@@ -14,4 +14,4 @@ The pipeline integrates **YOLO**-based detection, **table transformers** for str
 
 ### Outcome
 
-First place, LLM category — **Kathmandu University AI Competition 2023**.
+First place, LLM category at **Kathmandu University AI Competition 2023**.

@@ -12,12 +12,12 @@ A generative system that turns a text script into a short video: scene images fr
 
 ### How it works
 
-1. **Scene frames** — generate key scenes with a Stable Diffusion pipeline.
-2. **Latent interpolation** — morph between scenes with **spherical linear interpolation (slerp)** in diffusion latent space (shortest path on the hypersphere), plus **FiLM** for more coherent frame-to-frame transitions, targeting **24 FPS**.
-3. **Audio** — turn audio-side prompts into tracks and mux them with the video.
+1. **Scene frames**, generate key scenes with a Stable Diffusion pipeline.
+2. **Latent interpolation**, morph between scenes with **spherical linear interpolation (slerp)** in diffusion latent space (shortest path on the hypersphere), plus **FiLM** for more coherent frame-to-frame transitions, targeting **24 FPS**.
+3. **Audio**, turn audio-side prompts into tracks and mux them with the video.
 
 Implementation lives in [mnjkhtri/slerp-diffusion](https://github.com/mnjkhtri/slerp-diffusion).
 
 ### Outcome
 
-First place, GenAI category — **LOCUS Hack-A-Week 2023**.
+First place, GenAI category at **LOCUS Hack-A-Week 2023**.

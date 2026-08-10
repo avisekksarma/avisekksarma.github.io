@@ -59,7 +59,7 @@ cv:
         summary: Document AI and production ML systems for enterprise extraction workloads.
         highlights:
           - Contributed to the core document extraction pipeline for key-value and OMR systems, including research, implementation, optimization, and refactoring of production APIs.
-          - Performed critical performance analysis on the key-value extraction pipeline and reduced extraction latency by approximately 27% (7–8 seconds), improving throughput and user experience.
+          - Performed critical performance analysis on the key-value extraction pipeline and reduced extraction latency by approximately 27% (7-8 seconds), improving throughput and user experience.
           - Worked with the SRE team to improve reliability and scalability of distributed systems using GCP, Kubernetes, Docker, and Redis.
           - Built and maintained scalable backend services and APIs using Flask and MongoDB for high-volume document processing workflows.
 
@@ -85,7 +85,7 @@ cv:
         start_date: 2024
         end_date: 2025
 
-      - name: Videolize — Text Script to Video Generator
+      - name: Videolize: Text Script to Video Generator
         summary: Deep learning system converting sequential scripts to video using Stable Diffusion, Microsoft text-to-audio, and the Gemini API. Scene images are interpolated with spherical interpolation for smooth transitions. First prize, GenAI category, LOCUS Hack-A-Week 2023.
         highlights:
           - PyTorch, HuggingFace, Stable Diffusion, Gemini API
@@ -107,9 +107,9 @@ cv:
         end_date: 2023
 
       - name: Checkers with AI
-        summary: Object-oriented Checkers implementation in C++ with an adversarial AI using Minimax and alpha–beta pruning (SFML, CMake).
+        summary: Object-oriented Checkers implementation in C++ with an adversarial AI using Minimax and alpha-beta pruning (SFML, CMake).
         highlights:
-          - C++, Minimax, Alpha–beta pruning, SFML
+          - C++, Minimax, Alpha-beta pruning, SFML
         start_date: 2022
         end_date: 2022
 
@@ -157,22 +157,22 @@ cv:
         keywords: "Git, Docker, Selenium, Postman, VS Code, Visual Studio, Cisco Packet Tracer"
 
     Awards:
-      - title: Winner — LLM Category
+      - title: Winner, LLM Category
         date: 2023-12
         awarder: Kathmandu University AI Competition
         summary: First place for invoice information extraction using LLMs, YOLO, and table transformers.
 
-      - title: Winner — Generative AI Category
+      - title: Winner, Generative AI Category
         date: 2024-01
         awarder: LOCUS Hack-A-Week
         summary: First place for Videolize, a text-to-video generation system.
 
-      - title: Full Undergraduate Scholarship — IOE Entrance Rank 34
+      - title: Full Undergraduate Scholarship, IOE Entrance Rank 34
         date: 2019
         awarder: Institute of Engineering
         summary: Ranked 34 among 14,000+ candidates in the IOE entrance examination.
 
-      - title: Rank 1 — Electronics Department Entrance
+      - title: Rank 1, Electronics Department Entrance
         date: 2019
         awarder: Kathmandu University
         summary: Top rank in the entrance examination of the Electronics Department.
@@ -182,22 +182,22 @@ cv:
         awarder: Embassy of India, Kathmandu
         summary: Undergraduate scholarship awarded by the Embassy of India in Nepal.
 
-      - title: Position Holder — Budanilkantha Math League
+      - title: Position Holder, Budanilkantha Math League
         date: 2018
         awarder: Budanilkantha School
         summary: National-level mathematics competition.
 
-      - title: Entrance Topper — +2 Level
+      - title: Entrance Topper, +2 Level
         date: 2017
         awarder: +2 entrance examination
         summary: Topped the +2 level entrance examination among 3,000+ students.
 
-      - title: College Topper — Grade 12 Board Examination
+      - title: College Topper, Grade 12 Board Examination
         date: 2019
         awarder: SOSHGS, Gandaki
         summary: 3.85 GPA in the Grade 12 board examination.
 
-      - title: School Topper — SEE
+      - title: School Topper, SEE
         date: 2017
         awarder: Secondary Education Examination
         summary: 3.8 GPA at the SEE level.

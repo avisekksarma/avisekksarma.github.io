@@ -6,7 +6,7 @@ importance: 2
 category: Workshops
 ---
 
-**PDSC & IT Club, Pulchowk Campus · 2021–2022** · Programming Instructor
+**PDSC & IT Club, Pulchowk Campus · 2021-2022** · Programming Instructor
 
 A multi-session workshop introducing web application development with **Django**, covering models, views, templates, authentication, and deployment basics.
 

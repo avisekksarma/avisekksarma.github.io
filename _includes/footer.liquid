@@ -1,0 +1,36 @@
+{% capture footer_contents %}
+  <div class="footer-social" aria-label="Social links">{% social_links %}</div>
+  <p class="footer-copy">
+    &copy; Copyright {{ site.time | date: '%Y' }}
+    {{ site.first_name }}{% if site.middle_name %} {{ site.middle_name }}{% endif %}
+    {{ site.last_name }}.{% if site.footer_text %} {{ site.footer_text }}{% endif %}
+    {% if site.impressum_path %}
+      <a href="{{ site.url }}{{ site.baseurl }}{{ site.impressum_path }}">Impressum</a>.
+    {% endif %}
+    {% if site.last_updated %}
+      Last updated: {{ 'now' | date: '%B %d, %Y' }}.
+    {% endif %}
+  </p>
+{% endcapture %}
+
+{% if site.footer_fixed %}
+  <footer class="fixed-bottom" role="contentinfo">
+    <div class="container mt-0">
+      {{ footer_contents }}
+    </div>
+  </footer>
+{% else %}
+  <footer class="sticky-bottom mt-5" role="contentinfo">
+    {% if site.newsletter.enabled %}
+      {% if site.plugins contains 'al_newsletter' %}
+        {% include plugins/al_newsletter_form_center.liquid %}
+      {% else %}
+        {% include newsletter.liquid %}
+      {% endif %}
+    {% endif %}
+
+    <div class="container">
+      {{ footer_contents }}
+    </div>
+  </footer>
+{% endif %}

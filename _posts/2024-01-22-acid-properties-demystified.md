@@ -1,12 +1,12 @@
 ---
 layout: post
 title: "ACID Properties Demystified"
-subtitle: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
+subtitle: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
 date: 2026-05-01
 categories: [Tech, databases, backend]
 tags: [postgresql, sql, acid, transactions, isolation-levels, backend-engineering]
 reading_time: 14
-description: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
+description: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
 ---
 
 If you've worked with databases for more than a week, you've heard the acronym ACID. Most engineers know it stands for Atomicity, Consistency, Isolation, and Durability — and can roughly explain what each word means. Fewer can tell you what isolation levels actually protect against, what write skew is, or why the default isolation level in PostgreSQL isn't always enough.

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Database Skills for Software Engineers — Part 3: Production Engineering"
+title: "Database Skills for Software Engineers, Part 3: Production Engineering"
 subtitle: "MVCC, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring."
 date: 2026-05-13
 categories: [Tech, databases, backend, series]
