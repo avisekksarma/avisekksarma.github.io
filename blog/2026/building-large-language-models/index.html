@@ -1,0 +1,324 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Building Large Language Models | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency — based on Stanford CS229 guest lecture notes."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://avisekksarma.github.io/blog/2026/building-large-language-models/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Abhishek Sharma </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">Publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">Projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/">Teaching </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Blog <span class="sr-only">(current)</span> </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Building Large Language Models</h1> <p class="post-meta"> Created on August 10, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/llm"> <i class="fa-solid fa-hashtag fa-sm"></i> llm</a>   <a href="/blog/tag/machine-learning"> <i class="fa-solid fa-hashtag fa-sm"></i> machine-learning</a>   <a href="/blog/tag/cs229"> <i class="fa-solid fa-hashtag fa-sm"></i> cs229</a>   <a href="/blog/tag/deep-learning"> <i class="fa-solid fa-hashtag fa-sm"></i> deep-learning</a>   <a href="/blog/tag/transformers"> <i class="fa-solid fa-hashtag fa-sm"></i> transformers</a>   <a href="/blog/tag/rlhf"> <i class="fa-solid fa-hashtag fa-sm"></i> rlhf</a>   <a href="/blog/tag/scaling-laws"> <i class="fa-solid fa-hashtag fa-sm"></i> scaling-laws</a>   ·   <a href="/blog/category/tech"> <i class="fa-solid fa-tag fa-sm"></i> Tech</a>   <a href="/blog/category/machine-learning"> <i class="fa-solid fa-tag fa-sm"></i> machine-learning</a>   <a href="/blog/category/llm"> <i class="fa-solid fa-tag fa-sm"></i> llm</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <blockquote> <p><strong>The five pillars of training an LLM</strong></p> <ol> <li> <strong>Architecture</strong> — the neural net design (transformers — not covered here)</li> <li> <strong>Training loss / algorithm</strong> — how you optimize the model</li> <li> <strong>Data</strong> — what you train on</li> <li> <strong>Evaluation</strong> — how you know you are improving</li> <li> <strong>Systems</strong> — how you make it run efficiently on real hardware</li> </ol> <p>Academia historically over-indexes on (1) and (2) because they make for clean papers. In industry, <strong>(3), (4), and (5) dominate practical progress</strong> — a recurring “bitter lesson” theme.</p> </blockquote> <pre><code class="language-mermaid">flowchart LR
+  A[1. Architecture] --- B[2. Loss / Algorithm]
+  B --- C[3. Data]
+  C --- D[4. Evaluation]
+  D --- E[5. Systems]
+</code></pre> <hr> <h2 id="1-two-eras-pretraining-vs-post-training">1. Two eras: pretraining vs post-training</h2> <table> <thead> <tr> <th> </th> <th>Pretraining</th> <th>Post-training</th> </tr> </thead> <tbody> <tr> <td><strong>Goal</strong></td> <td>Model “all of the internet” — a general model of language</td> <td>Turn that raw model into a helpful <strong>assistant</strong> </td> </tr> <tr> <td><strong>Era</strong></td> <td>GPT-2 / GPT-3</td> <td>ChatGPT onward (since ~2022)</td> </tr> <tr> <td><strong>Data</strong></td> <td>Huge, low-average-quality, scraped</td> <td>Small, high-quality, curated / human-labeled</td> </tr> <tr> <td><strong>Analogy</strong></td> <td>Learning to speak/write like <em>any</em> internet author</td> <td>Learning to speak like a <em>helpful assistant</em> </td> </tr> </tbody> </table> <p>A useful mental model: <strong>pretraining is a very good weight initialization</strong>; post-training is “just” fine-tuning from that initialization. There is nothing mathematically special separating the two in the SFT case — same underlying loss, different data, hyperparameters (much higher learning rate), and dataset size.</p> <pre><code class="language-mermaid">flowchart LR
+  P[Pretraining&lt;br/&gt;huge noisy web text] --&gt; B[Base model]
+  B --&gt; S[SFT&lt;br/&gt;instruction data]
+  S --&gt; R[RLHF / DPO&lt;br/&gt;preference data]
+  R --&gt; A[Assistant model]
+</code></pre> <hr> <h2 id="2-language-modeling-fundamentals">2. Language modeling fundamentals</h2> <p>A language model defines a probability distribution over token sequences:</p> \[P(x_1, x_2, \dots, x_L)\] <p>For example, <code class="language-plaintext highlighter-rouge">P("The mouse ate the cheese")</code> should be high (grammatical and sensible), <code class="language-plaintext highlighter-rouge">P("The the mouse ate cheese")</code> should be lower (bad grammar), and <code class="language-plaintext highlighter-rouge">P("The cheese ate the mouse")</code> should be lower than the first (bad <em>semantics</em>, even though grammatical).</p> <h3 id="autoregressive-factorization">Autoregressive factorization</h3> <p>Nearly all current LLMs use the <strong>chain rule of probability</strong> to decompose this joint distribution — an exact identity, not an approximation:</p> \[P(x_1, \dots, x_L) = \prod_{t=1}^{L} P(x_t \mid x_1, \dots, x_{t-1})\] <p>That is: predict each token given everything before it. This is <em>one</em> choice of factorization. Its main downside is that <strong>generation is inherently sequential</strong> (one token at a time). To generate word 5 you need words 1–4 already generated. That is why long generations are slow, and why systems research cares about speculative decoding and related tricks.</p> <pre><code class="language-mermaid">flowchart LR
+  x1[x₁] --&gt; x2[x₂]
+  x2 --&gt; x3[x₃]
+  x3 --&gt; x4[x₄]
+  x4 --&gt; xn[…]
+</code></pre> <h3 id="training-objective--cross-entropy-loss">Training objective — cross-entropy loss</h3> <p>At each position, the model outputs a distribution over the vocabulary (final linear layer + softmax). Training compares this to the <strong>true next token</strong>, represented as a one-hot vector:</p> \[\mathcal{L} = -\log P(x_t \mid x_1, \dots, x_{t-1})\] <p>summed or averaged over positions. This is standard <strong>cross-entropy</strong> for classification, where the “classes” are vocabulary tokens.</p> <p>Minimizing this loss over a corpus is mathematically identical to <strong>maximizing log-likelihood</strong> of the training text:</p> \[\max_\theta \sum_t \log P_\theta(x_t \mid x_{&lt;t}) \equiv \min_\theta \sum_t -\log P_\theta(x_t \mid x_{&lt;t})\] <p>Notes:</p> <ul> <li>The output layer size equals vocabulary size, so tokenizer design also affects architecture cost.</li> <li>At inference, you <strong>sample</strong> a token then <strong>detokenize</strong>. During training you skip sampling — you compare the predicted distribution to the real next token.</li> </ul> <hr> <h2 id="3-tokenization">3. Tokenization</h2> <h3 id="why-not-just-words-or-characters">Why not just words or characters?</h3> <ul> <li> <strong>Whole words</strong>: break on typos; fail for languages without spaces (e.g., Thai).</li> <li> <strong>Characters</strong>: works, but sequences become very long. Transformer self-attention cost scales <strong>quadratically with length</strong>, so this is expensive.</li> <li>Compromise: <strong>subword tokenization</strong>, where common chunks (~3–4 characters on average) become tokens.</li> </ul> <h3 id="byte-pair-encoding-bpe">Byte Pair Encoding (BPE)</h3> <p>Training (done once on a large corpus, <em>before</em> LLM training):</p> <ol> <li>Start with every character as its own token.</li> <li>Find the <strong>most frequent adjacent pair</strong>.</li> <li>Merge that pair into a new token.</li> <li>Repeat until you hit the target vocabulary size.</li> </ol> <pre><code class="language-mermaid">flowchart TD
+  A[Characters as tokens] --&gt; B[Find most frequent adjacent pair]
+  B --&gt; C[Merge into new token]
+  C --&gt; D{Reached vocab size?}
+  D --&gt;|No| B
+  D --&gt;|Yes| E[Frozen tokenizer vocabulary]
+</code></pre> <p>Important details:</p> <ul> <li> <strong>Older tokens are never deleted</strong> — rare or misspelled words can still be spelled out character-by-character.</li> <li>At application time, greedily use the <strong>longest matching token</strong> available.</li> <li> <strong>Pre-tokenization</strong> (split on spaces/punctuation first) is mostly a computational shortcut; it makes tokenizers somewhat English/Latin-script-centric.</li> <li>The same surface form gets the same token ID regardless of sense (“bank” finance vs. river). Disambiguation is left to the model.</li> </ul> <h3 id="why-tokenization-quietly-matters">Why tokenization quietly matters</h3> <ul> <li> <strong>Math</strong>: numbers are often not digit-by-digit tokens, so place-value composition is harder to learn — a known contributor to weak arithmetic.</li> <li> <strong>Code</strong>: early tokenizers handled indentation poorly; later models improved code tokenization.</li> <li>Pure byte/character models are attractive, but quadratic attention cost remains a blocker until architectures change.</li> </ul> <hr> <h2 id="4-evaluating-pretrained-models">4. Evaluating pretrained models</h2> <h3 id="perplexity">Perplexity</h3> <p>Perplexity is 2 raised to the average per-token log-loss:</p> \[\text{Perplexity} = 2^{\frac{1}{L}\sum_{t=1}^{L} -\log_2 P(x_t \mid x_{&lt;t})}\] <p>Exponentiating moves from log-space into roughly “vocabulary-size units.” Averaging per token makes it length-independent.</p> <ul> <li> <strong>Range</strong>: 1 (perfectly certain and correct) to <strong>vocabulary size</strong> (uniform / maximally uncertain).</li> <li> <strong>Intuition</strong>: about how many tokens the model is effectively hesitating between.</li> <li>Historically dropped from ~70 (2017) to under 10 (2023) on standard setups.</li> <li> <strong>Limitation</strong>: not comparable across different tokenizers/vocab sizes, and depends on the eval set. Still useful internally, less so for public leaderboards.</li> </ul> <h3 id="standardized-suites">Standardized suites</h3> <ul> <li> <strong>HELM</strong> (Stanford) and the <strong>Hugging Face Open LLM Leaderboard</strong>: aggregate many auto-gradable NLP tasks.</li> <li> <strong>MMLU</strong>: common academic multitask multiple-choice benchmark. <ul> <li>Method A: compare likelihoods of full answer strings.</li> <li>Method B: force A/B/C/D letter choice.</li> <li>These can give <strong>meaningfully different scores</strong> for the same model.</li> </ul> </li> </ul> <h3 id="two-major-evaluation-challenges">Two major evaluation challenges</h3> <ol> <li> <strong>Inconsistent implementations</strong>: the “same” benchmark can score differently across harnesses (e.g., Llama-65B at 63.7 vs 48.8 on different MMLU setups).</li> <li> <strong>Train/test contamination</strong>: web-scale training may include benchmark items. <ul> <li>Detection trick: datasets online are often <em>not</em> randomly ordered. If the model assigns higher likelihood to the test set <strong>in original order</strong> than shuffled, that is evidence of memorization.</li> </ul> </li> </ol> <hr> <h2 id="5-data-for-pretraining">5. Data for pretraining</h2> <blockquote> <p>“Train on clean internet” sounds simple, but is one of the most labor-intensive parts of building an LLM — often more people-hours than the modeling loop itself.</p> </blockquote> <h3 id="the-pipeline">The pipeline</h3> <p>Each step is its own research problem:</p> <ol> <li> <strong>Crawl</strong> — usually via <strong>Common Crawl</strong> (~250B pages, ~1 PB raw).</li> <li> <strong>Extract text from HTML</strong> — strip tags, recover structure, handle math, remove boilerplate.</li> <li> <strong>Filter undesirable content</strong> — NSFW, PII, harmful material via blocklists and/or classifiers.</li> <li> <strong>Deduplication</strong> — repeated boilerplate, duplicate URLs, heavily duplicated passages, at massive scale.</li> <li> <strong>Heuristic filtering</strong> — abnormal token distributions, broken “words,” too few/too many words.</li> <li> <strong>Model-based filtering</strong> — e.g., classify pages resembling Wikipedia references and upweight them.</li> <li> <strong>Domain reweighting</strong> — books, code, forums, entertainment, etc. More code often helps general reasoning; entertainment is often downweighted.</li> <li> <strong>High-quality cooldown</strong> — near the end, lower LR and overweight very clean data (Wikipedia, curated text).</li> <li>Continual pretraining for longer context (mentioned, not detailed).</li> </ol> <pre><code class="language-mermaid">flowchart TD
+  A[Crawl] --&gt; B[HTML → text]
+  B --&gt; C[Safety / PII filter]
+  C --&gt; D[Dedup]
+  D --&gt; E[Heuristic filters]
+  E --&gt; F[Quality classifier]
+  F --&gt; G[Domain reweight]
+  G --&gt; H[Final training mix]
+  H --&gt; I[High-quality cooldown]
+</code></pre> <h3 id="scale-reference-points">Scale reference points</h3> <ul> <li>Common Crawl: ~250B pages ≈ 10⁶ GB.</li> <li>The Pile (academic): ~280B tokens.</li> <li>Llama 2: 2T tokens.</li> <li>Llama 3: <strong>15T tokens</strong>.</li> <li>GPT-4: undisclosed; similar order of magnitude in estimates.</li> </ul> <h3 id="open-research-problems">Open research problems</h3> <ul> <li>Efficient petabyte-scale processing.</li> <li>Optimal domain weighting.</li> <li> <strong>Synthetic data</strong> as natural high-quality text becomes scarce.</li> <li>Multimodal data improving text-only performance.</li> <li>Secrecy: competition <em>and</em> copyright liability concerns.</li> </ul> <hr> <h2 id="6-scaling-laws">6. Scaling laws</h2> <blockquote> <p><strong>Central empirical finding (OpenAI, ~2020):</strong> larger models + more data + more compute → <strong>predictably</strong> better performance. Unlike the overfitting intuition from classical ML courses, frontier LLMs keep improving with scale — no clear overfitting wall yet.</p> </blockquote> <h3 id="the-core-plot">The core plot</h3> <p>Log(compute) vs log(test loss) is roughly a <strong>straight line</strong>. Similar power-law behavior appears for data size and parameter count:</p> \[\text{Loss}(C) \approx a \cdot C^{-\alpha} + b\] <p>This lets labs <strong>predict</strong> gains before spending the full training budget.</p> <h3 id="why-this-changes-lab-workflows">Why this changes lab workflows</h3> <ul> <li> <strong>Old workflow</strong>: burn most of the budget on hyperparameter search at full target scale.</li> <li> <strong>New workflow</strong>: <ol> <li>Find a scaling recipe (how hyperparameters should change with size).</li> <li>Tune cheaply on several smaller models.</li> <li>Fit a scaling law across those runs.</li> <li>Extrapolate to target scale.</li> <li>Spend most compute on <strong>one</strong> large optimized run.</li> </ol> </li> </ul> <pre><code class="language-mermaid">flowchart LR
+  S[Small model sweeps] --&gt; F[Fit scaling law]
+  F --&gt; E[Extrapolate config]
+  E --&gt; L[One large training run]
+</code></pre> <p>Most tiny architectural tweaks mostly shift the <strong>intercept</strong>, not the <strong>slope</strong> — i.e., a smaller lever than data/scale/compute.</p> <h3 id="chinchilla-compute-optimal-allocation">Chinchilla: compute-optimal allocation</h3> <p>Given fixed compute: bigger model + less data, or smaller model + more data?</p> <p>DeepMind’s Chinchilla used IsoFLOP curves and found roughly <strong>~20 tokens per parameter</strong> as compute-optimal.</p> <p>But that ignores <strong>inference cost</strong>. Production often <strong>overtrains</strong> smaller models. A cited production-ish rule of thumb is closer to <strong>~150 tokens per parameter</strong>.</p> <h3 id="the-bitter-lesson-richard-sutton-2019">The Bitter Lesson (Richard Sutton, 2019)</h3> <ol> <li>Scaling laws: more compute → predictably better models.</li> <li>Compute gets cheaper/better over time.</li> <li>Therefore the long-term winners are methods that <strong>absorb ever more compute</strong>, not clever hand-designed tricks.</li> </ol> <h3 id="worked-example-llama-3-405b-back-of-envelope">Worked example: Llama 3 405B (back-of-envelope)</h3> <ul> <li>405B params, 15.6T tokens → <strong>~40 tokens/parameter</strong> (between Chinchilla ~20 and inference-oriented ~150).</li> <li>FLOPs rule of thumb:</li> </ul> \[\text{FLOPs} \approx 6 \times (\text{# parameters}) \times (\text{# training tokens})\] <p>→ about <strong>3.8 × 10²⁵ FLOPs</strong>.</p> <ul> <li>~16,000 H100s → on the order of <strong>~70 days</strong> / <strong>~26M GPU-hours</strong> (Meta reported ~30M with real inefficiencies).</li> <li>Rough cost: compute rental ~$52M + team ~$25M → <strong>~$75M</strong> for one run (order-of-magnitude).</li> <li>Carbon: ~4,000 tons CO₂e ≈ ~2,000 JFK↔London round trips — not yet first-order for many labs, but likely more salient as scale grows another ~100×.</li> <li>Trend: each generation often aims for roughly <strong>10× more FLOPs</strong>, contingent on power and GPU supply.</li> </ul> <hr> <h2 id="7-post-training-base-model--assistant">7. Post-training: base model → assistant</h2> <p>A raw pretrained model does not behave like an assistant. Asked to “explain the moon landing to a six-year-old,” a pure base model may continue with <em>another similar question</em>, because question lists are common on the internet. Post-training adds instruction-following and safety behavior.</p> <h3 id="71-supervised-fine-tuning-sft">7.1 Supervised Fine-Tuning (SFT)</h3> <ul> <li> <strong>Same loss</strong> as pretraining (next-token cross-entropy).</li> <li>What changes: <strong>data</strong> (instruction → response pairs) and <strong>hyperparameters</strong> (higher LR; often a few epochs, e.g. 3).</li> <li>“Supervised” because targets are known desired outputs.</li> </ul> <p><strong>Alpaca</strong> (Stanford): 175 seed examples → synthetic expansion to ~52K with text-davinci-003 → SFT on Llama 7B. This popularized <strong>synthetic instruction data</strong>.</p> <p><strong>LIMA finding</strong>: scaling SFT from ~2K → ~32K examples gave little gain. Interpretation: SFT mostly teaches <em>which response style to prefer</em>, not new knowledge — knowledge is already latent from pretraining.</p> <h3 id="72-rlhf--reinforcement-learning-from-human-feedback">7.2 RLHF — Reinforcement Learning from Human Feedback</h3> <p><strong>Why SFT alone is insufficient:</strong></p> <ol> <li> <strong>Bounded by human writing ability</strong> — people often judge quality better than they produce ideal answers.</li> <li> <strong>Hallucination risk</strong> — cloning “gold” answers with facts the model never learned can teach confident fabrication.</li> <li> <strong>Cost</strong> — writing full answers is expensive; comparing two answers is cheaper.</li> </ol> <p><strong>RLHF pipeline:</strong></p> <ol> <li>Generate two candidate answers from an SFT model.</li> <li>Human (or LLM) picks the preferred one.</li> <li>Update the model toward preferred-style answers (PPO or DPO).</li> </ol> <pre><code class="language-mermaid">flowchart TD
+  P[Prompt] --&gt; G[Generate two answers]
+  G --&gt; H[Preference label]
+  H --&gt; U[Update model&lt;br/&gt;PPO or DPO]
+  U --&gt; P
+</code></pre> <p><strong>Reward options:</strong></p> <ul> <li>Binary (+1/−1): simple, sparse.</li> <li>Learned reward model (common): Bradley–Terry preference model:</li> </ul> \[P(y_1 \succ y_2) = \frac{\exp(r(x, y_1))}{\exp(r(x, y_1)) + \exp(r(x, y_2))}\] <p><strong>PPO</strong> (original ChatGPT-style recipe):</p> <ol> <li>SFT</li> <li>Train reward model on preferences</li> <li>Optimize policy with PPO to maximize reward</li> <li>Add <strong>KL regularization</strong> toward the SFT model to limit reward hacking</li> </ol> <p>After PPO, the model is no longer a well-calibrated likelihood model of text — it is a policy optimized for a preferred answer. <strong>Perplexity stops being a good eval</strong> for post-RLHF models. PPO is also operationally messy.</p> <p><strong>DPO</strong> (Direct Preference Optimization, Stanford ~2023):</p> <p>Skips the explicit reward model and RL loop. Directly increases likelihood of preferred responses and decreases rejected ones relative to a frozen reference (SFT) model:</p> \[\mathcal{L}_{DPO} = -\log \sigma\left(\beta \log\frac{\pi_\theta(y_w|x)}{\pi_{ref}(y_w|x)} - \beta \log\frac{\pi_\theta(y_l|x)}{\pi_{ref}(y_l|x)}\right)\] <p>Under assumptions, DPO’s optimum matches PPO against the corresponding reward model. Much simpler to implement; now standard in open source and common in industry. Empirically, DPO ≈ PPO, both clearly beat SFT alone.</p> <h3 id="73-preference-data-challenges">7.3 Preference data challenges</h3> <ul> <li>Humans are slow, expensive, inconsistent (~66–68% agreement with majority in one study).</li> <li>Humans overweight superficial cues (<strong>length</strong> especially) — a likely reason RLHF models get verbose.</li> <li>Annotator distribution shift and crowdsourcing ethics matter.</li> <li> <strong>LLM-as-labeler</strong>: much cheaper (~50× cited) and can agree with majority humans better than individual humans, partly via lower variance. Now common practice.</li> </ul> <hr> <h2 id="8-evaluating-assistants">8. Evaluating assistants</h2> <p>Open-ended answers make this harder than pretraining eval.</p> <p><strong>Why old metrics fail:</strong></p> <ul> <li>Validation loss is not comparable across PPO vs DPO objectives.</li> <li>Perplexity fails after preference optimization — models are no longer calibrated distributions over all phrasings.</li> <li>Valid inputs/outputs are enormous and hard to auto-score.</li> </ul> <p><strong>Preference-based evaluation:</strong></p> <ul> <li> <strong>Chatbot Arena</strong>: blind side-by-side human votes; trusted but skewed toward tech-savvy users.</li> <li> <strong>AlpacaEval</strong>: LLM judge compares against a baseline; ~98% correlation with Arena in reports; cheap/fast (&lt;$10, minutes). <ul> <li>Shared bias toward <strong>longer</strong> answers.</li> <li>Example: GPT-4 vs itself ≈ 50%; “be more verbose” → ~64% win rate; “be concise” → ~20%.</li> <li>Mitigation: length-controlled / regression-style adjustments.</li> </ul> </li> </ul> <hr> <h2 id="9-systems-brief">9. Systems (brief)</h2> <ul> <li>You cannot always “just buy more GPUs” — cost, scarcity, and communication overhead.</li> <li>GPUs optimize <strong>throughput</strong> (especially matmul); CPUs optimize flexible low-latency work.</li> <li>Compute has outpaced memory/communication bandwidth — GPUs often wait on data movement.</li> <li> <strong>MFU</strong> (Model FLOP Utilization):</li> </ul> \[\text{MFU} = \frac{\text{observed FLOPs/sec}}{\text{peak FLOPs/sec}}\] <p>~50% is considered strong (Meta reported ~45% for Llama training).</p> <ul> <li> <strong>Mixed precision</strong>: store/update in 32-bit; do heavy matmuls in 16-bit.</li> <li> <strong>Operator fusion</strong> (<code class="language-plaintext highlighter-rouge">torch.compile</code> etc.): avoid DRAM round-trips per tiny op; often ~2× speedups.</li> <li>Skipped for time in the lecture, but important: tiling, data/tensor/pipeline parallelism, mixture-of-experts.</li> </ul> <pre><code class="language-mermaid">flowchart LR
+  M[Model weights] --&gt; C[Cast to 16-bit]
+  C --&gt; F[Fused matmul kernels]
+  F --&gt; U[Update 32-bit master weights]
+</code></pre> <hr> <h2 id="10-key-takeaways">10. Key takeaways</h2> <ol> <li> <strong>Autoregressive LMs</strong> = chain-rule factorization + next-token cross-entropy. Simple math; tokenization still shapes what can be learned.</li> <li> <strong>Scaling laws</strong> make large spends extrapolatable — that is why labs can justify huge single runs.</li> <li> <strong>Bitter Lesson</strong>: micro-architecture tweaks mostly move a constant; compute + data + systems compound.</li> <li> <strong>Post-training is mostly style/alignment fine-tuning</strong>, not primary knowledge injection (LIMA).</li> <li> <strong>RLHF/DPO</strong> optimize preferences beyond SFT, but inherit judge biases (especially length).</li> <li> <strong>Open-ended eval</strong> remains hard; pairwise preference (Arena / AlpacaEval) is the current standard, with known confounds.</li> <li> <strong>Systems efficiency is first-class</strong> — even top labs leave substantial FLOPs on the table without mixed precision, fusion, and careful parallelism.</li> </ol> <hr> <h2 id="further-learning">Further learning</h2> <p>As recommended in the lecture:</p> <ul> <li> <strong>CS224N</strong> — NLP with Deep Learning (broader / historical NLP context)</li> <li> <strong>CS324</strong> — Large Language Models (deeper coverage of the topics above)</li> <li> <strong>CS336</strong> — Language Models from Scratch (build your own; heavy workload)</li> </ul> <hr> <p><em>Source: Stanford CS229 guest lecture on building LLMs (transcript-based notes, expanded for self-contained reading).</em></p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/rumination-and-default-mode-network/">Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets Stuck</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/">Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/">Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode to Self-Control</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/">Neuroplasticity, Part 2: The Machinery of Brain Change</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/">Neuroplasticity, Part 1: The Brain Learns by Changing</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-3-production/">Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-2-internals/">Database Skills Every Software Engineer Must Have — Part 2: Internals That Actually Matter</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-1-foundations/">Database Skills Every Software Engineer Must Have — Part 1: Foundations</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/acid-properties-demystified/">ACID Properties Demystified: What Every Backend Engineer Must Know</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Abhishek Sharma. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10.7.0/dist/mermaid.min.js" integrity="sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js" integrity="sha256-1rA678n2xEx7x4cTZ5x4wpUCj6kUMZEZ5cxLSVSFWxw=" crossorigin="anonymous"></script> <script defer src="/assets/al_charts/js/mermaid-setup.js" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "About",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-publications",
+          title: "Publications",
+          description: "Peer-reviewed conference publications",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/publications/";
+          },
+        },{id: "nav-projects",
+          title: "Projects",
+          description: "Selected research and engineering projects.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/projects/";
+          },
+        },{id: "nav-cv",
+          title: "CV",
+          description: "Curriculum vitae — education, experience, teaching, awards, and selected work.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-teaching",
+          title: "Teaching",
+          description: "Instruction, workshops, and mentoring in computer science and machine learning.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/teaching/";
+          },
+        },{id: "nav-blog",
+          title: "Blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "post-building-large-language-models",
+        
+          title: "Building Large Language Models",
+        
+        description: "A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency — based on Stanford CS229 guest lecture notes.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/building-large-language-models/";
+          
+        },
+      },{id: "post-rumination-and-the-default-mode-network-why-the-mind-replays-worries-and-gets-stuck",
+        
+          title: "Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets...",
+        
+        description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rumination-and-default-mode-network/";
+          
+        },
+      },{id: "post-dopamine-and-motivation-the-neuroscience-of-wanting-effort-reward-and-drive",
+        
+          title: "Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive",
+        
+        description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/";
+          
+        },
+      },{id: "post-stress-the-amygdala-and-the-prefrontal-cortex-a-complete-guide-from-survival-mode-to-self-control",
+        
+          title: "Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode...",
+        
+        description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/";
+          
+        },
+      },{id: "post-neuroplasticity-part-2-the-machinery-of-brain-change",
+        
+          title: "Neuroplasticity, Part 2: The Machinery of Brain Change",
+        
+        description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/";
+          
+        },
+      },{id: "post-neuroplasticity-part-1-the-brain-learns-by-changing",
+        
+          title: "Neuroplasticity, Part 1: The Brain Learns by Changing",
+        
+        description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-3-production-grade-engineering",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 3: Production-Grade Engineering",
+        
+        description: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-3-production/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-2-internals-that-actually-matter",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 2: Internals That Actually...",
+        
+        description: "Indexes, query planning, transactions, window functions, N+1, connection pooling, and locks. The intermediate layer that separates engineers who write queries from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-2-internals/";
+          
+        },
+      },{id: "post-database-skills-every-software-engineer-must-have-part-1-foundations",
+        
+          title: "Database Skills Every Software Engineer Must Have — Part 1: Foundations",
+        
+        description: "A practical, no-fluff guide to relational databases — the kind of depth that actually shows up in senior engineering interviews.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-1-foundations/";
+          
+        },
+      },{id: "post-acid-properties-demystified-what-every-backend-engineer-must-know",
+        
+          title: "ACID Properties Demystified: What Every Backend Engineer Must Know",
+        
+        description: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/acid-properties-demystified/";
+          
+        },
+      },{id: "books-the-godfather",
+          title: 'The Godfather',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_godfather/";
+            },},{id: "projects-topic-modeling-for-nepali-political-news",
+          title: 'Topic Modeling for Nepali Political News',
+          description: "IEEE ICICT 2025",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/1_nepali-topic-modeling/";
+            },},{id: "projects-invoice-information-extraction",
+          title: 'Invoice Information Extraction',
+          description: "Multimodal document understanding for structured invoice data extraction",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/2_invoice-extraction/";
+            },},{id: "projects-videolize",
+          title: 'Videolize',
+          description: "Text-to-video generation via spherical interpolation in Stable Diffusion latent space",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/3_videolize/";
+            },},{id: "projects-summitseeker",
+          title: 'SummitSeeker',
+          description: "Backend platform for a tourism application with cloud CI/CD",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/4_summitseeker/";
+            },},{id: "projects-adversarial-search-for-checkers",
+          title: 'Adversarial Search for Checkers',
+          description: "Game-playing agent with Minimax search and alpha–beta pruning",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/5_checkers-ai/";
+            },},{id: "projects-procedural-terrain-generation",
+          title: 'Procedural Terrain Generation',
+          description: "Perlin-noise terrain synthesis in C++",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/6_procedural-terrain/";
+            },},{id: "projects-campus-network-design",
+          title: 'Campus Network Design',
+          description: "Hierarchical network design with VLANs, subnetting, and OSPF",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/7_university-network/";
+            },},{id: "teachings-web-development-with-django",
+          title: 'Web Development with Django',
+          description: "Large-scale workshop series on Django application development",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/django-workshop/";
+            },},{id: "teachings-it-club-technical-programs",
+          title: 'IT Club Technical Programs',
+          description: "Campus technical community leadership and programming outreach",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/it-club-service/";
+            },},{id: "teachings-mathematical-foundations-of-machine-learning",
+          title: 'Mathematical Foundations of Machine Learning',
+          description: "LOCUS Fellowship instructor — core ML mathematics and algorithms",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/locus-fellowship/";
+            },},{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%61%62%68%69%73%68%65%6B.%77%6F%72%6B%31%37%31%30@%67%6D%61%69%6C.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/avisekksarma", "_blank");
+        },
+      },{
+        id: 'social-linkedin',
+        title: 'LinkedIn',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.linkedin.com/in/aviseksarma", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
