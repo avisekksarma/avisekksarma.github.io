@@ -1,0 +1,17 @@
+# Blog index sections. Each post should match exactly one section via `category`.
+# Order here controls display order on /blog/.
+
+- id: machine-learning
+  title: Machine Learning
+  description: How modern LLMs are trained, scaled, evaluated, and aligned.
+  category: machine-learning
+
+- id: databases-backend
+  title: Databases & Backend
+  description: SQL, ACID, indexes, transactions, and production database engineering.
+  category: databases
+
+- id: neuroscience
+  title: Neuroscience
+  description: Plasticity, stress, dopamine, motivation, and how the mind gets stuck — and unstuck.
+  category: Neuroscience
