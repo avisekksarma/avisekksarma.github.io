@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Stress, the Amygdala, and the Prefrontal Cortex: A Complete Guide from Survival Mode to Self-Control"
+title: "Stress, the Amygdala, and the Prefrontal Cortex"
 description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life."
 date: 2026-06-05
 categories: [Neuroscience, Psychology, Self-Improvement]

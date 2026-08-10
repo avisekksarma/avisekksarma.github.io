@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "ACID Properties Demystified: What Every Backend Engineer Must Know"
+title: "ACID Properties Demystified"
 subtitle: "Atomicity, Consistency, Isolation, Durability — explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
 date: 2026-05-01
 categories: [Tech, databases, backend]

@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Database Skills Every Software Engineer Must Have — Part 1: Foundations"
-subtitle: "A practical, no-fluff guide to relational databases — the kind of depth that actually shows up in senior engineering interviews."
+title: "Database Skills for Software Engineers — Part 1: Foundations"
+subtitle: "A practical guide to relational databases — schema design, keys, constraints, joins, and aggregation."
 date: 2026-05-13
 categories: [Tech, databases, backend, series]
 tags: [postgresql, sql, relational-databases, backend-engineering, database-design]

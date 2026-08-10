@@ -2,7 +2,8 @@
 layout: about
 title: About
 permalink: /
-subtitle: Software Engineer &nbsp;|&nbsp; Backend Systems &nbsp;|&nbsp; Applied Machine Learning
+subtitle: Software Engineer · Backend Systems · Applied Machine Learning
+description: Personal site of Abhishek Sharma — software engineer working on backend systems and applied machine learning.
 
 profile:
   align: right

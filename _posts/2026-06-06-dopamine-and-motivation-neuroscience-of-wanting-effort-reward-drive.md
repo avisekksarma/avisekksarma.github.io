@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Dopamine and Motivation: The Neuroscience of Wanting, Effort, Reward, and Drive"
+title: "Dopamine and Motivation"
 description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design."
 date: 2026-06-06
 categories: [Neuroscience, Psychology, Self-Improvement]

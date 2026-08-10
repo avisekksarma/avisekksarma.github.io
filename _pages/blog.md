@@ -1,9 +1,10 @@
 ---
 layout: default
 permalink: /blog/
-title: Blog
+title: Writing
 nav: true
 nav_order: 7
+description: Essays and technical notes on machine learning, databases, and neuroscience.
 pagination:
   enabled: false
 ---

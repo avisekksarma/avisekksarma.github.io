@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Rumination and the Default Mode Network: Why the Mind Replays, Worries, and Gets Stuck"
+title: "Rumination and the Default Mode Network"
 description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops."
 date: 2026-06-06
 categories: [Neuroscience, Psychology, Self-Improvement]

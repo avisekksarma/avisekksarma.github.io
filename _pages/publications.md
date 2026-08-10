@@ -2,7 +2,7 @@
 layout: page
 permalink: /publications/
 title: Publications
-description: Peer-reviewed conference publications
+description: Peer-reviewed publications and conference papers.
 nav: true
 nav_order: 1
 ---
