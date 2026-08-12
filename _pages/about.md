@@ -24,7 +24,7 @@ announcements:
 latest_posts:
   enabled: true
   scrollable: true
-  limit: 3
+  limit: 2
 ---
 
 I am a software engineer working on scalable backend systems and applied machine learning. My interests lie at the intersection of distributed service design, data infrastructure, and deploying learning-based methods in production.
