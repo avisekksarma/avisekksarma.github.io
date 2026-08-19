@@ -1,0 +1,33 @@
+<svg width="100%" viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>PHOE: reacts only to one spin direction of light</title>
+<desc>Left-handed circularly polarized light hitting the recorded film gets diffracted, while right-handed circularly polarized light passes straight through unaffected.</desc>
+<defs>
+<marker id="arrowAmber7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+<marker id="arrowTeal7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<style>
+text{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#1f2937;}
+.th{font-size:14px;font-weight:600;}
+.ts{font-size:12px;fill:#4b5563;}
+</style>
+
+<rect x="330" y="70" width="14" height="160" rx="2" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+<rect x="330" y="95" width="14" height="30" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+
+<text class="th" x="100" y="90" text-anchor="start">LCP light</text>
+<text class="ts" x="100" y="105" text-anchor="start">(left-hand spin)</text>
+<line x1="100" y1="118" x2="328" y2="112" stroke="#d97706" stroke-width="2" opacity="0.9" marker-end="url(#arrowAmber7)"/>
+<line x1="346" y1="112" x2="460" y2="88" stroke="#d97706" stroke-width="2" opacity="0.9" marker-end="url(#arrowAmber7)"/>
+<text class="th" x="470" y="80" text-anchor="start">Diffracted</text>
+<text class="ts" x="470" y="97" text-anchor="start">(recorded reaction)</text>
+
+<text class="th" x="100" y="175" text-anchor="start">RCP light</text>
+<text class="ts" x="100" y="190" text-anchor="start">(right-hand spin)</text>
+<line x1="100" y1="200" x2="460" y2="200" stroke="#0d9488" stroke-width="2" opacity="0.85" marker-end="url(#arrowTeal7)"/>
+<text class="th" x="470" y="195" text-anchor="start">Ignored</text>
+<text class="ts" x="470" y="212" text-anchor="start">passes straight through</text>
+</svg>

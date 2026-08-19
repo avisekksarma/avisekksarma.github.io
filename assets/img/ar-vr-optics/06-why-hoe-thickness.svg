@@ -1,0 +1,26 @@
+<svg width="100%" viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Why use an HOE instead of a normal glass lens</title>
+<desc>A thick curved glass lens and a thin recorded HOE film produce the exact same lens effect, but the HOE needs vastly less physical material.</desc>
+<style>
+text{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#1f2937;}
+.th{font-size:14px;font-weight:600;}
+.ts{font-size:12px;fill:#4b5563;}
+</style>
+
+<text class="th" x="135" y="45" text-anchor="middle">Normal glass lens</text>
+<rect x="110" y="60" width="50" height="160" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<line x1="110" y1="240" x2="160" y2="240" stroke="#1f2937" stroke-width="1"/>
+<line x1="110" y1="234" x2="110" y2="246" stroke="#1f2937" stroke-width="1"/>
+<line x1="160" y1="234" x2="160" y2="246" stroke="#1f2937" stroke-width="1"/>
+<text class="ts" x="135" y="262" text-anchor="middle">~15 mm thick</text>
+
+<text class="th" x="310" y="150" text-anchor="middle">=</text>
+
+<text class="th" x="484" y="45" text-anchor="middle">HOE film</text>
+<rect x="480" y="60" width="8" height="160" rx="1" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<text class="ts" x="484" y="262" text-anchor="middle">~0.05 mm thin</text>
+<text class="ts" x="484" y="278" text-anchor="middle">(like a sticker)</text>
+
+<text class="ts" x="310" y="290" text-anchor="middle">Both bend light exactly the same way &#8212;</text>
+<text class="ts" x="310" y="306" text-anchor="middle">one just needs far less material</text>
+</svg>
