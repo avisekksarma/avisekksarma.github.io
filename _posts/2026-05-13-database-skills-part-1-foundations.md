@@ -4,7 +4,7 @@ title: "Database Skills for Software Engineers, Part 1: Foundations"
 subtitle: "A practical guide to relational databases: schema design, keys, constraints, joins, and aggregation."
 date: 2026-05-13
 categories: [Tech, databases, backend, series]
-tags: [postgresql, sql, relational-databases, backend-engineering, database-design]
+tags: [databases, backend, sql]
 series: "Database Engineering: From Good to Great"
 series_part: 1
 reading_time: 12

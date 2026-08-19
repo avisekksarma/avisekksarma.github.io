@@ -1,0 +1,44 @@
+<svg width="100%" viewBox="0 0 680 350" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Pancake optics: folding a long light path into a short physical gap</title>
+<desc>Left: a normal display needs a long straight gap to the eye. Right: pancake optics bounces light back and forth between two close surfaces, achieving the same effective travel distance in a much smaller physical space.</desc>
+<defs>
+<marker id="arrowAmber9" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<style>
+text{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#1f2937;}
+.th{font-size:14px;font-weight:600;}
+.ts{font-size:12px;fill:#4b5563;}
+</style>
+
+<text class="th" x="180" y="25" text-anchor="middle">Normal (no folding)</text>
+<rect x="140" y="40" width="80" height="40" rx="6" fill="#f3f4f6" stroke="#6b7280" stroke-width="1"/>
+<text class="th" x="180" y="64" text-anchor="middle">Display</text>
+<line x1="180" y1="82" x2="180" y2="258" stroke="#d97706" stroke-width="2" opacity="0.85" marker-end="url(#arrowAmber9)"/>
+<text class="ts" x="200" y="175" text-anchor="start">long distance</text>
+<text class="ts" x="200" y="190" text-anchor="start">needed</text>
+<ellipse cx="180" cy="278" rx="20" ry="13" fill="none" stroke="#1f2937" stroke-width="1"/>
+<text class="ts" x="180" y="305" text-anchor="middle">Your eye</text>
+
+<line x1="345" y1="20" x2="345" y2="330" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4 3"/>
+
+<text class="th" x="500" y="25" text-anchor="middle">Pancake (folded)</text>
+<rect x="460" y="40" width="80" height="40" rx="6" fill="#f3f4f6" stroke="#6b7280" stroke-width="1"/>
+<text class="th" x="500" y="64" text-anchor="middle">Display</text>
+<line x1="500" y1="82" x2="500" y2="99" stroke="#d97706" stroke-width="2" opacity="0.85" marker-end="url(#arrowAmber9)"/>
+
+<line x1="430" y1="100" x2="570" y2="100" stroke="#2563eb" stroke-width="2" opacity="0.85"/>
+<text class="th" x="575" y="97" text-anchor="start">Polarizer</text>
+
+<line x1="430" y1="220" x2="570" y2="220" stroke="#7c3aed" stroke-width="2" opacity="0.85"/>
+<text class="th" x="575" y="217" text-anchor="start">Mirror</text>
+
+<polyline points="500,100 470,220 530,100 500,220" fill="none" stroke="#d97706" stroke-width="2" opacity="0.9"/>
+<line x1="500" y1="220" x2="598" y2="296" stroke="#d97706" stroke-width="2" opacity="0.85" marker-end="url(#arrowAmber9)"/>
+
+<ellipse cx="600" cy="313" rx="20" ry="13" fill="none" stroke="#1f2937" stroke-width="1"/>
+<text class="ts" x="600" y="340" text-anchor="middle">Your eye</text>
+
+<text class="ts" x="340" y="332" text-anchor="middle">Same effective distance, far less physical space</text>
+</svg>

@@ -4,7 +4,7 @@ title: "Rumination and the Default Mode Network"
 description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops."
 date: 2026-06-06
 categories: [Neuroscience, Psychology, Self-Improvement]
-tags: [rumination, default-mode-network, DMN, overthinking, anxiety, depression, mindfulness, neuroscience]
+tags: [neuroscience, psychology, cognition]
 mermaid:
   enabled: true
   zoomable: true

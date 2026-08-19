@@ -4,7 +4,7 @@ title: "Neuroplasticity, Part 1: The Brain Learns by Changing"
 description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life."
 date: 2026-06-05
 categories: [Neuroscience, Learning]
-tags: [neuroplasticity, brain, habits, learning, self-improvement, neuroscience]
+tags: [neuroscience, learning, brain]
 mermaid:
   enabled: true
   zoomable: true

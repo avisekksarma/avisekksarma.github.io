@@ -4,7 +4,7 @@ title: "Building Large Language Models"
 subtitle: "Architecture is only one pillar; data, evaluation, and systems often dominate real progress. Notes from a Stanford CS229 guest lecture, expanded for self-contained reading."
 date: 2026-08-10
 categories: [Tech, machine-learning, llm]
-tags: [llm, machine-learning, cs229, deep-learning, transformers, rlhf, scaling-laws]
+tags: [machine-learning, llm, training]
 mermaid:
   enabled: true
   zoomable: true

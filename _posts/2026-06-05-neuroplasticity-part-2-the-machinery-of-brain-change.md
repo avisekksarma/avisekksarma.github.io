@@ -4,7 +4,7 @@ title: "Neuroplasticity, Part 2: The Machinery of Brain Change"
 description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change."
 date: 2026-06-05
 categories: [Neuroscience, Learning]
-tags: [neuroplasticity, synaptic-plasticity, dopamine, BDNF, habits, anxiety, learning, neuroscience]
+tags: [neuroscience, learning, brain]
 mermaid:
   enabled: true
   zoomable: true

@@ -6,6 +6,11 @@
   description: How modern LLMs are trained, scaled, evaluated, and aligned.
   category: machine-learning
 
+- id: ar-vr
+  title: AR / VR
+  description: "Near-eye display optics: waveguides, holographic films, metasurfaces, and pancake lenses."
+  category: ar-vr
+
 - id: databases-backend
   title: Databases & Backend
   description: SQL, ACID, indexes, transactions, and production database engineering.

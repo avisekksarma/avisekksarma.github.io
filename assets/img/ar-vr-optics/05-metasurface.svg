@@ -1,0 +1,41 @@
+<svg width="100%" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>How a metasurface bends light using an array of tiny structures</title>
+<desc>A row of nanostructures of varying height sits on a flat substrate. Flat incoming light hits the structures, and each one delays the light by a different, precisely controlled amount, so the outgoing light converges to a focus point, just like a curved lens, despite the surface being flat.</desc>
+<defs>
+<marker id="arrowTeal5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<style>
+text{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#1f2937;}
+.th{font-size:14px;font-weight:600;}
+.ts{font-size:12px;fill:#4b5563;}
+</style>
+
+<rect x="45" y="190" width="590" height="10" rx="2" fill="#f3f4f6" stroke="#6b7280" stroke-width="1"/>
+
+<rect x="133" y="175" width="14" height="15" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<rect x="213" y="160" width="14" height="30" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<rect x="293" y="142" width="14" height="48" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<rect x="373" y="120" width="14" height="70" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<rect x="453" y="142" width="14" height="48" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<rect x="533" y="160" width="14" height="30" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+<rect x="613" y="175" width="14" height="15" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+
+<text class="ts" x="380" y="50" text-anchor="middle">Flat wavefront (plain light coming in)</text>
+<line x1="380" y1="70" x2="380" y2="118" stroke="#0d9488" stroke-width="1.5" opacity="0.85" marker-end="url(#arrowTeal5)"/>
+
+<line x1="140" y1="175" x2="65" y2="120" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4 3"/>
+<text class="th" x="70" y="112" text-anchor="start">Meta-atom</text>
+<text class="ts" x="70" y="128" text-anchor="start">(tiny nanostructure)</text>
+
+<line x1="140" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<line x1="220" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<line x1="300" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<line x1="380" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<line x1="460" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<line x1="540" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<line x1="620" y1="200" x2="380" y2="300" stroke="#d97706" stroke-width="1.5" opacity="0.8"/>
+<circle cx="380" cy="300" r="4" fill="#d97706"/>
+<text class="ts" x="380" y="320" text-anchor="middle">Focus point (like a lens!)</text>
+</svg>

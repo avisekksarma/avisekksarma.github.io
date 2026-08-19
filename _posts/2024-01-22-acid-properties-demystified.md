@@ -4,7 +4,7 @@ title: "ACID Properties Demystified"
 subtitle: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
 date: 2026-05-01
 categories: [Tech, databases, backend]
-tags: [postgresql, sql, acid, transactions, isolation-levels, backend-engineering]
+tags: [databases, backend, sql]
 reading_time: 14
 description: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use."
 ---

@@ -4,7 +4,7 @@ title: "Database Skills for Software Engineers, Part 2: Internals"
 subtitle: "Indexes, query planning, transactions, window functions, N+1 queries, connection pooling, and locks."
 date: 2026-05-13
 categories: [Tech, databases, backend, series]
-tags: [postgresql, sql, indexes, transactions, performance, backend-engineering]
+tags: [databases, backend, sql]
 series: "Database Engineering: From Good to Great"
 series_part: 2
 reading_time: 18

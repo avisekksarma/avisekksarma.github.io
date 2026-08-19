@@ -4,7 +4,7 @@ title: "Stress, the Amygdala, and the Prefrontal Cortex"
 description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life."
 date: 2026-06-05
 categories: [Neuroscience, Psychology, Self-Improvement]
-tags: [stress, amygdala, prefrontal-cortex, HPA-axis, cortisol, anxiety, emotion-regulation, neuroscience]
+tags: [neuroscience, psychology, stress]
 mermaid:
   enabled: true
   zoomable: true

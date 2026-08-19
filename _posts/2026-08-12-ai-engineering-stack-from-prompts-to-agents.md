@@ -4,7 +4,7 @@ title: "The AI Engineering Stack in 2026"
 subtitle: "Prompt, context, harness, loops, agents, and graphs: what these terms actually mean, and how they fit together."
 date: 2026-08-12
 categories: [Tech, machine-learning, llm]
-tags: [llm, agents, prompt-engineering, context-engineering, harness-engineering, agentic-ai, rag]
+tags: [machine-learning, llm, agents]
 mermaid:
   enabled: true
   zoomable: true
