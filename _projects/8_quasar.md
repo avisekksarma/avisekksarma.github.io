@@ -1,8 +1,8 @@
 ---
 layout: project
 title: Quasar
-description: A Raft-based replicated key-value store covering consensus, log replication, crash recovery, snapshots, and linearizable reads.
-summary: A Raft-based replicated key-value store. Nodes elect a leader, replicate an ordered log, and commit writes only after a majority agrees—then recover from crashes, partitions, and lag via WAL, snapshots, and snapshot install, with linearizable reads that refuse stale data from an isolated leader.
+description: Linearizable replicated KV store: Raft state-machine replication, majority-quorum commit, WAL, snapshot compaction, InstallSnapshot catch-up, and majority-checked reads that refuse stale state.
+summary: A linearizable replicated key-value store built as a Raft state machine. Nodes elect a leader, replicate an ordered log, and commit writes only after a majority agrees—then recover from crashes, partitions, and lag via WAL, snapshot compaction, and InstallSnapshot catch-up, with linearizable reads after a majority quorum check so an isolated leader cannot return stale state.
 importance: 1
 category: Engineering
 year: 2026

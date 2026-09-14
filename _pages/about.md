@@ -30,7 +30,7 @@ I am a software engineer working on scalable systems and applied machine learnin
 
 I currently contribute as a **founding software engineer** at **ZeroTB**, where I design backend infrastructure for compliance automation, including database architecture, service integrations, and AI-powered workflows with RAG and LLM orchestration. Previously, at **Docsumo**, I worked as an associate software engineer (ML) on document understanding systems, production inference services, extraction pipelines, and latency-sensitive APIs.
 
-During my undergraduate studies, I also completed a research project on [topic modeling for Nepali political news](/projects/1_nepali-topic-modeling/), later published at IEEE ICICT 2025.
+During my undergraduate studies, I also completed a research project on [topic modeling for Nepali political news](/projects/1_nepali-topic-modeling/), later published at IEEE ICICT 2025. More recently I have been building distributed systems from scratch, including [Quasar](/projects/8_quasar/), a linearizable replicated key-value store implemented as a Raft state machine (quorum commit, WAL and snapshots, majority-checked reads).
 
 I received a B.E. in Computer Engineering from [IOE Pulchowk Campus](https://pcampus.edu.np/) (2019-2024), where I was awarded the Golden Jubilee Scholarship by the Embassy of India.
 

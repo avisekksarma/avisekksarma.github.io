@@ -76,6 +76,18 @@ cv:
         url: /projects/1_nepali-topic-modeling/
 
     Projects:
+      - name: Quasar
+        summary: Raft replicated state machine with log-matching replication, WAL, snapshot compaction, and InstallSnapshot catch-up. Linearizable reads use a majority quorum check so an isolated leader cannot return stale state; interactive lab covers election, partition, crash, and stale-leader recovery.
+        highlights:
+          - Raft
+          - Linearizability
+          - State-machine replication
+          - WAL
+          - Snapshots
+        url: /projects/8_quasar/
+        start_date: 2026
+        end_date: 2026
+
       - name: Topic Modeling for Nepali Political News
         summary: Compared LDA, NMF, LSA, and BERTopic on Nepali political news. Paper at IEEE ICICT 2025.
         highlights:
@@ -140,6 +152,9 @@ cv:
 
       - name: Machine learning
         keywords: "Computer vision, NLP, transformers, RAG, production inference"
+
+      - name: Distributed systems
+        keywords: "Raft, state-machine replication, linearizability, quorum commit, WAL, snapshots"
 
       - name: Data
         keywords: "PostgreSQL, MySQL, SQLite, MongoDB, Redis"

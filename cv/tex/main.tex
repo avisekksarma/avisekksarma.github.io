@@ -245,6 +245,13 @@
 \section{Projects}
     \resumeSubHeadingListStart
       \resumeProjectHeading
+          {\textbf{Quasar: Linearizable Replicated Key-Value Store} $|$ \href{https://github.com/avisekksarma/nebula/tree/main/projects/quasar}{Link} $|$ \emph{Raft, SMR, WAL, FastAPI, Python}}{}
+          \resumeItemListStart
+            \resumeItem{Implemented a Raft replicated state machine with term-based leader election, log-matching replication, and majority-quorum commit before applying writes.}
+            \resumeItem{Built crash-durable recovery with a write-ahead log, snapshot compaction, and InstallSnapshot catch-up for lagging replicas under crash and partition.}
+            \resumeItem{Served linearizable reads via a majority quorum check so an isolated leader cannot return stale state, and built an interactive lab to step through election, partition, crash, and stale-leader recovery on a live three-node cluster.}
+          \resumeItemListEnd
+      \resumeProjectHeading
           {\textbf{Topic Modeling for Nepali Political News (NLP)} $|$ \href{https://github.com/adh-aashish/topic_modeling} {Link} $|$ \emph{LDA, BERTopic, nltk, Pandas, spaCy, gensim}}{}
           \resumeItemListStart
             \resumeItem{Utilized Probabilistic, Algebraic, and Transformer-Based Methods for Topic Modeling in Low Resource Language like Nepali.}
@@ -313,7 +320,7 @@
     \small{\item{
      \textbf{Languages}{: Python, C/C++, JavaScript, SQL,  Dart, HTML/CSS } \\
      \textbf{Frameworks}{:  Flask, FastAPI, Django,  PyTorch, Node.js, Express.js, Flutter} \\  
-     \textbf{Knowledge}{: Linux/Unix, Computer Networks, Web Dev, Computer Vision (YOLO, CNN, ResNets, U-Net, etc.), Mathematical Domain (Linear Algebra, Probability and Statistics,etc.), NLP (RNNs, LSTMs), Transformer, DSA} \\
+     \textbf{Knowledge}{: Linux/Unix, Distributed Systems (Raft, SMR, linearizability), Computer Networks, Web Dev, Computer Vision (YOLO, CNN, ResNets, U-Net, etc.), Mathematical Domain (Linear Algebra, Probability and Statistics,etc.), NLP (RNNs, LSTMs), Transformer, DSA} \\
      \textbf{Developer Tools}{: Git, Docker, Selenium, Postman, VS Code, Visual Studio, Cisco Packet Tracer } \\
      \textbf{Libraries}{: gensim, spaCy, NLTK, scikit-learn, NumPy, Matplotlib,  seaborn, Pandas} \\
      \textbf{Databases}{: SQL ( PostgreSQL, MySQL, SQLite ), NoSQL ( MongoDB ) } \\
