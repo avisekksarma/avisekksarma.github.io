@@ -1,0 +1,314 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Counting Transformer Parameters | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="How to count the parameters in a decoder-only Transformer: tokenizer vs embedding, 12 d_model² per block, a 7B example, and the difference between weight memory and KV-cache."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="/assets/img/favicon.png?v=e254c71222a16b596b1a2429b539be0d"> <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=603eef51037927dcc5aa87187423f565"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://avisekksarma.github.io/blog/2026/counting-transformer-parameters/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav sticky-bottom-footer"> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Abhishek Sharma </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">Publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">Projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/">Teaching </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Writing <span class="sr-only">(current)</span> </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Counting Transformer Parameters</h1> <p class="post-meta"> Created on September 14, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/machine-learning"> <i class="fa-solid fa-hashtag fa-sm"></i> machine-learning</a>   <a href="/blog/tag/llm"> <i class="fa-solid fa-hashtag fa-sm"></i> llm</a>   <a href="/blog/tag/transformers"> <i class="fa-solid fa-hashtag fa-sm"></i> transformers</a>   ·   <a href="/blog/category/tech"> <i class="fa-solid fa-tag fa-sm"></i> Tech</a>   <a href="/blog/category/machine-learning"> <i class="fa-solid fa-tag fa-sm"></i> machine-learning</a>   <a href="/blog/category/llm"> <i class="fa-solid fa-tag fa-sm"></i> llm</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>When a model card says <strong>7B</strong>, it is counting learned numbers: the parameters. Those numbers are what you load onto a GPU before the model writes a single token. This post is a short count of where they live, why a block is about <code class="language-plaintext highlighter-rouge">12 d²</code> weights, and why a 7B model is roughly 14 GB in memory.</p> <p>The stack below is the GPT-style picture from <a href="https://jalammar.github.io/illustrated-gpt2/" rel="external nofollow noopener" target="_blank">Illustrated GPT-2</a> and the <a href="https://www.deeplearning.ai/courses/how-transformer-llms-work" rel="external nofollow noopener" target="_blank">How Transformer LLMs Work</a> course with Jay Alammar and Maarten Grootendorst. The counting trick is from <a href="https://kipp.ly/p/transformer-param-count" rel="external nofollow noopener" target="_blank">kipply’s parameter-counting note</a>.</p> <hr> <h2 id="1-the-architecture">1. The architecture</h2> <p><a href="https://jalammar.github.io/illustrated-transformer/" rel="external nofollow noopener" target="_blank">Jay Alammar’s Illustrated Transformer</a> is the 2017 <strong>encoder–decoder</strong> (built for translation). GPT-style LLMs drop the encoder. What you actually run is a <strong>decoder-only</strong> stack, the same shape as the figure you know from <em>How Transformer LLMs Work</em>: tokenizer at the <strong>top</strong>, <code class="language-plaintext highlighter-rouge">N</code> blocks, LM head, then <code class="language-plaintext highlighter-rouge">P(next token)</code> at the <strong>bottom</strong>.</p> <p><img src="/assets/img/transformer-param-count/00-decoder-stack.svg" alt="Decoder-only LLM: tokenizer and tokens at the top, embeddings, stacked blocks 1 to N, LM head, then P(next token) at the bottom. One block is masked self-attention plus an MLP." style="max-width: 36rem; width: 100%; height: auto; display: block; margin: 1.25rem auto;"></p> <p>Each block does the same two jobs, then the next block gets the result. Attention is <strong>masked</strong> (causal), so a token can only read earlier tokens, never the future. Residuals keep the vector width equal to <code class="language-plaintext highlighter-rouge">d</code> all the way through.</p> <hr> <h2 id="2-three-stages">2. Three stages</h2> <p>The same model, left to right, as three stages.</p> <p><img src="/assets/img/transformer-param-count/01-architecture.svg" alt="Decoder-only Transformer: tokenizer and embedding, one transformer block with attention and MLP, then the language-model head"></p> <p><strong>Tokenizer.</strong> Text becomes token IDs — integers into a vocabulary. <code class="language-plaintext highlighter-rouge">the cat sat</code> might become <code class="language-plaintext highlighter-rouge">464, 3797, 3332</code>. The tokenizer does <strong>not</strong> create the 4096-dimensional vectors. It only picks IDs.</p> <p><strong>Embedding.</strong> Each ID is a lookup in a table of size <code class="language-plaintext highlighter-rouge">V × d</code>. That table is the first real parameter matrix. After this step, every token is a vector of length <code class="language-plaintext highlighter-rouge">d = d_model</code> (4096 in the example below). From here on, that width stays <code class="language-plaintext highlighter-rouge">d</code>.</p> <p><strong>Blocks, then the LM head.</strong> Those vectors go through the same block <code class="language-plaintext highlighter-rouge">N</code> times. Each copy has its own weights. Inside a block, <strong>masked self-attention</strong> lets a token read earlier tokens (not future ones), then the <strong>MLP</strong> processes each token by itself. Residual connections add the block’s input back after each sublayer, which is why the vector size never changes.</p> <p>Then a linear map <code class="language-plaintext highlighter-rouge">d → V</code> turns the <strong>last token’s</strong> vector into one score per vocabulary entry. Softmax makes that a next-token distribution.</p> <hr> <h2 id="3-the-six-matrices-that-are-almost-the-whole-model">3. The six matrices that are almost the whole model</h2> <p>Open one block and almost every parameter is in six matrices.</p> <p><img src="/assets/img/transformer-param-count/02-parameter-count.svg" alt="Attention has four d by d matrices; the MLP has d by 4d and 4d by d; together that is 12 d squared per block"></p> <p><strong>Attention: <code class="language-plaintext highlighter-rouge">4 d²</code>.</strong> Four projections <code class="language-plaintext highlighter-rouge">Wq</code>, <code class="language-plaintext highlighter-rouge">Wk</code>, <code class="language-plaintext highlighter-rouge">Wv</code>, <code class="language-plaintext highlighter-rouge">Wo</code>. People talk about heads, but in the usual design</p> \[n_{\text{heads}} \cdot d_{\text{head}} = d\] <p>so each of those four matrices is <code class="language-plaintext highlighter-rouge">d × d</code>. That is <code class="language-plaintext highlighter-rouge">4 d²</code>.</p> <p><strong>MLP: <code class="language-plaintext highlighter-rouge">8 d²</code>.</strong> Two matrices: expand <code class="language-plaintext highlighter-rouge">d → 4d</code>, then contract <code class="language-plaintext highlighter-rouge">4d → d</code>. That is <code class="language-plaintext highlighter-rouge">2 × 4 d² = 8 d²</code>. The factor of four is the original Transformer convention. It is still the right first-order picture.</p> <p>Add them:</p> \[\text{parameters per block} \approx 12\, d^2\] <p>LayerNorm and biases exist. They are <code class="language-plaintext highlighter-rouge">O(d)</code> per block, not <code class="language-plaintext highlighter-rouge">O(d²)</code>. On a 7B-class model they are a rounding error, so the <code class="language-plaintext highlighter-rouge">12 d²</code> rule can ignore them.</p> <p>The embedding table is extra: <code class="language-plaintext highlighter-rouge">V × d</code>. The LM head is another <code class="language-plaintext highlighter-rouge">d × V</code>. Some models share those two (tied embeddings); some do not. Either way that is hundreds of millions, not the billions.</p> <hr> <h2 id="4-a-7b-worked-example">4. A 7B worked example</h2> <p>Take <code class="language-plaintext highlighter-rouge">d = 4096</code>, <code class="language-plaintext highlighter-rouge">N = 32</code> blocks, <code class="language-plaintext highlighter-rouge">V = 65,536</code>.</p> <p>Per block:</p> \[12 \times 4096^2 = 12 \times 16{,}777{,}216 \approx 201\text{M}\] <p>All blocks:</p> \[201\text{M} \times 32 \approx 6.44\text{B}\] <p>Embeddings:</p> \[65{,}536 \times 4096 \approx 268\text{M}\] <p>Total ≈ <strong>6.7B</strong> parameters. That is a “7B model”. If the LM head is not tied, add another 268M — still about 7B.</p> <p>So the whole count is:</p> \[\text{parameters} \approx 12\, N\, d^2 + V\, d\] <p>Modern variants move the constant a little (grouped-query attention shrinks <code class="language-plaintext highlighter-rouge">Wk</code> and <code class="language-plaintext highlighter-rouge">Wv</code>; SwiGLU uses three MLP matrices instead of two). They do not change the picture: almost all the weights are still <code class="language-plaintext highlighter-rouge">O(N d²)</code>, plus a vocabulary table.</p> <hr> <h2 id="5-memory-weights-vs-kv-cache">5. Memory: weights vs KV cache</h2> <p>Each parameter occupies a few bytes:</p> <table> <thead> <tr> <th>Precision</th> <th>Bytes / param</th> <th>7B weights</th> </tr> </thead> <tbody> <tr> <td>FP32</td> <td>4</td> <td>~28 GB</td> </tr> <tr> <td>FP16 / BF16</td> <td>2</td> <td>~14 GB</td> </tr> <tr> <td>INT8</td> <td>1</td> <td>~7 GB</td> </tr> <tr> <td>INT4</td> <td>0.5</td> <td>~3.5 GB</td> </tr> </tbody> </table> <p>The number people quote for loading a 7B model in half precision:</p> \[7\text{B} \times 2 \text{ bytes} \approx 14\text{GB}\] <p>That is <strong>static weight memory</strong>: what you need to load the model at all.</p> <p><strong>KV cache is separate.</strong> During generation the model stores keys and values for tokens it has already seen, so it does not recompute attention from scratch. That memory grows with sequence length. A model that <em>fits</em> at 14 GB can still run out of memory on a long prompt. The weights do not grow as you generate; the cache does.</p> <hr> <h2 id="the-one-number-to-keep">The one number to keep</h2> <p>Count <code class="language-plaintext highlighter-rouge">12 N d² + V d</code>, multiply by bytes per parameter, and you know the GPU memory to <strong>load</strong> the LLM. Activations and the KV cache are extra, and they depend on batch size and context length — not on the parameter count on the model card.</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/ar-vr-optics-explained-from-scratch/">AR/VR Optics, Explained From Scratch</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/ai-engineering-stack-from-prompts-to-agents/">The AI Engineering Stack in 2026</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/building-large-language-models/">Building Large Language Models</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/rumination-and-default-mode-network/">Rumination and the Default Mode Network</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/">Dopamine and Motivation</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/">Stress, the Amygdala, and the Prefrontal Cortex</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/">Neuroplasticity, Part 2: The Machinery of Brain Change</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/">Neuroplasticity, Part 1: The Brain Learns by Changing</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-3-production/">Database Skills for Software Engineers, Part 3: Production Engineering</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-2-internals/">Database Skills for Software Engineers, Part 2: Internals</a> </li> </ul> </div> </div> <footer class="sticky-bottom mt-5" role="contentinfo"> <div class="container"> <div class="footer-social" aria-label="Social links"> <a href="mailto:abhishek.work1710@gmail.com" title="Email"><i class="fa-solid fa-envelope"></i></a> <a href="https://github.com/avisekksarma" title="Github username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-github"></i></a> <a href="https://www.linkedin.com/in/aviseksarma" title="Linkedin username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-linkedin"></i></a> <a href="https://twitter.com/abh_avisek" title="X username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-x-twitter"></i></a> </div> <p class="footer-copy"> © Copyright 2026 Abhishek Sharma. </p> </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "About",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-publications",
+          title: "Publications",
+          description: "Peer-reviewed publications and conference papers.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/publications/";
+          },
+        },{id: "nav-projects",
+          title: "Projects",
+          description: "Selected research and engineering projects.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/projects/";
+          },
+        },{id: "nav-cv",
+          title: "CV",
+          description: "Curriculum vitae, education, experience, teaching, awards, and selected work.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-teaching",
+          title: "Teaching",
+          description: "Instruction, workshops, and mentoring in computer science and machine learning.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/teaching/";
+          },
+        },{id: "nav-writing",
+          title: "Writing",
+          description: "Essays and technical notes on machine learning, databases, neuroscience, and AR/VR.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "post-counting-transformer-parameters",
+        
+          title: "Counting Transformer Parameters",
+        
+        description: "How to count the parameters in a decoder-only Transformer: tokenizer vs embedding, 12 d_model² per block, a 7B example, and the difference between weight memory and KV-cache.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/counting-transformer-parameters/";
+          
+        },
+      },{id: "post-ar-vr-optics-explained-from-scratch",
+        
+          title: "AR/VR Optics, Explained From Scratch",
+        
+        description: "AR/VR display optics: field of view, eye-box, vergence-accommodation conflict, waveguides, holographic optical elements, metasurfaces, and pancake lenses.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/ar-vr-optics-explained-from-scratch/";
+          
+        },
+      },{id: "post-the-ai-engineering-stack-in-2026",
+        
+          title: "The AI Engineering Stack in 2026",
+        
+        description: "A practical map of current AI engineering vocabulary: prompt, context, harness, loop, agentic, and graph engineering, plus memory and evals.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/ai-engineering-stack-from-prompts-to-agents/";
+          
+        },
+      },{id: "post-building-large-language-models",
+        
+          title: "Building Large Language Models",
+        
+        description: "A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency. Based on Stanford CS229 guest lecture notes.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/building-large-language-models/";
+          
+        },
+      },{id: "post-rumination-and-the-default-mode-network",
+        
+          title: "Rumination and the Default Mode Network",
+        
+        description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rumination-and-default-mode-network/";
+          
+        },
+      },{id: "post-dopamine-and-motivation",
+        
+          title: "Dopamine and Motivation",
+        
+        description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/";
+          
+        },
+      },{id: "post-stress-the-amygdala-and-the-prefrontal-cortex",
+        
+          title: "Stress, the Amygdala, and the Prefrontal Cortex",
+        
+        description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/";
+          
+        },
+      },{id: "post-neuroplasticity-part-2-the-machinery-of-brain-change",
+        
+          title: "Neuroplasticity, Part 2: The Machinery of Brain Change",
+        
+        description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/";
+          
+        },
+      },{id: "post-neuroplasticity-part-1-the-brain-learns-by-changing",
+        
+          title: "Neuroplasticity, Part 1: The Brain Learns by Changing",
+        
+        description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-3-production-engineering",
+        
+          title: "Database Skills for Software Engineers, Part 3: Production Engineering",
+        
+        description: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-3-production/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-2-internals",
+        
+          title: "Database Skills for Software Engineers, Part 2: Internals",
+        
+        description: "Indexes, query planning, transactions, window functions, N+1, connection pooling, and locks. The intermediate layer that separates engineers who write queries from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-2-internals/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-1-foundations",
+        
+          title: "Database Skills for Software Engineers, Part 1: Foundations",
+        
+        description: "A practical, no-fluff guide to relational databases: the kind of depth that actually shows up in senior engineering interviews.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-1-foundations/";
+          
+        },
+      },{id: "post-acid-properties-demystified",
+        
+          title: "ACID Properties Demystified",
+        
+        description: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/acid-properties-demystified/";
+          
+        },
+      },{id: "books-the-godfather",
+          title: 'The Godfather',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_godfather/";
+            },},{id: "projects-topic-modeling-for-nepali-political-news",
+          title: 'Topic Modeling for Nepali Political News',
+          description: "IEEE ICICT 2025",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/1_nepali-topic-modeling/";
+            },},{id: "projects-invoice-information-extraction",
+          title: 'Invoice Information Extraction',
+          description: "Multimodal document understanding for structured invoice data extraction",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/2_invoice-extraction/";
+            },},{id: "projects-videolize",
+          title: 'Videolize',
+          description: "Text-to-video generation via spherical interpolation in Stable Diffusion latent space",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/3_videolize/";
+            },},{id: "projects-summitseeker",
+          title: 'SummitSeeker',
+          description: "Backend platform for a tourism application with cloud CI/CD",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/4_summitseeker/";
+            },},{id: "projects-adversarial-search-for-checkers",
+          title: 'Adversarial Search for Checkers',
+          description: "Game-playing agent with Minimax search and alpha-beta pruning",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/5_checkers-ai/";
+            },},{id: "projects-procedural-terrain-generation",
+          title: 'Procedural Terrain Generation',
+          description: "Perlin-noise terrain synthesis in C++",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/6_procedural-terrain/";
+            },},{id: "projects-campus-network-design",
+          title: 'Campus Network Design',
+          description: "Hierarchical network design with VLANs, subnetting, and OSPF",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/7_university-network/";
+            },},{id: "teachings-web-development-with-django",
+          title: 'Web Development with Django',
+          description: "Large-scale workshop series on Django application development",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/django-workshop/";
+            },},{id: "teachings-it-club-technical-programs",
+          title: 'IT Club Technical Programs',
+          description: "Campus technical community leadership and programming outreach",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/it-club-service/";
+            },},{id: "teachings-mathematical-foundations-of-machine-learning",
+          title: 'Mathematical Foundations of Machine Learning',
+          description: "LOCUS Fellowship instructor: core ML mathematics and algorithms",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/locus-fellowship/";
+            },},{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%61%62%68%69%73%68%65%6B.%77%6F%72%6B%31%37%31%30@%67%6D%61%69%6C.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/avisekksarma", "_blank");
+        },
+      },{
+        id: 'social-linkedin',
+        title: 'LinkedIn',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.linkedin.com/in/aviseksarma", "_blank");
+        },
+      },{
+        id: 'social-x',
+        title: 'X',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://twitter.com/abh_avisek", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

@@ -52,12 +52,23 @@ ninja.data = [{
           },
         },{id: "nav-writing",
           title: "Writing",
-          description: "Essays and technical notes on machine learning, databases, neuroscience, and AR/VR optics.",
+          description: "Essays and technical notes on machine learning, databases, neuroscience, and AR/VR.",
           section: "Navigation",
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-ar-vr-optics-explained-from-scratch",
+        },{id: "post-counting-transformer-parameters",
+        
+          title: "Counting Transformer Parameters",
+        
+        description: "How to count the parameters in a decoder-only Transformer: tokenizer vs embedding, 12 d_model² per block, a 7B example, and the difference between weight memory and KV-cache.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/counting-transformer-parameters/";
+          
+        },
+      },{id: "post-ar-vr-optics-explained-from-scratch",
         
           title: "AR/VR Optics, Explained From Scratch",
         
