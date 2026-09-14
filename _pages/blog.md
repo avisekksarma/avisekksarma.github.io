@@ -4,7 +4,7 @@ permalink: /blog/
 title: Writing
 nav: true
 nav_order: 7
-description: Essays and technical notes on machine learning, databases, neuroscience, and AR/VR optics.
+description: Essays and technical notes on machine learning, databases, neuroscience, and AR/VR.
 pagination:
   enabled: false
 ---

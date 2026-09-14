@@ -2,7 +2,7 @@
 layout: about
 title: About
 permalink: /
-subtitle: Software Engineer · Backend Systems · Applied Machine Learning
+subtitle: Software Engineer · Systems · Applied Machine Learning
 description: Personal site of Abhishek Sharma, software engineer working on backend systems and applied machine learning.
 
 profile:
@@ -23,10 +23,10 @@ announcements:
 latest_posts:
   enabled: true
   scrollable: true
-  limit: 2
+  limit: 3
 ---
 
-I am a software engineer working on scalable backend systems and applied machine learning. My interests lie at the intersection of distributed service design, data infrastructure, and deploying learning-based methods in production.
+I am a software engineer working on scalable systems and applied machine learning. My interests lie at the intersection of distributed service design, data infrastructure, and deploying learning-based methods in production.
 
 I currently contribute as a **founding software engineer** at **ZeroTB**, where I design backend infrastructure for compliance automation, including database architecture, service integrations, and AI-powered workflows with RAG and LLM orchestration. Previously, at **Docsumo**, I worked as an associate software engineer (ML) on document understanding systems, production inference services, extraction pipelines, and latency-sensitive APIs.
 

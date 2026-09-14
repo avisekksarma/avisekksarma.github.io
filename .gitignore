@@ -2,6 +2,7 @@ _site
 .bundle
 .DS_store
 .idea
+.cursor/
 .jekyll-cache
 .jekyll-metadata
 .ruby-version
