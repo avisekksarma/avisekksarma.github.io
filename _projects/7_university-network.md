@@ -1,13 +1,16 @@
 ---
-layout: page
+layout: project
 title: Campus Network Design
-description: Hierarchical network design with VLANs, subnetting, and OSPF
-importance: 7
+description: "University campus network in Cisco Packet Tracer: hierarchical topology, VLANs, subnetting, and OSPF."
+summary: University campus network simulated in Cisco Packet Tracer — hierarchical topology, addressing, VLAN segmentation, and OSPF.
+importance: 8
 category: Engineering
+year: 2023
+tech:
+  - Cisco Packet Tracer
+  - OSPF
+  - VLANs
+github: https://github.com/avisekksarma/Computer-Network-Project
 ---
 
-A campus-scale network design exercise covering addressing, segmentation, and dynamic routing.
-
-### Scope
-
-Hierarchical topology design with **subnetting**, **VLAN** segmentation, and **OSPF**, validated in Cisco Packet Tracer.
+A Packet Tracer simulation of a university campus network: hierarchical topology, **subnetting**, **VLAN** segmentation, and **OSPF**. The [repo](https://github.com/avisekksarma/Computer-Network-Project) includes the `.pkt` file and a short design report.

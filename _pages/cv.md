@@ -4,9 +4,7 @@ permalink: /cv/
 title: CV
 nav: true
 nav_order: 3
-cv_pdf: # add a path or URL to your CV PDF when available
-cv_format: rendercv # options: rendercv, jsonresume
+cv_pdf: /assets/pdf/Abhishek_Sharma_Resume.pdf
+cv_format: rendercv
 description: Curriculum vitae, education, experience, teaching, awards, and selected work.
-toc:
-  sidebar: left
 ---

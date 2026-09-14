@@ -1,0 +1,46 @@
+{% assign proj_href = project.url | relative_url %}
+{% if project.redirect %}
+  {% assign proj_href = project.redirect %}
+{% endif %}
+{% assign proj_blurb = project.summary | default: project.description %}
+{% assign proj_year = project.dates | default: project.year %}
+
+<article class="proj-entry">
+  <div class="proj-entry-head">
+    <h3 class="proj-entry-title">
+      <a href="{{ proj_href }}">{{ project.title }}</a>
+    </h3>
+    {% unless proj_year == blank %}
+      <div class="proj-entry-year">{{ proj_year }}</div>
+    {% endunless %}
+  </div>
+
+  {% unless project.venue == blank %}
+    <p class="proj-entry-meta">{{ project.venue }}</p>
+  {% endunless %}
+
+  {% unless proj_blurb == blank %}
+    <p class="proj-entry-summary">{{ proj_blurb }}</p>
+  {% endunless %}
+
+  {% if project.tech.size > 0 or project.paper or project.github or project.demo %}
+    <div class="proj-entry-foot">
+      {% if project.tech and project.tech.size > 0 %}
+        <p class="proj-entry-tech">{{ project.tech | join: " · " }}</p>
+      {% endif %}
+      {% if project.paper or project.github or project.demo %}
+        <p class="proj-entry-links">
+          {% if project.paper %}
+            <a href="{{ project.paper }}" target="_blank" rel="noopener">Paper</a>
+          {% endif %}
+          {% if project.github %}
+            <a href="{{ project.github }}" target="_blank" rel="noopener">Code</a>
+          {% endif %}
+          {% if project.demo %}
+            <a href="{{ project.demo }}" target="_blank" rel="noopener">Demo</a>
+          {% endif %}
+        </p>
+      {% endif %}
+    </div>
+  {% endif %}
+</article>

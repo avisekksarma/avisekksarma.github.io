@@ -1,0 +1,255 @@
+{% include cv/styles.liquid %}
+
+{% assign cv = site.data.cv.cv %}
+{% assign pdf_url = page.cv_pdf | default: "/assets/pdf/Abhishek_Sharma_Resume.pdf" %}
+{% assign empty_array = "" | split: "," %}
+
+<div class="post">
+  <div class="cv-page">
+    <header class="cv-page-header">
+      <h1 class="post-title">{{ page.title }}</h1>
+      <nav class="cv-actions" aria-label="Résumé formats">
+        <a class="cv-btn" href="{{ '/cv/pdf/' | relative_url }}">View PDF</a>
+        <a class="cv-btn" href="{{ pdf_url | relative_url }}" download="Abhishek_Sharma_Resume.pdf">Download</a>
+      </nav>
+    </header>
+
+    {% if cv.summary %}
+      <p class="cv-lead">{{ cv.summary }}</p>
+    {% endif %}
+
+    <p class="cv-contact">
+      {%- if cv.location %}{{ cv.location }}{% endif -%}
+      {%- if cv.email -%}
+        {%- if cv.location %} <span class="cv-sep" aria-hidden="true">·</span> {% endif -%}
+        <a href="mailto:{{ cv.email }}">{{ cv.email }}</a>
+      {%- endif -%}
+      {%- for network in cv.social_networks %}
+        <span class="cv-sep" aria-hidden="true">·</span>
+        {%- assign net = network.network | downcase -%}
+        {%- if net == "github" %}
+          <a href="https://github.com/{{ network.username }}" target="_blank" rel="noopener">GitHub</a>
+        {%- elsif net == "linkedin" %}
+          <a href="https://www.linkedin.com/in/{{ network.username }}" target="_blank" rel="noopener">LinkedIn</a>
+        {%- else %}
+          {{ network.network }}
+        {%- endif -%}
+      {%- endfor %}
+    </p>
+
+    {% assign experience = cv.sections.Experience | default: empty_array %}
+    {% if experience.size > 0 %}
+      <section class="cv-section" id="experience">
+        <h2>Experience</h2>
+        {% for entry in experience %}
+          {% assign cv_start = entry.start_date %}
+          {% assign cv_end = entry.end_date %}
+          {% include cv/format_dates.liquid %}
+          {% assign e_title = entry.position %}
+          {% assign e_org = entry.company %}
+          {% assign e_location = entry.location %}
+          {% assign e_dates = cv_date_label %}
+          {% assign e_url = entry.url %}
+          {% assign e_summary = entry.summary %}
+          {% assign e_highlights = entry.highlights %}
+          {% include cv/entry.liquid %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% assign education = cv.sections.Education | default: empty_array %}
+    {% if education.size > 0 %}
+      <section class="cv-section" id="education">
+        <h2>Education</h2>
+        {% for entry in education %}
+          {% assign cv_start = entry.start_date %}
+          {% assign cv_end = entry.end_date %}
+          {% include cv/format_dates.liquid %}
+          {% capture e_title %}
+            {% if entry.studyType and entry.area %}
+              {{ entry.studyType }} in {{ entry.area }}
+            {% elsif entry.studyType %}
+              {{ entry.studyType }}
+            {% else %}
+              {{ entry.area }}
+            {% endif %}
+          {% endcapture %}
+          {% assign e_title = e_title | strip %}
+          {% assign e_org = entry.institution %}
+          {% assign e_location = entry.location %}
+          {% assign e_dates = cv_date_label %}
+          {% assign e_url = entry.url %}
+          {% assign e_extra = entry.score %}
+          {% assign e_summary = nil %}
+          {% assign e_highlights = entry.highlights %}
+          {% include cv/entry.liquid %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% assign publications = cv.sections.Publications | default: empty_array %}
+    {% if publications.size > 0 %}
+      <section class="cv-section" id="publications">
+        <h2>Publications</h2>
+        {% for entry in publications %}
+          {% assign cv_point = entry.releaseDate | default: entry.date %}
+          {% include cv/format_dates.liquid %}
+          {% assign e_title = entry.title %}
+          {% assign e_org = entry.authors | join: ", " %}
+          {% assign e_location = entry.publisher %}
+          {% assign e_dates = cv_date_label %}
+          {% assign e_url = entry.url %}
+          {% assign e_summary = entry.summary %}
+          {% assign e_highlights = nil %}
+          {% include cv/entry.liquid %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% assign projects = cv.sections.Projects | default: empty_array %}
+    {% if projects.size > 0 %}
+      <section class="cv-section" id="projects">
+        <h2>Projects</h2>
+        {% for entry in projects %}
+          {% assign cv_start = entry.start_date %}
+          {% assign cv_end = entry.end_date %}
+          {% assign cv_point = entry.date %}
+          {% include cv/format_dates.liquid %}
+          {% assign e_title = entry.name %}
+          {% assign e_org = "" %}
+          {% assign e_location = "" %}
+          {% assign e_dates = cv_date_label %}
+          {% assign e_url = entry.url %}
+          {% assign e_summary = entry.summary %}
+          {% if entry.highlights %}
+            {% assign e_extra = entry.highlights | join: " · " %}
+          {% else %}
+            {% assign e_extra = "" %}
+          {% endif %}
+          {% assign e_highlights = nil %}
+          {% include cv/entry.liquid %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% assign skills = cv.sections.Skills | default: empty_array %}
+    {% if skills.size > 0 %}
+      <section class="cv-section" id="skills">
+        <h2>Skills</h2>
+        <div class="cv-skills">
+          {% for entry in skills %}
+            <div class="cv-skill-name">{{ entry.name }}</div>
+            <div class="cv-skill-list">{{ entry.keywords }}</div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% assign awards = cv.sections.Awards | default: empty_array %}
+    {% if awards.size > 0 %}
+      <section class="cv-section" id="awards">
+        <h2>Awards</h2>
+        <ul class="cv-compact">
+          {% for entry in awards %}
+            {% assign cv_point = entry.date %}
+            {% include cv/format_dates.liquid %}
+            <li>
+              <div class="cv-compact-main">
+                <div class="cv-compact-title">
+                  {% if entry.url %}
+                    <a href="{{ entry.url }}">{{ entry.title }}</a>
+                  {% else %}
+                    {{ entry.title }}
+                  {% endif %}
+                </div>
+                <div class="cv-compact-meta">
+                  {{ entry.awarder }}{% if entry.summary %} — {{ entry.summary }}{% endif %}
+                </div>
+              </div>
+              {% if cv_date_label != "" %}
+                <div class="cv-entry-dates">{{ cv_date_label }}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% assign certificates = cv.sections.Certificates | default: empty_array %}
+    {% if certificates.size > 0 %}
+      <section class="cv-section" id="certificates">
+        <h2>Certificates</h2>
+        <ul class="cv-compact">
+          {% for entry in certificates %}
+            {% assign cv_point = entry.date %}
+            {% include cv/format_dates.liquid %}
+            <li>
+              <div class="cv-compact-main">
+                <div class="cv-compact-title">
+                  {% if entry.url %}
+                    <a href="{{ entry.url }}">{{ entry.name }}</a>
+                  {% else %}
+                    {{ entry.name }}
+                  {% endif %}
+                </div>
+                {% if entry.issuer %}
+                  <div class="cv-compact-meta">{{ entry.issuer }}</div>
+                {% endif %}
+              </div>
+              {% if cv_date_label != "" %}
+                <div class="cv-entry-dates">{{ cv_date_label }}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% assign volunteer = cv.sections.Volunteer | default: empty_array %}
+    {% if volunteer.size > 0 %}
+      <section class="cv-section" id="community">
+        <h2>Community</h2>
+        {% for entry in volunteer %}
+          {% assign cv_start = entry.start_date %}
+          {% assign cv_end = entry.end_date %}
+          {% include cv/format_dates.liquid %}
+          {% assign e_title = entry.position %}
+          {% assign e_org = entry.company %}
+          {% assign e_location = entry.location %}
+          {% assign e_dates = cv_date_label %}
+          {% assign e_url = entry.url %}
+          {% assign e_summary = entry.summary %}
+          {% assign e_highlights = entry.highlights %}
+          {% include cv/entry.liquid %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% assign languages = cv.sections.Languages | default: empty_array %}
+    {% if languages.size > 0 %}
+      <section class="cv-section" id="languages">
+        <h2>Languages</h2>
+        <ul class="cv-inline">
+          {% for entry in languages %}
+            <li><strong>{{ entry.name }}</strong> {{ entry.summary }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% assign interests = cv.sections.Interests | default: empty_array %}
+    {% if interests.size > 0 %}
+      <section class="cv-section" id="interests">
+        <h2>Interests</h2>
+        <ul class="cv-inline">
+          {% for entry in interests %}
+            <li>
+              <strong>{{ entry.name }}</strong>
+              {% if entry.keywords %} — {{ entry.keywords }}{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  </div>
+</div>

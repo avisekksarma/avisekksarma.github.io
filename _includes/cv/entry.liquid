@@ -1,0 +1,54 @@
+<article class="cv-entry">
+  <div class="cv-entry-head">
+    <h3 class="cv-entry-title">
+      {% if e_url and e_url != blank %}
+        <a href="{{ e_url }}">{{ e_title }}</a>
+      {% else %}
+        {{ e_title }}
+      {% endif %}
+    </h3>
+    {% unless e_dates == blank %}
+      <div class="cv-entry-dates">{{ e_dates }}</div>
+    {% endunless %}
+  </div>
+
+  {% unless e_org == blank and e_location == blank and e_extra == blank %}
+    <p class="cv-entry-meta">
+      {% unless e_org == blank %}
+        <span class="cv-entry-org">{{ e_org }}</span>
+      {% endunless %}
+      {% unless e_org == blank or e_location == blank %}
+        <span class="cv-sep" aria-hidden="true">·</span>
+      {% endunless %}
+      {% unless e_location == blank %}
+        <span class="cv-entry-location">{{ e_location }}</span>
+      {% endunless %}
+      {% unless e_extra == blank %}
+        {% unless e_org == blank and e_location == blank %}
+          <span class="cv-sep" aria-hidden="true">·</span>
+        {% endunless %}
+        <span>{{ e_extra }}</span>
+      {% endunless %}
+    </p>
+  {% endunless %}
+
+  {% unless e_summary == blank %}
+    <p class="cv-entry-summary">{{ e_summary | markdownify | remove: '<p>' | remove: '</p>' }}</p>
+  {% endunless %}
+
+  {% if e_highlights and e_highlights.size > 0 %}
+    <ul class="cv-entry-points">
+      {% for item in e_highlights %}
+        <li>{{ item | markdownify | remove: '<p>' | remove: '</p>' }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</article>
+{% assign e_title = "" %}
+{% assign e_url = "" %}
+{% assign e_dates = "" %}
+{% assign e_org = "" %}
+{% assign e_location = "" %}
+{% assign e_extra = "" %}
+{% assign e_summary = "" %}
+{% assign e_highlights = nil %}

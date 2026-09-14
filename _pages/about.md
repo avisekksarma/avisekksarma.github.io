@@ -26,7 +26,7 @@ latest_posts:
   limit: 3
 ---
 
-I am a software engineer working on scalable systems and applied machine learning. My interests lie at the intersection of distributed service design, data infrastructure, and deploying learning-based methods in production.
+I am a software engineer working on scalable systems and applied machine learning. My interests lie at the intersection of distributed systems, data infrastructure, machine learning, and cloud computing technologies.
 
 I currently contribute as a **founding software engineer** at **ZeroTB**, where I design backend infrastructure for compliance automation, including database architecture, service integrations, and AI-powered workflows with RAG and LLM orchestration. Previously, at **Docsumo**, I worked as an associate software engineer (ML) on document understanding systems, production inference services, extraction pipelines, and latency-sensitive APIs.
 

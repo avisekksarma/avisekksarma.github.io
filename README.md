@@ -9,7 +9,7 @@ Software engineer working on backend systems and applied machine learning. Found
 - [About](https://avisekksarma.github.io/) — background, interests, and selected work
 - [Publications](https://avisekksarma.github.io/publications/) — peer-reviewed papers
 - [Projects](https://avisekksarma.github.io/projects/) — research and engineering work
-- [CV](https://avisekksarma.github.io/cv/) — education, experience, and awards
+- [CV](https://avisekksarma.github.io/cv/) — education, experience, and awards ([PDF](https://avisekksarma.github.io/cv/pdf/))
 - [Teaching](https://avisekksarma.github.io/teaching/) — instruction and mentorship
 - [Writing](https://avisekksarma.github.io/blog/) — notes on ML, databases, neuroscience, and AR/VR
 

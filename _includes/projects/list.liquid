@@ -1,0 +1,14 @@
+<div class="projects-list">
+{% for category in page.display_categories %}
+{% assign categorized_projects = site.projects | where: "category", category %}
+{% assign sorted_projects = categorized_projects | sort: "importance" %}
+{% if sorted_projects.size > 0 %}
+<section class="projects-section" id="{{ category | slugify }}">
+<h2>{{ category }}</h2>
+{% for project in sorted_projects %}
+{% include projects/entry.liquid %}
+{% endfor %}
+</section>
+{% endif %}
+{% endfor %}
+</div>

@@ -1,0 +1,17 @@
+---
+layout: default
+---
+{% include projects/styles.liquid %}
+
+<div class="post">
+  <div class="projects-page">
+    <header class="projects-page-header">
+      <h1 class="post-title">{{ page.title }}</h1>
+      {% if page.description %}
+        <p class="projects-lead">{{ page.description }}</p>
+      {% endif %}
+    </header>
+
+    {{ content }}
+  </div>
+</div>

@@ -1,0 +1,41 @@
+{% comment %}
+  Sets cv_date_label from cv_start, cv_end, and/or cv_point (YYYY or YYYY-MM).
+{% endcomment %}
+{% assign cv_months = "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec" | split: "," %}
+{% capture cv_date_label %}
+  {% if cv_start and cv_start != "" %}
+    {% assign cv_s_parts = cv_start | split: "-" %}
+    {% if cv_s_parts.size > 1 %}
+      {% assign cv_s_i = cv_s_parts[1] | plus: 0 | minus: 1 %}
+      {{ cv_months[cv_s_i] }} {{ cv_s_parts[0] }}
+    {% else %}
+      {{ cv_s_parts[0] }}
+    {% endif %}
+    {% if cv_end and cv_end != "" %}
+      {% assign cv_end_key = cv_end | downcase %}
+      {% if cv_end_key == "present" or cv_end_key == "now" %}
+        – Present
+      {% else %}
+        {% assign cv_e_parts = cv_end | split: "-" %}
+        {% if cv_e_parts.size > 1 %}
+          {% assign cv_e_i = cv_e_parts[1] | plus: 0 | minus: 1 %}
+          – {{ cv_months[cv_e_i] }} {{ cv_e_parts[0] }}
+        {% else %}
+          – {{ cv_e_parts[0] }}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  {% elsif cv_point and cv_point != "" %}
+    {% assign cv_p_parts = cv_point | split: "-" %}
+    {% if cv_p_parts.size > 1 %}
+      {% assign cv_p_i = cv_p_parts[1] | plus: 0 | minus: 1 %}
+      {{ cv_months[cv_p_i] }} {{ cv_p_parts[0] }}
+    {% else %}
+      {{ cv_p_parts[0] }}
+    {% endif %}
+  {% endif %}
+{% endcapture %}
+{% assign cv_date_label = cv_date_label | strip | split: " " | join: " " %}
+{% assign cv_start = "" %}
+{% assign cv_end = "" %}
+{% assign cv_point = "" %}

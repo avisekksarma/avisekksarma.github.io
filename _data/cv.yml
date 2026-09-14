@@ -5,7 +5,7 @@ cv:
   phone: ""
   location: Kathmandu, Nepal
   image: ""
-  summary: Software engineer specializing in backend systems and applied machine learning, with experience in compliance automation and document AI.
+  summary: Software engineer working on backend systems and applied machine learning, with a focus on production infrastructure, data pipelines, and LLM-powered workflows.
 
   social_networks:
     - network: GitHub
@@ -19,13 +19,13 @@ cv:
         location: Lalitpur, Nepal
         url: https://pcampus.edu.np/
         area: Computer Engineering
-        studyType: Bachelor
+        studyType: B.E.
         start_date: 2019-11
         end_date: 2024-04
         score: "76% average"
         highlights:
           - Rank 34 in the IOE entrance examination among 14,000+ candidates.
-          - Recipient of the Golden Jubilee Scholarship, Embassy of India.
+          - Golden Jubilee Scholarship, Embassy of India.
 
       - institution: SOSHGS, Gandaki
         location: Pokhara, Nepal
@@ -33,7 +33,7 @@ cv:
         studyType: "+2"
         start_date: 2017
         end_date: 2019
-        score: "3.85 GPA (CGPA 3.72)"
+        score: "3.85 GPA"
         highlights:
           - College topper in the Grade 12 board examination.
           - Entrance topper at the +2 level among 3,000+ students.
@@ -41,27 +41,27 @@ cv:
     Experience:
       - company: ZeroTB
         position: Founding Software Engineer
-        location: San Francisco, California
+        location: San Francisco, CA
         start_date: 2025-04
         end_date: present
-        summary: Early-stage startup building compliance automation systems.
+        summary: Early-stage startup building compliance automation.
         highlights:
-          - Built core backend infrastructure and APIs from the ground up, contributing to system architecture and scalability decisions.
-          - Engineered scalable database structure, optimized database performance, and executed large-scale data migrations and third-party integrations for production systems.
-          - Developed AI-powered workflows using RAG and LLM orchestration frameworks (LangChain, LlamaIndex) to enhance automation and intelligent data processing.
-          - Collaborated across product and engineering teams to rapidly prototype and ship backend features in a fast-paced startup setting.
+          - Built the core backend and APIs, including architecture and scaling decisions, for a compliance-automation product.
+          - Designed the production database, ran large data migrations, and integrated third-party services.
+          - Shipped RAG and LLM workflows with LangChain and LlamaIndex for automated data processing.
+          - Worked with product and engineering to prototype and ship backend features in a small team.
 
       - company: Docsumo
-        position: Associate Software Engineer (ML)
-        location: Chabahil, Kathmandu
+        position: Associate Software Engineer, ML
+        location: Kathmandu, Nepal
         start_date: 2024-04
         end_date: 2025-04
-        summary: Document AI and production ML systems for enterprise extraction workloads.
+        summary: Document AI and production ML for enterprise extraction.
         highlights:
-          - Contributed to the core document extraction pipeline for key-value and OMR systems, including research, implementation, optimization, and refactoring of production APIs.
-          - Performed critical performance analysis on the key-value extraction pipeline and reduced extraction latency by approximately 27% (7-8 seconds), improving throughput and user experience.
-          - Worked with the SRE team to improve reliability and scalability of distributed systems using GCP, Kubernetes, Docker, and Redis.
-          - Built and maintained scalable backend services and APIs using Flask and MongoDB for high-volume document processing workflows.
+          - Worked on the document extraction pipeline for key-value and OMR systems, from research through production APIs.
+          - Reduced key-value extraction latency by about 27% (7–8 seconds), improving throughput.
+          - Partnered with SRE on reliability and scale using GCP, Kubernetes, Docker, and Redis.
+          - Built Flask and MongoDB services for high-volume document processing.
 
     Publications:
       - title: Topic Modeling for Nepali Political News Using Probabilistic, Algebraic and Transformer-Based Methods
@@ -71,162 +71,149 @@ cv:
           - Manoj Khatri
           - Hrishav Khadka
           - Aman Shakya
-        publisher: IEEE International Conference on Inventive Computation Technologies (ICICT)
+        publisher: IEEE ICICT
         releaseDate: 2025-04
         url: /projects/1_nepali-topic-modeling/
-        summary: Undergraduate research project on topic modeling for Nepali political news.
 
     Projects:
       - name: Topic Modeling for Nepali Political News
-        summary: Undergraduate research project comparing probabilistic, algebraic, and transformer-based topic modeling methods on Nepali news. Paper published at ICICT 2025.
+        summary: Compared LDA, NMF, LSA, and BERTopic on Nepali political news. Paper at IEEE ICICT 2025.
         highlights:
-          - LDA, BERTopic, nltk, Pandas, spaCy, gensim
+          - LDA
+          - BERTopic
+          - spaCy
+          - gensim
         url: /projects/1_nepali-topic-modeling/
         start_date: 2024
         end_date: 2025
 
-      - name: "Videolize: Text Script to Video Generator"
-        summary: Deep learning system converting sequential scripts to video using Stable Diffusion, Microsoft text-to-audio, and the Gemini API. Scene images are interpolated with spherical interpolation for smooth transitions. First prize, GenAI category, LOCUS Hack-A-Week 2023.
+      - name: "Videolize: Script to Video"
+        summary: Sequential scripts to video with Stable Diffusion, text-to-audio, and Gemini. First prize, GenAI, LOCUS Hack-A-Week 2023.
         highlights:
-          - PyTorch, HuggingFace, Stable Diffusion, Gemini API
+          - PyTorch
+          - Stable Diffusion
+          - Gemini API
         start_date: 2023
         end_date: 2023
 
-      - name: Information Extraction from Invoices using LLMs
-        summary: Invoice table and key-value extraction combining GPT-4 Vision with locally fine-tuned table transformers and YOLO for object detection. First prize, LLM category, Kathmandu University AI Competition 2023.
+      - name: Invoice Information Extraction
+        summary: Table and key-value extraction with GPT-4 Vision, fine-tuned table transformers, and YOLO. First prize, LLM category, Kathmandu University AI Competition 2023.
         highlights:
-          - LLMs, YOLO, GPT-4 API, Table Transformers
+          - GPT-4 Vision
+          - YOLO
+          - Table Transformers
         start_date: 2023
         end_date: 2023
 
-      - name: University Network Infrastructure Design
-        summary: Campus network topology design across multiple departments, including subnetting, VLANs, web and DNS servers, and OSPF dynamic routing (Cisco Packet Tracer).
+      - name: University Network Design
+        summary: Campus topology with subnetting, VLANs, web and DNS servers, and OSPF in Cisco Packet Tracer.
         highlights:
-          - Cisco Packet Tracer, OSPF, VLANs
+          - Cisco Packet Tracer
+          - OSPF
+          - VLANs
         start_date: 2023
         end_date: 2023
 
       - name: Checkers with AI
-        summary: Object-oriented Checkers implementation in C++ with an adversarial AI using Minimax and alpha-beta pruning (SFML, CMake).
+        summary: Object-oriented Checkers in C++ with Minimax and alpha-beta pruning.
         highlights:
-          - C++, Minimax, Alpha-beta pruning, SFML
+          - C++
+          - Minimax
+          - SFML
         start_date: 2022
         end_date: 2022
 
       - name: Procedural Terrain Generator
-        summary: Procedural hill terrain generation using Perlin noise, with controllable randomness, clipping, and wireframe rendering (C++, CMake).
+        summary: Hill terrain from Perlin noise, with controls for randomness, clipping, and wireframe rendering.
         highlights:
-          - C++, Perlin noise, CMake
+          - C++
+          - Perlin noise
         start_date: 2022
         end_date: 2022
 
     Skills:
       - name: Languages
-        level: ""
-        icon: fa-solid fa-code
         keywords: "Python, C/C++, JavaScript, SQL, Dart, HTML/CSS"
 
       - name: Frameworks
-        level: ""
-        icon: fa-solid fa-cubes
-        keywords: "Flask, FastAPI, Django, PyTorch, Node.js, Express.js, Flutter"
+        keywords: "Flask, FastAPI, Django, PyTorch, Node.js, Express, Flutter"
 
-      - name: Machine learning & NLP
-        level: ""
-        icon: fa-solid fa-brain
-        keywords: "Computer vision (YOLO, CNN, ResNets, U-Net), NLP (RNNs, LSTMs, Transformers), linear algebra, probability and statistics, DSA"
+      - name: Machine learning
+        keywords: "Computer vision, NLP, transformers, RAG, production inference"
+
+      - name: Data
+        keywords: "PostgreSQL, MySQL, SQLite, MongoDB, Redis"
+
+      - name: Infrastructure
+        keywords: "GCP, AWS, Docker, Kubernetes, Linux"
 
       - name: Libraries
-        level: ""
-        icon: fa-solid fa-book
-        keywords: "gensim, spaCy, NLTK, scikit-learn, NumPy, Matplotlib, seaborn, Pandas"
-
-      - name: Databases
-        level: ""
-        icon: fa-solid fa-database
-        keywords: "PostgreSQL, MySQL, SQLite, MongoDB"
-
-      - name: Cloud & infrastructure
-        level: ""
-        icon: fa-solid fa-cloud
-        keywords: "GCP, AWS (S3, EC2, Lambda), Docker, Kubernetes, Linux/Unix, Git, Redis"
-
-      - name: Developer tools
-        level: ""
-        icon: fa-solid fa-wrench
-        keywords: "Git, Docker, Selenium, Postman, VS Code, Visual Studio, Cisco Packet Tracer"
+        keywords: "NumPy, Pandas, scikit-learn, spaCy, NLTK, gensim"
 
     Awards:
       - title: Winner, LLM Category
         date: 2023-12
         awarder: Kathmandu University AI Competition
-        summary: First place for invoice information extraction using LLMs, YOLO, and table transformers.
+        summary: Invoice extraction with LLMs, YOLO, and table transformers.
 
       - title: Winner, Generative AI Category
         date: 2024-01
         awarder: LOCUS Hack-A-Week
-        summary: First place for Videolize, a text-to-video generation system.
+        summary: Videolize, a text-to-video system.
 
-      - title: Full Undergraduate Scholarship, IOE Entrance Rank 34
+      - title: IOE Entrance Rank 34
         date: 2019
         awarder: Institute of Engineering
-        summary: Ranked 34 among 14,000+ candidates in the IOE entrance examination.
+        summary: Full undergraduate scholarship; 14,000+ candidates.
 
       - title: Rank 1, Electronics Department Entrance
         date: 2019
         awarder: Kathmandu University
-        summary: Top rank in the entrance examination of the Electronics Department.
 
       - title: Golden Jubilee Scholarship
         date: 2020
         awarder: Embassy of India, Kathmandu
-        summary: Undergraduate scholarship awarded by the Embassy of India in Nepal.
 
       - title: Position Holder, Budanilkantha Math League
         date: 2018
         awarder: Budanilkantha School
-        summary: National-level mathematics competition.
+        summary: National mathematics competition.
 
       - title: Entrance Topper, +2 Level
         date: 2017
-        awarder: +2 entrance examination
-        summary: Topped the +2 level entrance examination among 3,000+ students.
+        awarder: "+2 entrance examination"
+        summary: First among 3,000+ students.
 
-      - title: College Topper, Grade 12 Board Examination
+      - title: College Topper, Grade 12
         date: 2019
         awarder: SOSHGS, Gandaki
-        summary: 3.85 GPA in the Grade 12 board examination.
+        summary: 3.85 GPA.
 
       - title: School Topper, SEE
         date: 2017
         awarder: Secondary Education Examination
-        summary: 3.8 GPA at the SEE level.
+        summary: 3.8 GPA.
 
     Certificates:
       - name: Machine Learning Specialization
         date: 2023
         issuer: Coursera & DeepLearning.AI
-        icon: fa-solid fa-certificate
 
       - name: Deep Learning Specialization
         date: 2023
         issuer: Coursera & DeepLearning.AI
-        icon: fa-solid fa-certificate
 
       - name: Annual Nepal AI School
         date: 2023
         issuer: NAAMII, Nepal
-        icon: fa-solid fa-certificate
 
       - name: AWS Academy Cloud Architecting
         date: 2023
         issuer: AWS Academy
-        icon: fa-brands fa-aws
 
       - name: AWS Academy Data Engineering
         date: 2023
         issuer: AWS Academy
-        icon: fa-brands fa-aws
 
     Volunteer:
       - company: IT Club, Pulchowk Campus
@@ -234,41 +221,38 @@ cv:
         location: Lalitpur, Nepal
         start_date: 2022-01
         end_date: 2023-05
-        summary: Department representative for Electronics and Computer Engineering; organized campus tech events including Git and design workshops, expanding participation beyond Pulchowk.
+        summary: Department representative for Electronics and Computer Engineering. Helped organize Git and design workshops, including students from other campuses.
 
       - company: LOCUS, Pulchowk Campus
         position: Instructor
         location: Lalitpur, Nepal
         start_date: 2023
         end_date: 2023
-        summary: Contributed to curriculum design for the Software Fellowship; taught mathematical foundations of machine learning and algorithm implementation (from scratch and with libraries) to 100+ students.
+        summary: Helped design the Software Fellowship curriculum and taught mathematical foundations of machine learning to 100+ students.
 
       - company: IT Club & PDSC, Pulchowk Campus
-        position: Software Programming Instructor
+        position: Programming Instructor
         location: Lalitpur, Nepal
         start_date: 2021
         end_date: 2022
-        summary: Instructed 250+ students in a Django web framework workshop (PDSC) and 40+ students in an in-person Git and GitHub workshop (IT Club).
+        summary: Taught Django to 250+ students (PDSC) and Git/GitHub to 40+ students (IT Club).
 
     Languages:
       - name: Nepali
         summary: Native
 
       - name: English
-        summary: Professional proficiency
+        summary: Professional
 
       - name: Hindi
-        summary: Professional proficiency
+        summary: Professional
 
     Interests:
-      - name: Backend systems & data infrastructure
-        icon: fa-solid fa-server
-        keywords: "APIs, databases, reliability, scalability"
+      - name: Backend systems
+        keywords: "APIs, databases, reliability"
 
-      - name: Applied machine learning
-        icon: fa-solid fa-robot
-        keywords: "document AI, LLMs, RAG, production ML"
+      - name: Applied ML
+        keywords: "document AI, LLMs, production systems"
 
-      - name: Teaching & mentorship
-        icon: fa-solid fa-chalkboard-user
-        keywords: "workshops, curriculum, community"
+      - name: Teaching
+        keywords: "workshops, curriculum, mentorship"

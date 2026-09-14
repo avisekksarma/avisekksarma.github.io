@@ -1,0 +1,53 @@
+---
+layout: default
+---
+{% include projects/styles.liquid %}
+
+{% assign proj_year = page.dates | default: page.year %}
+
+<div class="post">
+  <article class="project-page">
+    <header class="project-page-header">
+      <p class="projects-back"><a href="{{ '/projects/' | relative_url }}">Projects</a></p>
+      <h1 class="post-title">{{ page.title }}</h1>
+
+      <p class="project-meta">
+        {% unless proj_year == blank %}{{ proj_year }}{% endunless %}
+        {% unless proj_year == blank or page.category == blank %}
+          <span class="proj-sep" aria-hidden="true">·</span>
+        {% endunless %}
+        {% unless page.category == blank %}{{ page.category }}{% endunless %}
+        {% unless page.venue == blank %}
+          {% unless proj_year == blank and page.category == blank %}
+            <span class="proj-sep" aria-hidden="true">·</span>
+          {% endunless %}
+          {{ page.venue }}
+        {% endunless %}
+      </p>
+
+      {% unless page.authors == blank %}
+        <p class="project-authors">{{ page.authors }}</p>
+      {% endunless %}
+
+      {% if page.paper or page.github or page.demo %}
+        <nav class="project-actions" aria-label="Project links">
+          {% if page.paper %}
+            <a class="proj-btn" href="{{ page.paper }}" target="_blank" rel="noopener">Paper</a>
+          {% endif %}
+          {% if page.github %}
+            <a class="proj-btn" href="{{ page.github }}" target="_blank" rel="noopener">Code</a>
+          {% endif %}
+          {% if page.demo %}
+            <a class="proj-btn" href="{{ page.demo }}" target="_blank" rel="noopener">Demo</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+
+      {% if page.tech.size > 0 %}
+        <p class="project-tech">{{ page.tech | join: " · " }}</p>
+      {% endif %}
+    </header>
+
+    <div class="project-body">{{ content }}</div>
+  </article>
+</div>
