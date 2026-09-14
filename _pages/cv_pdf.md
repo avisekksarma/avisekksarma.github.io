@@ -10,14 +10,14 @@ description: PDF résumé — view in the browser or download.
 
 <div class="pdf-page">
   <p class="pdf-toolbar">
-    <a class="pdf-btn" href="{{ '/assets/pdf/Abhishek_Sharma_Resume.pdf' | relative_url }}" download="Abhishek_Sharma_Resume.pdf">Download PDF</a>
-    <a class="pdf-btn" href="{{ '/assets/pdf/Abhishek_Sharma_Resume.pdf' | relative_url }}" target="_blank" rel="noopener">Open in new tab</a>
+    <a class="pdf-btn" href="{{ '/cv/pdf/main.pdf' | relative_url }}" download="Abhishek_Sharma_Resume.pdf">Download PDF</a>
+    <a class="pdf-btn" href="{{ '/cv/pdf/main.pdf' | relative_url }}" target="_blank" rel="noopener">Open in new tab</a>
     <a class="pdf-btn pdf-btn-quiet" href="{{ '/cv/' | relative_url }}">HTML version</a>
   </p>
 
   <iframe
     class="pdf-frame"
-    src="{{ '/assets/pdf/Abhishek_Sharma_Resume.pdf' | relative_url }}#view=FitH"
+    src="{{ '/cv/pdf/main.pdf' | relative_url }}#view=FitH"
     title="Abhishek Sharma résumé"
   ></iframe>
 </div>

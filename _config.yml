@@ -241,6 +241,18 @@ exclude:
   - migrations/
   - test/
   - vendor
+  - cv/tex
+  - cv/Makefile
+  - cv/tex/*.aux
+  - cv/pdf/*.aux
+  - cv/pdf/*.log
+  - cv/pdf/*.out
+  - cv/pdf/*.fls
+  - cv/pdf/*.fdb_latexmk
+  - cv/pdf/*.synctex.gz
+  - cv/pdf/*.toc
+  - cv/pdf/*.bbl
+  - cv/pdf/*.blg
 keep_files:
   - CNAME
   - .nojekyll

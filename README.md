@@ -24,7 +24,7 @@ Then open [http://localhost:4000/](http://localhost:4000/).
 
 ## Contact
 
-[Email](mailto:abhishek.work1710@gmail.com) · [GitHub](https://github.com/avisekksarma) · [LinkedIn](https://www.linkedin.com/in/aviseksarma)
+[Email](mailto:sharmabhishek1710@gmail.com) · [GitHub](https://github.com/avisekksarma) · [LinkedIn](https://www.linkedin.com/in/aviseksarma)
 
 ---
 

@@ -12,7 +12,7 @@ profile:
   more_info: >
     <p>Founding Software Engineer, ZeroTB</p>
     <p>Kathmandu, Nepal</p>
-    <p><a href="mailto:abhishek.work1710@gmail.com">abhishek.work1710@gmail.com</a></p>
+    <p><a href="mailto:sharmabhishek1710@gmail.com">sharmabhishek1710@gmail.com</a></p>
 
 selected_papers: true
 social: false # social links live in the site footer

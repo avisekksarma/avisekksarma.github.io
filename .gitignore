@@ -17,6 +17,22 @@ output/playwright/
 test-results/
 vendor
 
+# LaTeX junk (keep cv/pdf/*.pdf)
+cv/**/*.aux
+cv/**/*.log
+cv/**/*.out
+cv/**/*.fls
+cv/**/*.fdb_latexmk
+cv/**/*.synctex.gz
+cv/**/*.toc
+cv/**/*.bbl
+cv/**/*.blg
+cv/**/*.bcf
+cv/**/*.run.xml
+cv/**/*.latexmk
+
 # Python bytecode from bin/ helper scripts
 __pycache__/
 *.pyc
+
+.vscode/
