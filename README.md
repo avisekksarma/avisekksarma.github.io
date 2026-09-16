@@ -13,8 +13,6 @@ Software engineer working on systems and applied machine learning.
 - [Teaching](https://avisekksarma.github.io/teaching/) — instruction and mentorship
 - [Writing](https://avisekksarma.github.io/blog/) — notes on ML, databases, neuroscience, and AR/VR
 
-
-
 ## Local
 
 ```bash
