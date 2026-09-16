@@ -1,0 +1,330 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Transformer Inference Arithmetic — A Worked Walkthrough | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="A first-principles walkthrough of Transformer inference arithmetic: KV-cache size, weight bandwidth, batching, tensor parallelism, communication, FLOPs, and real-hardware corrections."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="/assets/img/favicon.png?v=e254c71222a16b596b1a2429b539be0d"> <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=603eef51037927dcc5aa87187423f565"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://avisekksarma.github.io/blog/2026/transformer-inference-arithmetic/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav sticky-bottom-footer"> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Abhishek Sharma </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">Publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">Projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/">Teaching </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Writing <span class="sr-only">(current)</span> </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Transformer Inference Arithmetic — A Worked Walkthrough</h1> <p class="post-meta"> Created on September 16, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/machine-learning"> <i class="fa-solid fa-hashtag fa-sm"></i> machine-learning</a>   <a href="/blog/tag/llm"> <i class="fa-solid fa-hashtag fa-sm"></i> llm</a>   <a href="/blog/tag/transformers"> <i class="fa-solid fa-hashtag fa-sm"></i> transformers</a>   <a href="/blog/tag/inference"> <i class="fa-solid fa-hashtag fa-sm"></i> inference</a>   <a href="/blog/tag/gpu"> <i class="fa-solid fa-hashtag fa-sm"></i> gpu</a>   ·   <a href="/blog/category/tech"> <i class="fa-solid fa-tag fa-sm"></i> Tech</a>   <a href="/blog/category/machine-learning"> <i class="fa-solid fa-tag fa-sm"></i> machine-learning</a>   <a href="/blog/category/llm"> <i class="fa-solid fa-tag fa-sm"></i> llm</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p><em>My notes on <a href="https://kipp.ly/p/transformer-inference-arithmetic" rel="external nofollow noopener" target="_blank">kipply’s “Transformer Inference Arithmetic”</a>, rebuilt from first principles with one consistent example, full derivations, and no magic numbers.</em></p> <p><strong>Want the short version? <a href="#tldr">Jump straight to the TL;DR.</a></strong></p> <hr> <h2 id="why-this-matters">Why this matters</h2> <p>If you serve an LLM, these calculations answer practical questions:</p> <ul> <li>How many requests can fit in one batch?</li> <li>What does one more token of context cost?</li> <li>Is this step limited by math, HBM bandwidth, or GPU-to-GPU communication?</li> <li>Will adding another GPU reduce latency, or only add communication?</li> </ul> <p>The goal is not to predict latency to the microsecond. It is to build a model simple enough to calculate by hand and accurate enough to identify the right bottleneck.</p> <h2 id="our-running-example">Our running example</h2> <table> <thead> <tr> <th>Quantity</th> <th style="text-align: right">Value</th> </tr> </thead> <tbody> <tr> <td>Model size</td> <td style="text-align: right">52B parameters</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">d_model</code></td> <td style="text-align: right">8,192</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">n_layers</code></td> <td style="text-align: right">64</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">n_heads × d_head</code></td> <td style="text-align: right"><code class="language-plaintext highlighter-rouge">64 × 128 = 8,192</code></td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">vocab_size</code></td> <td style="text-align: right">50,257</td> </tr> <tr> <td>Weight/cache format</td> <td style="text-align: right">BF16, 2 bytes per value</td> </tr> <tr> <td>GPU</td> <td style="text-align: right">NVIDIA A100 40GB</td> </tr> <tr> <td>Peak BF16 compute</td> <td style="text-align: right">312 TFLOP/s</td> </tr> <tr> <td>HBM bandwidth</td> <td style="text-align: right">1.5 TB/s</td> </tr> <tr> <td>Effective one-direction GPU link bandwidth</td> <td style="text-align: right">300 GB/s</td> </tr> </tbody> </table> <p>This is the same illustrative 52B shape used in kipply’s post. It assumes ordinary multi-head attention and a two-matrix MLP with a <code class="language-plaintext highlighter-rouge">4d</code> hidden width. Modern models may use grouped-query attention (GQA), gated MLPs, RoPE, quantized weights, or different accelerators. Those change constants, not the method.</p> <blockquote> <p><strong>Important:</strong> hardware peak numbers produce <strong>lower bounds</strong>, not promises. Unless stated otherwise, GB and TB below are decimal units, while “MiB” and “GiB” are binary units.</p> </blockquote> <hr> <h2 id="part-1--the-architecture-in-matrix-shapes">Part 1 — The architecture, in matrix shapes</h2> <h3 id="11-tokens-become-residual-stream-vectors">1.1 Tokens become residual-stream vectors</h3> <p>A tokenizer turns text into integer token IDs. An embedding table</p> \[E \in \mathbb{R}^{V \times d}\] <p>maps each ID to a vector of width <code class="language-plaintext highlighter-rouge">d = d_model</code>. Positional information is then added or applied. Older models may use learned position embeddings; many modern models rotate Q and K with RoPE instead.</p> <p>For a sequence of length <code class="language-plaintext highlighter-rouge">S</code>, the residual stream has shape</p> \[X \in \mathbb{R}^{S \times d} = \mathbb{R}^{S \times 8192}.\] <p>Every Transformer block accepts and returns that same shape. Only the vocabulary head changes the final dimension from <code class="language-plaintext highlighter-rouge">d</code> to <code class="language-plaintext highlighter-rouge">V</code>.</p> <p><img src="/assets/img/transformer-param-count/01-architecture.svg" alt="Decoder-only Transformer: tokenization and embedding, repeated attention and MLP blocks, then a vocabulary head"></p> <h3 id="12-what-self-attention-computes">1.2 What self-attention computes</h3> <p>For one layer,</p> \[Q = XW_Q,\qquad K = XW_K,\qquad V = XW_V,\] <p>with</p> \[W_Q,W_K,W_V \in \mathbb{R}^{d \times d}.\] <p>After splitting the result into heads, one head computes</p> \[A = \operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_{\text{head}}}} + M_{\text{causal}}\right),\qquad Z = AV.\] <p>The distinction is essential:</p> <ul> <li> <code class="language-plaintext highlighter-rouge">q · k</code> produces a <strong>score</strong>, not a value.</li> <li>The softmax turns all scores into weights.</li> <li>Those weights form a weighted sum of the <code class="language-plaintext highlighter-rouge">v</code> vectors.</li> </ul> <p><code class="language-plaintext highlighter-rouge">K</code> answers “how relevant is this position to my query?” <code class="language-plaintext highlighter-rouge">V</code> supplies the content that position contributes.</p> <p>For a full <code class="language-plaintext highlighter-rouge">S</code>-token prefill, each head’s score matrix is <code class="language-plaintext highlighter-rouge">S × S</code>. During cached decoding, the new query has shape <code class="language-plaintext highlighter-rouge">1 × d_head</code>, so it produces only a <code class="language-plaintext highlighter-rouge">1 × t</code> row against the <code class="language-plaintext highlighter-rouge">t</code> cached keys.</p> <h3 id="13-why-cache-k-and-v-but-not-q">1.3 Why cache K and V, but not Q?</h3> <p>Causal masking creates the asymmetry:</p> <ul> <li>A token’s query is consumed while computing <strong>that token’s</strong> output. Future tokens bring their own queries.</li> <li>A token’s key and value are read by <strong>every later token</strong> that attends to it.</li> <li>Once computed at a layer, that token’s K and V cannot be changed by future tokens.</li> </ul> <p><img src="/assets/img/transformer-inference-arithmetic/01-kv-cache.svg" alt="A token's query is used once and discarded, while its key and value persist in the cache and are reused by future queries." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;"></p> <p>The cache stores answers already computed. It does not change the model’s result; it avoids repeating the same K/V projections.</p> <h3 id="14-what-one-block-contains">1.4 What one block contains</h3> <p>Under this post’s assumptions, one block has six large matrices:</p> <ul> <li>attention: <code class="language-plaintext highlighter-rouge">Wq</code>, <code class="language-plaintext highlighter-rouge">Wk</code>, <code class="language-plaintext highlighter-rouge">Wv</code>, <code class="language-plaintext highlighter-rouge">Wo</code>, each <code class="language-plaintext highlighter-rouge">d × d</code>;</li> <li>MLP: <code class="language-plaintext highlighter-rouge">W1</code>, shape <code class="language-plaintext highlighter-rouge">d × 4d</code>, and <code class="language-plaintext highlighter-rouge">W2</code>, shape <code class="language-plaintext highlighter-rouge">4d × d</code>.</li> </ul> <p>LayerNorm, residual additions, the activation, masking, and softmax are also real operations. They contain far fewer parameters and FLOPs, but their data movement is not always free. We return to that in Part 9.</p> <hr> <h2 id="part-2--the-kv-cache-quantified">Part 2 — The KV cache, quantified</h2> <h3 id="21-bytes-stored-per-token">2.1 Bytes stored per token</h3> <p>For ordinary multi-head attention, each token stores one K vector and one V vector at every layer:</p> \[\begin{aligned} \text{KV bytes/token} &amp;= 2_{\text{K,V}} \cdot b_{\text{bytes/value}} \cdot n_{\text{layers}} \cdot n_{\text{heads}} \cdot d_{\text{head}} \\ &amp;= 2 \cdot 2 \cdot 64 \cdot 64 \cdot 128 \\ &amp;= 2{,}097{,}152\text{ bytes} \\ &amp;= 2\text{ MiB}. \end{aligned}\] <p>Because <code class="language-plaintext highlighter-rouge">n_heads · d_head = d_model</code>, the BF16 formula simplifies to</p> \[\boxed{\text{KV bytes/token} = 4\,n_{\text{layers}}d_{\text{model}}.}\] <p>That means one 2,048-token request needs</p> \[2\text{ MiB/token} \times 2048 = 4\text{ GiB}\] <p>of KV cache across the tensor-parallel group.</p> <p>For GQA or multi-query attention, replace <code class="language-plaintext highlighter-rouge">n_heads</code> with the smaller <code class="language-plaintext highlighter-rouge">n_kv_heads</code>:</p> \[\text{KV bytes/token} = 2b\,n_{\text{layers}}n_{\text{kv-heads}}d_{\text{head}}.\] <p>This is one reason serving-oriented models use fewer KV heads.</p> <h3 id="22-projection-flops-saved-by-caching">2.2 Projection FLOPs saved by caching</h3> <p>Projecting one token through K and V at all layers costs</p> \[2_{\text{matmul}} \cdot 2_{\text{K,V}} \cdot n_{\text{layers}} \cdot d^2 = 4 \cdot 64 \cdot 8192^2 = 17{,}179{,}869{,}184\] <p>or about <strong>17.18 GFLOPs per old token</strong>.</p> <p>The six large matrices in a complete block stack cost about 103.08 GFLOPs per token (derived in Part 8), so K and V projections are exactly one-sixth of that dense-matmul baseline.</p> <p>At decode position <code class="language-plaintext highlighter-rouge">t</code>, the cache avoids repeating those K/V projections for the previous <code class="language-plaintext highlighter-rouge">t</code> positions. It still:</p> <ol> <li>computes K and V for the <strong>new</strong> token;</li> <li>reads old K/V from the cache;</li> <li>computes the new query against all cached keys;</li> <li>forms a weighted sum of all cached values.</li> </ol> <h3 id="23-a-complexity-correction-worth-remembering">2.3 A complexity correction worth remembering</h3> <p>It is tempting to say that a KV cache changes generation from quadratic to linear. That is not quite right.</p> <ul> <li>Without a cache, each decode step reruns projections over the whole prefix.</li> <li>With a cache, dense projection/MLP work is done only for the new token.</li> <li>But the new query still scans <code class="language-plaintext highlighter-rouge">t</code> cached keys and values.</li> </ul> <p>So the <strong>attention scan per decode step remains <code class="language-plaintext highlighter-rouge">O(t)</code></strong>, and dense autoregressive attention over a whole generated sequence remains <code class="language-plaintext highlighter-rouge">O(L²)</code> in sequence length. The cache removes repeated prefix computation; it does not make attention itself constant-time.</p> <p>In practice, for a very wide model and moderate context, streaming the dense weights can dominate enough that consecutive decode steps look almost flat. At long contexts, KV-cache reads and attention become visible.</p> <hr> <h2 id="part-3--where-compute-actually-happens">Part 3 — Where compute actually happens</h2> <p>There are two different “load the model” events:</p> <ol> <li> <strong>Storage → GPU HBM:</strong> load the checkpoint at process startup.</li> <li> <strong>HBM → on-chip SRAM/registers/tensor cores:</strong> stream weight tiles during every forward pass.</li> </ol> <p>The checkpoint remains resident in HBM, but 104GB cannot remain in the GPU’s tiny on-chip memories. Kernels repeatedly stage tiles from HBM, multiply them, and make room for the next tiles.</p> <p>For 52B BF16 parameters:</p> \[52\text{B} \times 2\text{ bytes} = 104\text{ GB of weights}.\] <p>On an imaginary single A100 large enough to hold them, the ideal time to read those weights once would be</p> \[T_{\text{weights,1}} = \frac{104\text{e}9}{1.5\text{e}12} = 69.3\text{ ms}.\] <p>The real model does not fit on one 40GB A100. With four-way tensor parallelism, each GPU reads roughly 26GB:</p> \[T_{\text{weights,4}} = \frac{26\text{e}9}{1.5\text{e}12} = 17.3\text{ ms}.\] <h3 id="31-why-batching-amortizes-weight-traffic">3.1 Why batching amortizes weight traffic</h3> <p>Suppose <code class="language-plaintext highlighter-rouge">B</code> token positions use the same matrix in one matrix-matrix multiplication. The weights are read once, while the math scales with <code class="language-plaintext highlighter-rouge">B</code>:</p> \[\text{arithmetic intensity} \approx \frac{2BP\text{ FLOPs}}{2P\text{ bytes}} = B\text{ FLOPs/byte}.\] <p>The A100 hardware balance is</p> \[\frac{312\text{e}12\text{ FLOP/s}}{1.5\text{e}12\text{ byte/s}} \approx 208\text{ FLOPs/byte}.\] <p>Therefore the ideal dense-matmul ridge point is near <strong><code class="language-plaintext highlighter-rouge">B = 208</code></strong>:</p> <ul> <li>below 208, weight bandwidth is the lower-bound bottleneck;</li> <li>above 208, peak math throughput is the lower-bound bottleneck.</li> </ul> <p>For decode, <code class="language-plaintext highlighter-rouge">B</code> usually means concurrent sequences contributing one new token each. Prefill also processes many token positions together, although causal attention and exact matrix shapes make it less identical than this simple model suggests.</p> <p><img src="/assets/img/transformer-inference-arithmetic/02-batching-crossover.svg" alt="Ideal batching roofline for the 52B model on four A100 GPUs: a 17.3 millisecond weight-streaming floor meets the compute line near a batch of 208." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;"></p> <p>Using only the six large matrices:</p> <table> <thead> <tr> <th style="text-align: right">Positions processed together (<code class="language-plaintext highlighter-rouge">B</code>)</th> <th style="text-align: right">Weight floor, TP=4</th> <th style="text-align: right">Ideal math time, TP=4</th> <th style="text-align: right">Dense-matmul lower bound</th> </tr> </thead> <tbody> <tr> <td style="text-align: right">1</td> <td style="text-align: right">17.3 ms</td> <td style="text-align: right">0.083 ms</td> <td style="text-align: right">17.3 ms</td> </tr> <tr> <td style="text-align: right">50</td> <td style="text-align: right">17.3 ms</td> <td style="text-align: right">4.13 ms</td> <td style="text-align: right">17.3 ms</td> </tr> <tr> <td style="text-align: right">100</td> <td style="text-align: right">17.3 ms</td> <td style="text-align: right">8.26 ms</td> <td style="text-align: right">17.3 ms</td> </tr> <tr> <td style="text-align: right"><strong>208</strong></td> <td style="text-align: right"><strong>17.3 ms</strong></td> <td style="text-align: right"><strong>17.2 ms</strong></td> <td style="text-align: right"><strong>≈17.3 ms</strong></td> </tr> <tr> <td style="text-align: right">500</td> <td style="text-align: right">17.3 ms</td> <td style="text-align: right">41.3 ms</td> <td style="text-align: right">41.3 ms</td> </tr> </tbody> </table> <p>This does <strong>not</strong> mean all extra tokens are literally free below 208. It means the idealized large matmuls can reuse weights while math hardware that would otherwise wait on memory does useful work. KV reads, attention, activation traffic, communication, and kernel overhead give the memory line a slope in reality.</p> <hr> <h2 id="part-4--capacity-does-it-fit">Part 4 — Capacity: does it fit?</h2> <p>Weights alone require</p> \[\left\lceil\frac{104}{40}\right\rceil = 3\text{ A100-40GB GPUs}.\] <p>The remaining aggregate HBM is the first approximation of the KV-cache budget:</p> <table> <thead> <tr> <th style="text-align: right">GPUs</th> <th style="text-align: right">Total HBM</th> <th style="text-align: right">Weight memory</th> <th style="text-align: right">Theoretical remainder</th> <th style="text-align: right">Theoretical KV-token capacity</th> </tr> </thead> <tbody> <tr> <td style="text-align: right">3</td> <td style="text-align: right">120 GB</td> <td style="text-align: right">104 GB</td> <td style="text-align: right">16 GB</td> <td style="text-align: right">≈7,629 tokens</td> </tr> <tr> <td style="text-align: right">4</td> <td style="text-align: right">160 GB</td> <td style="text-align: right">104 GB</td> <td style="text-align: right">56 GB</td> <td style="text-align: right">≈26,703 tokens</td> </tr> </tbody> </table> <p>The final column is simply <code class="language-plaintext highlighter-rouge">remainder / 2,097,152 bytes per token</code>.</p> <p>These are <strong>ceilings</strong>, not safe scheduler limits. A serving runtime also needs:</p> <ul> <li>temporary activations and workspaces;</li> <li>communication buffers;</li> <li>allocator headroom and memory lost to fragmentation;</li> <li>CUDA context and kernel-library allocations;</li> <li>possibly untied vocabulary-head weights.</li> </ul> <p>Consequently, a practical four-GPU limit can be noticeably below 26,700 cached tokens. This is not a rounding issue; it is reserved and fragmented memory.</p> <p>The scheduling consequence is still clear: after the weights fit, extra HBM can increase concurrency, and concurrency lets the server build larger efficient batches.</p> <hr> <h2 id="part-5--splitting-weights-across-gpus">Part 5 — Splitting weights across GPUs</h2> <p>Tensor parallelism shards each large matrix. With four GPUs, each package owns roughly one quarter of the weight bytes and performs roughly one quarter of the matmul work.</p> <p><img src="/assets/img/transformer-inference-arithmetic/03-tensor-parallel.svg" alt="Four tensor-parallel GPUs each read a 26GB weight shard, compute a partial output, and exchange partials in a collective to reconstruct the full activation." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;"></p> <p>The GPUs are not merely a shared pool of memory. Each GPU has its own HBM controllers and compute units. Four GPUs therefore provide four independent weight streams and four sets of tensor cores.</p> <h3 id="51-why-communication-is-required">5.1 Why communication is required</h3> <p>Depending on how a matrix is partitioned, each GPU may produce:</p> <ul> <li>a distinct slice that can be concatenated; or</li> <li>a partial sum that must be reduced across GPUs.</li> </ul> <p>A common Megatron-style Transformer block arranges the sharding so that it needs <strong>two logical activation all-reduces per block</strong>:</p> <ol> <li>after attention’s output projection;</li> <li>after the MLP’s down-projection.</li> </ol> <p>An all-reduce is itself implemented as multiple network phases—for example, reduce-scatter plus all-gather. This is why some descriptions count four communication phases per block. Calling all four phases “four all-reduces” would overcount the logical synchronization points.</p> <h3 id="52-a-simple-communication-volume-model">5.2 A simple communication-volume model</h3> <p>One BF16 activation payload for <code class="language-plaintext highlighter-rouge">B</code> positions is</p> \[M_{\text{payload}} = 2Bd\text{ bytes}.\] <p>For <code class="language-plaintext highlighter-rouge">B=500</code> and <code class="language-plaintext highlighter-rouge">d=8192</code>,</p> \[M_{\text{payload}} = 2 \cdot 500 \cdot 8192 = 8.192\text{ MB}.\] <p>For a ring all-reduce over <code class="language-plaintext highlighter-rouge">N</code> GPUs, a common per-GPU send-plus-receive estimate is</p> \[M_{\text{ring}} \approx 2\frac{N-1}{N}M_{\text{payload}}.\] <p>At <code class="language-plaintext highlighter-rouge">N=4</code>, that is about <strong>12.288 MB per logical all-reduce</strong>. Two reductions per layer across 64 layers move about 1.57GB per GPU:</p> \[12.288\text{ MB} \times 2 \times 64 \approx 1.57\text{ GB}.\] <p>At an idealized effective 300GB/s, the bandwidth term is</p> \[T_{\text{comm,volume}} \approx \frac{1.57\text{e}9}{300\text{e}9} = 5.24\text{ ms}.\] <p>The exact number depends on topology, collective algorithm, whether bandwidth is quoted per direction or aggregate, message size, and overlap.</p> <hr> <h2 id="part-6--a-latency-model-that-does-not-contradict-itself">Part 6 — A latency model that does not contradict itself</h2> <p>A useful decomposition is</p> \[T_{\text{step}} \approx T_{\text{dense roofline}} + T_{\text{attention/cache}} + T_{\text{communication on critical path}} + T_{\text{fixed overhead}}.\] <p>For the dense matrices,</p> \[T_{\text{dense roofline}} \approx \max\left( \frac{\text{weight bytes}}{N\cdot\text{HBM bandwidth}}, \frac{\text{dense FLOPs}\cdot B}{N\cdot\text{peak FLOP/s}} \right).\] <p>Communication may overlap with independent compute, but collectives also sit between dependent stages. Therefore:</p> \[\max(T_{\text{compute}},T_{\text{comm}}) \leq T_{\text{compute+comm}} \leq T_{\text{compute}}+T_{\text{comm}}.\] <p>Neither “always add them” nor “always take the maximum” is universally correct.</p> <h3 id="61-small-decode-batch">6.1 Small decode batch</h3> <p>For <code class="language-plaintext highlighter-rouge">B=1</code>, TP=4:</p> <ul> <li>ideal weight-streaming floor: <strong>17.3ms</strong>;</li> <li>ideal math time: <strong>0.083ms</strong>;</li> <li>collective startup: if one logical collective costs an optimistic <code class="language-plaintext highlighter-rouge">8μs</code>, then</li> </ul> \[2 \cdot 64 \cdot 8\mu\text{s} \approx 1.0\text{ ms}.\] <p>That gives an illustrative <strong>≈18.3ms</strong> lower bound before long-context cache reads and runtime overhead. The <code class="language-plaintext highlighter-rouge">8μs</code> figure is only a toy latency assumption; real collective latency depends strongly on generation, topology, and implementation.</p> <h3 id="62-large-batch-b500">6.2 Large batch: <code class="language-plaintext highlighter-rouge">B=500</code> </h3> <p>The dense math term is</p> \[\frac{103.08\text{e}9 \cdot 500}{4 \cdot 312\text{e}12} \approx 41.3\text{ ms}.\] <p>The ring-volume estimate from Part 5 is about <strong>5.24ms</strong>. A conservative serialized estimate is therefore</p> \[41.3 + 5.24 \approx 46.5\text{ ms},\] <p>plus attention, cache, and software overhead. With useful overlap it could be closer to 41.3ms; with inefficient collectives it could be higher than 46.5ms.</p> <p>The throughput lesson survives either way. Producing 500 next-token positions in roughly tens of milliseconds is dramatically more efficient than running 500 separate weight-streaming passes. Batching improves aggregate throughput; it does not remove the sequential dependence between consecutive tokens of the <strong>same</strong> request.</p> <hr> <h2 id="part-7--when-does-communication-become-the-bottleneck">Part 7 — When does communication become the bottleneck?</h2> <p>The A100’s compute-to-link ratio is</p> \[\frac{312\text{e}12\text{ FLOP/s}}{300\text{e}9\text{ byte/s}} \approx 1040\text{ FLOPs/byte}.\] <p>This is a second roofline. A stage that performs fewer than about 1040 useful FLOPs per communicated byte is at risk of becoming communication-bound.</p> <p>For the output projection and MLP down-projection, a useful worst-case rule of thumb is that the per-GPU arithmetic intensity relative to an activation-sized collective scales like</p> \[\frac{d_{\text{model}}}{N}.\] <p>For our model:</p> <ul> <li>TP=4: <code class="language-plaintext highlighter-rouge">8192 / 4 = 2048 FLOPs/byte</code> — above 1040;</li> <li>TP=8: <code class="language-plaintext highlighter-rouge">8192 / 8 = 1024 FLOPs/byte</code> — approximately at the hardware balance;</li> <li>TP=16: <code class="language-plaintext highlighter-rouge">8192 / 16 = 512 FLOPs/byte</code> — communication is increasingly exposed.</li> </ul> <p>This is not a universal cutoff. Faster links, topology-aware collectives, overlap, quantized communication, and different matrix shapes move it. But it explains the tradeoff:</p> <blockquote> <p>More GPUs reduce each GPU’s weight traffic and math, while making the fixed-size activation exchange large relative to each GPU’s shrinking share of work.</p> </blockquote> <p>The minimum GPU count is a capacity question. The best GPU count is a latency-throughput-cost question.</p> <hr> <h2 id="part-8--where-flops-per-token--2--parameters-comes-from">Part 8 — Where “FLOPs per token ≈ 2 × parameters” comes from</h2> <h3 id="81-the-one-matmul-rule">8.1 The one matmul rule</h3> <p>Multiplying an <code class="language-plaintext highlighter-rouge">m × n</code> matrix by a length-<code class="language-plaintext highlighter-rouge">n</code> vector performs approximately</p> \[2mn\text{ FLOPs},\] <p>counting one multiply and one add per matrix element. The matrix itself contains <code class="language-plaintext highlighter-rouge">mn</code> parameters. Therefore, if a weight is used once in a matmul,</p> \[\text{FLOPs} \approx 2 \times \text{parameters}.\] <h3 id="82-the-six-large-matrices-in-one-block">8.2 The six large matrices in one block</h3> <table> <thead> <tr> <th>Matrix</th> <th>Shape</th> <th style="text-align: right">Parameters</th> <th style="text-align: right">FLOPs/token</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">Wq</code></td> <td><code class="language-plaintext highlighter-rouge">8192 × 8192</code></td> <td style="text-align: right">67,108,864</td> <td style="text-align: right">134,217,728</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">Wk</code></td> <td><code class="language-plaintext highlighter-rouge">8192 × 8192</code></td> <td style="text-align: right">67,108,864</td> <td style="text-align: right">134,217,728</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">Wv</code></td> <td><code class="language-plaintext highlighter-rouge">8192 × 8192</code></td> <td style="text-align: right">67,108,864</td> <td style="text-align: right">134,217,728</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">Wo</code></td> <td><code class="language-plaintext highlighter-rouge">8192 × 8192</code></td> <td style="text-align: right">67,108,864</td> <td style="text-align: right">134,217,728</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">W1</code></td> <td><code class="language-plaintext highlighter-rouge">8192 × 32768</code></td> <td style="text-align: right">268,435,456</td> <td style="text-align: right">536,870,912</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">W2</code></td> <td><code class="language-plaintext highlighter-rouge">32768 × 8192</code></td> <td style="text-align: right">268,435,456</td> <td style="text-align: right">536,870,912</td> </tr> </tbody> </table> <p>One block therefore costs</p> \[4(2d^2) + 2(2d\cdot4d) = 24d^2 = 1{,}610{,}612{,}736\text{ FLOPs/token}.\] <p>Across 64 layers:</p> \[24 \cdot 64 \cdot 8192^2 = 103{,}079{,}215{,}104 \approx 103.08\text{ GFLOPs/token}.\] <p>Dividing by two recovers the block-weight count:</p> \[\frac{103.08\text{B}}{2} = 51.54\text{B parameters}.\] <h3 id="83-what-the-2p-shortcut-leaves-out">8.3 What the <code class="language-plaintext highlighter-rouge">2P</code> shortcut leaves out</h3> <p>The 103.08 GFLOPs figure is the dense <strong>projection + MLP baseline</strong>, not the whole decode step.</p> <p><strong>Cached attention.</strong> At context length <code class="language-plaintext highlighter-rouge">t</code>, QK scores and the weighted-V operation add roughly</p> \[4t\,d\,n_{\text{layers}}\text{ FLOPs}.\] <p>At <code class="language-plaintext highlighter-rouge">t=2048</code>, that is</p> \[4 \cdot 2048 \cdot 8192 \cdot 64 = 4.29\text{ GFLOPs},\] <p>about 4.2% of the six-matrix baseline. At longer contexts it grows linearly per decode step.</p> <p><strong>Vocabulary head.</strong> Projecting the final hidden state to 50,257 logits costs</p> \[2Vd = 2 \cdot 50{,}257 \cdot 8192 \approx 0.823\text{ GFLOPs}.\] <p>The embedding table contains about 411.7M parameters. If embeddings are tied, those same parameters act as the vocabulary head and <strong>do</strong> participate in a matmul at output time, even though input embedding is only a lookup. If the head is untied, the model stores another matrix.</p> <p><strong>Other kernels.</strong> LayerNorm, RoPE, residuals, activation functions, softmax, sampling, and cache reads add smaller FLOP counts but nonzero latency.</p> <p>So <code class="language-plaintext highlighter-rouge">2P</code> is powerful because most large-model parameters are used once per token in dense matmuls. It is not an exact law.</p> <hr> <h2 id="part-9--memory-traffic-the-flop-count-misses">Part 9 — Memory traffic the FLOP count misses</h2> <p>FLOP accounting makes LayerNorm, softmax, residual additions, and activations look trivial. On a GPU, an operation can do very little arithmetic and still spend time reading and writing tensors.</p> <p>Three effects matter:</p> <ol> <li> <strong>Intermediate activation traffic.</strong> Unfused kernels may write a tensor to HBM only for the next kernel to read it back.</li> <li> <strong>KV-cache traffic.</strong> Each decode step reads all earlier K/V entries needed by attention.</li> <li> <strong>Kernel launch and synchronization overhead.</strong> Tiny kernels can be dominated by setup rather than arithmetic.</li> </ol> <p>The rough scaling intuition is still useful:</p> <ul> <li>dense projections and MLPs scale mostly as <code class="language-plaintext highlighter-rouge">d²</code>;</li> <li>normalization and elementwise work scale mostly as <code class="language-plaintext highlighter-rouge">d</code>;</li> <li>cached attention and cache reads scale as <code class="language-plaintext highlighter-rouge">t·d</code>.</li> </ul> <p>That is why elementwise work often occupies a larger <strong>fraction</strong> of latency in narrow models, while long-context cache traffic can reappear as a bottleneck even in wide models.</p> <p>kipply cites a 336M-parameter, <code class="language-plaintext highlighter-rouge">d=1024</code> study where memory-bound intermediate operations made up roughly 43% of latency. Scaling width from 1024 to 8192 makes the <code class="language-plaintext highlighter-rouge">d²</code> work grow faster than the <code class="language-plaintext highlighter-rouge">d</code> work, but one should not simply divide 43% by eight and treat the result as a prediction. Fractions, kernel fusion, tensor shapes, and implementations all change together.</p> <p>This is where fused LayerNorm/activation kernels and FlashAttention-style IO-aware attention help: they reduce HBM round trips rather than merely reducing arithmetic.</p> <hr> <h2 id="part-10--reality-check-against-a-13b-fastertransformer-run">Part 10 — Reality check against a 13B FasterTransformer run</h2> <p>kipply also reported a FasterTransformer benchmark for a 13B-shaped model:</p> <table> <thead> <tr> <th>Quantity</th> <th style="text-align: right">Value</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">d_model</code></td> <td style="text-align: right">5,120</td> </tr> <tr> <td>Layers</td> <td style="text-align: right">40</td> </tr> <tr> <td>Heads</td> <td style="text-align: right">40 × 128</td> </tr> <tr> <td>Context</td> <td style="text-align: right">512</td> </tr> <tr> <td>Generated tokens</td> <td style="text-align: right">10</td> </tr> </tbody> </table> <p>The six-matrix baseline is</p> \[24 \cdot 40 \cdot 5120^2 = 25.17\text{ GFLOPs/token}.\] <h3 id="101-decode-one-gpu">10.1 Decode, one GPU</h3> <p>Ideal weight-bandwidth time:</p> \[\frac{25.17\text{e}9\text{ bytes}}{1.5\text{e}12\text{ bytes/s}} = 16.8\text{ ms}.\] <p>Reported measurement: <strong>22.0ms per decode step</strong>.</p> <p>Using about 90% of peak HBM bandwidth raises the weight estimate to roughly 18.6ms. Profiled intermediate operations contributed about 2.2ms, and small remaining costs—launches, embeddings, and sampling—closed most of the gap.</p> <h3 id="102-decode-two-gpus">10.2 Decode, two GPUs</h3> <p>The ideal weight floor halves to about <strong>8.4ms</strong>, but communication appears. The reported measurement was <strong>13.5ms</strong>, not half of 22ms. Smaller per-GPU tensors reached less bandwidth, intermediate kernels remained, and profiled communication contributed roughly 1.7ms.</p> <p>This is the real tensor-parallel tradeoff in one result: weight time falls, but not every other term falls with it.</p> <h3 id="103-prefill-512-tokens">10.3 Prefill, 512 tokens</h3> <p>The ideal dense-matmul compute time is</p> \[\frac{25.17\text{e}9 \cdot 512}{312\text{e}12} \approx 41.3\text{ ms}.\] <p>The reported one-GPU context time was about <strong>63.2ms</strong>. At this larger matrix-matrix shape, actual kernels did not reach peak tensor-core throughput: the profile observed roughly 72% of peak for an MLP matmul and roughly 54% for an attention projection. Prefill also performs causal attention and writes the initial KV cache.</p> <h3 id="104-the-five-recurring-theory-to-reality-gaps">10.4 The five recurring theory-to-reality gaps</h3> <ol> <li>sustained HBM bandwidth is below the spec-sheet peak;</li> <li>intermediate and elementwise kernels are not free;</li> <li>kernel launches, sampling, and synchronization add fixed costs;</li> <li>real collectives have startup, topology, and bandwidth inefficiencies;</li> <li>matmul efficiency depends on exact dimensions and tiling.</li> </ol> <p>The arithmetic tells us <strong>which regime to investigate</strong>. Profiling tells us the constants for one model, runtime, and machine.</p> <hr> <h2 id="part-11--a-compact-serving-checklist">Part 11 — A compact serving checklist</h2> <p>When sizing a deployment, calculate in this order.</p> <h3 id="1-weight-capacity">1. Weight capacity</h3> \[M_{\text{weights}} = P \cdot b_{\text{weight}}.\] <p>This gives the minimum accelerator count before runtime headroom.</p> <h3 id="2-kv-cache-cost">2. KV-cache cost</h3> \[M_{\text{KV/token}} = 2b_{\text{cache}}n_{\text{layers}}n_{\text{kv-heads}}d_{\text{head}}.\] <p>Multiply by the sum of all live prompt and generated tokens—not merely the request count.</p> <h3 id="3-dense-roofline">3. Dense roofline</h3> \[T_{\text{dense}} \approx \max\left( \frac{M_{\text{weights}}}{N\cdot BW_{\text{HBM}}}, \frac{F_{\text{dense/token}}\cdot B}{N\cdot R_{\text{FLOP}}} \right).\] <p>This predicts whether batching can still amortize weight reads.</p> <h3 id="4-context-dependent-attention">4. Context-dependent attention</h3> <p>Estimate both</p> \[F_{\text{attention/decode}} \approx 4t\,d\,n_{\text{layers}}\] <p>and the K/V bytes read. Long contexts can change a weight-bound decode into a cache-bandwidth-bound decode.</p> <h3 id="5-tensor-parallel-communication">5. Tensor-parallel communication</h3> <p>Estimate payload size, collective count, topology, and startup latency. Then benchmark because collective efficiency is highly implementation-specific.</p> <h3 id="6-validate-with-the-real-stack">6. Validate with the real stack</h3> <p>Measure prefill latency, time to first token, inter-token latency, throughput, HBM use, and tail latency under the request-length distribution you actually expect.</p> <hr> <h2 id="tldr">TL;DR — Key takeaways</h2> <ul> <li> <strong>Q is used once; K and V are reused by later tokens.</strong> Causal masking makes cached K/V immutable after computation.</li> <li> <strong>KV-cache memory is linear in live token count.</strong> For ordinary BF16 MHA it is <code class="language-plaintext highlighter-rouge">4 · layers · d_model</code> bytes per token; GQA replaces attention-head count with the smaller KV-head count.</li> <li> <strong>The cache avoids repeated prefix projections, not the attention scan.</strong> Cached decode still reads past K/V and attends over a growing context.</li> <li> <strong>Weights remain in HBM but are streamed through on-chip memory every step.</strong> Reusing one weight stream across many token positions is why batching improves throughput.</li> <li> <strong><code class="language-plaintext highlighter-rouge">peak FLOPs ÷ HBM bandwidth</code> is the dense-matmul ridge point.</strong> For the assumed A100 numbers it is about 208 FLOPs/byte, corresponding ideally to about 208 token positions per weight read.</li> <li> <strong>Capacity and throughput are connected.</strong> HBM left after weights determines how many live KV tokens can be retained, which constrains concurrency and batch formation.</li> <li> <strong>Tensor parallelism divides weight traffic and math but introduces collectives.</strong> Standard Megatron-style blocks have two logical activation reductions; each collective may contain multiple network phases.</li> <li> <strong><code class="language-plaintext highlighter-rouge">FLOPs ≈ 2P</code> is a baseline, not the whole step.</strong> Cached attention, the vocabulary head, normalization, cache movement, and sampling remain.</li> <li> <strong>More GPUs are not always faster.</strong> Per-GPU work shrinks while activation communication does not shrink at the same rate.</li> <li> <strong>Use arithmetic to classify the bottleneck; use benchmarks to schedule production.</strong> Clean formulas are excellent for direction and poor substitutes for profiling exact model shapes.</li> </ul> <hr> <h2 id="references">References</h2> <ul> <li><a href="https://kipp.ly/p/transformer-inference-arithmetic" rel="external nofollow noopener" target="_blank">kipply, “Transformer Inference Arithmetic”</a></li> <li><a href="https://kipp.ly/p/transformer-param-count" rel="external nofollow noopener" target="_blank">kipply, “Transformer Parameter Counting”</a></li> <li><a href="https://www.nvidia.com/en-us/data-center/a100/" rel="external nofollow noopener" target="_blank">NVIDIA A100 Tensor Core GPU architecture</a></li> <li><a href="https://github.com/NVIDIA/FasterTransformer" rel="external nofollow noopener" target="_blank">NVIDIA FasterTransformer</a></li> <li> <a href="https://arxiv.org/abs/2205.05198" rel="external nofollow noopener" target="_blank">Korthikanti et al., “Reducing Activation Recomputation in Large Transformer Models”</a> — tensor-parallel communication structure</li> <li><a href="https://arxiv.org/abs/2007.00072" rel="external nofollow noopener" target="_blank">Ivanov et al., “Data Movement Is All You Need”</a></li> <li><a href="https://arxiv.org/abs/2205.14135" rel="external nofollow noopener" target="_blank">Dao et al., “FlashAttention”</a></li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/counting-transformer-parameters/">Counting Transformer Parameters</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/ar-vr-optics-explained-from-scratch/">AR/VR Optics, Explained From Scratch</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/ai-engineering-stack-from-prompts-to-agents/">The AI Engineering Stack in 2026</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/building-large-language-models/">Building Large Language Models</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/rumination-and-default-mode-network/">Rumination and the Default Mode Network</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/">Dopamine and Motivation</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/">Stress, the Amygdala, and the Prefrontal Cortex</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/">Neuroplasticity, Part 2: The Machinery of Brain Change</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/">Neuroplasticity, Part 1: The Brain Learns by Changing</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/database-skills-part-3-production/">Database Skills for Software Engineers, Part 3: Production Engineering</a> </li> </ul> </div> </div> <footer class="sticky-bottom mt-5" role="contentinfo"> <div class="container"> <div class="footer-social" aria-label="Social links"> <a href="mailto:sharmabhishek1710@gmail.com" title="Email"><i class="fa-solid fa-envelope"></i></a> <a href="https://github.com/avisekksarma" title="Github username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-github"></i></a> <a href="https://www.linkedin.com/in/aviseksarma" title="Linkedin username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-linkedin"></i></a> <a href="https://twitter.com/abh_avisek" title="X username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-x-twitter"></i></a> </div> <p class="footer-copy"> © Copyright 2026 Abhishek Sharma. </p> </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "About",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-publications",
+          title: "Publications",
+          description: "Peer-reviewed publications and conference papers.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/publications/";
+          },
+        },{id: "nav-projects",
+          title: "Projects",
+          description: "Selected research and engineering projects.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/projects/";
+          },
+        },{id: "nav-cv",
+          title: "CV",
+          description: "Curriculum vitae, education, experience, teaching, awards, and selected work.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-teaching",
+          title: "Teaching",
+          description: "Instruction, workshops, and mentoring in computer science and machine learning.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/teaching/";
+          },
+        },{id: "nav-writing",
+          title: "Writing",
+          description: "Essays and technical notes on machine learning, databases, neuroscience, and AR/VR.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "post-transformer-inference-arithmetic-a-worked-walkthrough",
+        
+          title: "Transformer Inference Arithmetic — A Worked Walkthrough",
+        
+        description: "A first-principles walkthrough of Transformer inference arithmetic: KV-cache size, weight bandwidth, batching, tensor parallelism, communication, FLOPs, and real-hardware corrections.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/transformer-inference-arithmetic/";
+          
+        },
+      },{id: "post-counting-transformer-parameters",
+        
+          title: "Counting Transformer Parameters",
+        
+        description: "How to count the parameters in a decoder-only Transformer: tokenizer vs embedding, 12 d_model² per block, a 7B example, and the difference between weight memory and KV-cache.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/counting-transformer-parameters/";
+          
+        },
+      },{id: "post-ar-vr-optics-explained-from-scratch",
+        
+          title: "AR/VR Optics, Explained From Scratch",
+        
+        description: "AR/VR display optics: field of view, eye-box, vergence-accommodation conflict, waveguides, holographic optical elements, metasurfaces, and pancake lenses.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/ar-vr-optics-explained-from-scratch/";
+          
+        },
+      },{id: "post-the-ai-engineering-stack-in-2026",
+        
+          title: "The AI Engineering Stack in 2026",
+        
+        description: "A practical map of current AI engineering vocabulary: prompt, context, harness, loop, agentic, and graph engineering, plus memory and evals.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/ai-engineering-stack-from-prompts-to-agents/";
+          
+        },
+      },{id: "post-building-large-language-models",
+        
+          title: "Building Large Language Models",
+        
+        description: "A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency. Based on Stanford CS229 guest lecture notes.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/building-large-language-models/";
+          
+        },
+      },{id: "post-rumination-and-the-default-mode-network",
+        
+          title: "Rumination and the Default Mode Network",
+        
+        description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rumination-and-default-mode-network/";
+          
+        },
+      },{id: "post-dopamine-and-motivation",
+        
+          title: "Dopamine and Motivation",
+        
+        description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/";
+          
+        },
+      },{id: "post-stress-the-amygdala-and-the-prefrontal-cortex",
+        
+          title: "Stress, the Amygdala, and the Prefrontal Cortex",
+        
+        description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/";
+          
+        },
+      },{id: "post-neuroplasticity-part-2-the-machinery-of-brain-change",
+        
+          title: "Neuroplasticity, Part 2: The Machinery of Brain Change",
+        
+        description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/";
+          
+        },
+      },{id: "post-neuroplasticity-part-1-the-brain-learns-by-changing",
+        
+          title: "Neuroplasticity, Part 1: The Brain Learns by Changing",
+        
+        description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-3-production-engineering",
+        
+          title: "Database Skills for Software Engineers, Part 3: Production Engineering",
+        
+        description: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-3-production/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-2-internals",
+        
+          title: "Database Skills for Software Engineers, Part 2: Internals",
+        
+        description: "Indexes, query planning, transactions, window functions, N+1, connection pooling, and locks. The intermediate layer that separates engineers who write queries from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-2-internals/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-1-foundations",
+        
+          title: "Database Skills for Software Engineers, Part 1: Foundations",
+        
+        description: "A practical, no-fluff guide to relational databases: the kind of depth that actually shows up in senior engineering interviews.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-1-foundations/";
+          
+        },
+      },{id: "post-acid-properties-demystified",
+        
+          title: "ACID Properties Demystified",
+        
+        description: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/acid-properties-demystified/";
+          
+        },
+      },{id: "books-the-godfather",
+          title: 'The Godfather',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_godfather/";
+            },},{id: "projects-topic-modeling-for-nepali-political-news",
+          title: 'Topic Modeling for Nepali Political News',
+          description: "Comparative evaluation of LDA, NMF, LSA, and BERTopic on Nepali political news, published at IEEE ICICT 2025.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/1_nepali-topic-modeling/";
+            },},{id: "projects-invoice-information-extraction",
+          title: 'Invoice Information Extraction',
+          description: "Layout-aware invoice extraction with YOLO, table transformers, and GPT-4 Vision. First place, LLM category, Kathmandu University AI Competition 2023.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/2_invoice-extraction/";
+            },},{id: "projects-videolize",
+          title: 'Videolize',
+          description: "Text-to-video generation by interpolating in Stable Diffusion latent space. First place, GenAI, LOCUS Hack-A-Week 2023.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/3_videolize/";
+            },},{id: "projects-summitseeker",
+          title: 'SummitSeeker',
+          description: "Django REST backend for a trekking app in Nepal, covering trails, guides, hiring, and reviews.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/4_summitseeker/";
+            },},{id: "projects-adversarial-search-for-checkers",
+          title: 'Adversarial Search for Checkers',
+          description: "A C++ checkers engine using Minimax search with alpha-beta pruning.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/5_checkers-ai/";
+            },},{id: "projects-procedural-terrain-generation",
+          title: 'Procedural Terrain Generation',
+          description: "Perlin-noise terrain in C++, drawn from scratch with clipping and a Z-buffer.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/6_procedural-terrain/";
+            },},{id: "projects-campus-network-design",
+          title: 'Campus Network Design',
+          description: "University campus network in Cisco Packet Tracer: hierarchical topology, VLANs, subnetting, and OSPF.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/7_university-network/";
+            },},{id: "projects-quasar-linearizable-replicated-key-value-store",
+          title: 'Quasar: Linearizable Replicated Key-Value Store',
+          description: "Raft replicated state machine with majority-quorum commit, crash-durable WAL, snapshot compaction, and linearizable reads.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/8_quasar/";
+            },},{id: "teachings-web-development-with-django",
+          title: 'Web Development with Django',
+          description: "Large-scale workshop series on Django application development",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/django-workshop/";
+            },},{id: "teachings-it-club-technical-programs",
+          title: 'IT Club Technical Programs',
+          description: "Campus technical community leadership and programming outreach",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/it-club-service/";
+            },},{id: "teachings-mathematical-foundations-of-machine-learning",
+          title: 'Mathematical Foundations of Machine Learning',
+          description: "LOCUS Fellowship instructor: core ML mathematics and algorithms",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/locus-fellowship/";
+            },},{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%73%68%61%72%6D%61%62%68%69%73%68%65%6B%31%37%31%30@%67%6D%61%69%6C.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/avisekksarma", "_blank");
+        },
+      },{
+        id: 'social-linkedin',
+        title: 'LinkedIn',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.linkedin.com/in/aviseksarma", "_blank");
+        },
+      },{
+        id: 'social-x',
+        title: 'X',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://twitter.com/abh_avisek", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
