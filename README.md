@@ -2,7 +2,7 @@
 
 Personal site: **[avisekksarma.github.io](https://avisekksarma.github.io)**
 
-Software engineer working on backend systems and applied machine learning. Founding software engineer at ZeroTB, based in Kathmandu.
+Software engineer working on systems and applied machine learning.
 
 ## Contents
 
@@ -12,6 +12,8 @@ Software engineer working on backend systems and applied machine learning. Found
 - [CV](https://avisekksarma.github.io/cv/) — education, experience, and awards ([PDF](https://avisekksarma.github.io/cv/pdf/))
 - [Teaching](https://avisekksarma.github.io/teaching/) — instruction and mentorship
 - [Writing](https://avisekksarma.github.io/blog/) — notes on ML, databases, neuroscience, and AR/VR
+
+
 
 ## Local
 

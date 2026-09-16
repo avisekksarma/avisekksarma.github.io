@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" role="img" aria-labelledby="title desc">
+  <title id="title">Ideal batching crossover (52B model, TP = 4)</title>
+  <desc id="desc">Roofline chart: weight-streaming floor at 17.3 ms meets compute line near batch size 208.</desc>
+
+  <rect width="1080" height="700" fill="#ffffff"/>
+
+  <text x="40" y="34" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#1e1e1e" font-weight="700">Ideal batching crossover (52B model, TP = 4)</text>
+  <text x="40" y="58" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#868e96">Roofline lower bound — real latency is higher (cache, attention, collectives, kernels).</text>
+
+  <!-- Legend row — kept clear of the plot -->
+  <rect x="40" y="76" width="300" height="36" rx="6" fill="#ffd8a8" stroke="#e8590c" stroke-width="1.5"/>
+  <text x="190" y="99" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#e8590c" text-anchor="middle">math time ≈ 0.0826 ms × B</text>
+
+  <rect x="355" y="76" width="330" height="36" rx="6" fill="#a5d8ff" stroke="#1971c2" stroke-width="1.5"/>
+  <text x="520" y="99" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#1971c2" text-anchor="middle">weight-streaming floor ≈ 17.3 ms</text>
+
+  <rect x="700" y="76" width="300" height="36" rx="6" fill="#eebefa" stroke="#9c36b5" stroke-width="1.5"/>
+  <text x="850" y="99" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#9c36b5" text-anchor="middle">ridge: B ≈ 208</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1e1e1e"/>
+    </marker>
+  </defs>
+
+  <!-- Plot: origin (200,540), x:800 for B=0..500, y:360 for 0..45ms -->
+  <!-- sx=1.6, sy=8 -->
+  <!-- mem y = 540 - 138.4 = 401.6 -->
+  <!-- B=208 x = 200 + 332.8 = 532.8 -->
+  <!-- B=500 end y = 540 - 330.4 = 209.6 -->
+
+  <line x1="200" y1="540" x2="200" y2="160" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="200" y1="540" x2="1030" y2="540" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <line x1="192" y1="401.6" x2="208" y2="401.6" stroke="#1971c2" stroke-width="2"/>
+  <line x1="192" y1="209.6" x2="208" y2="209.6" stroke="#e8590c" stroke-width="2"/>
+  <line x1="532.8" y1="532" x2="532.8" y2="548" stroke="#9c36b5" stroke-width="2"/>
+  <line x1="1000" y1="532" x2="1000" y2="548" stroke="#868e96" stroke-width="2"/>
+
+  <line x1="200" y1="401.6" x2="1000" y2="401.6" stroke="#1971c2" stroke-width="3"/>
+  <line x1="200" y1="540" x2="1000" y2="209.6" stroke="#e8590c" stroke-width="3"/>
+  <line x1="532.8" y1="401.6" x2="532.8" y2="540" stroke="#9c36b5" stroke-width="2" stroke-dasharray="6 5"/>
+  <circle cx="532.8" cy="401.6" r="8" fill="#eebefa" stroke="#9c36b5" stroke-width="2"/>
+
+  <text x="40" y="330" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#1e1e1e">ideal time / step</text>
+  <text x="700" y="595" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#1e1e1e">tokens processed together (B)</text>
+
+  <text x="112" y="406" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#1971c2" text-anchor="end">17.3 ms</text>
+  <text x="112" y="214" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#e8590c" text-anchor="end">41.3 ms</text>
+  <text x="200" y="560" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#868e96" text-anchor="middle">0</text>
+  <text x="532.8" y="565" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#9c36b5" text-anchor="middle">208</text>
+  <text x="1000" y="565" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#868e96" text-anchor="middle">500</text>
+
+  <!-- region labels in open space: left between floor and compute; right under the floor -->
+  <text x="250" y="430" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#1971c2">memory-bound</text>
+  <text x="250" y="450" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#1971c2">unused math capacity</text>
+
+  <text x="720" y="455" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#e8590c">compute-bound</text>
+  <text x="720" y="475" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#e8590c">larger B raises step latency</text>
+
+  <text x="40" y="650" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#1e1e1e">Below 208, batching improves throughput by amortizing weight traffic across more tokens — work is not free.</text>
+</svg>
