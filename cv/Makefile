@@ -1,5 +1,6 @@
 # Primary résumé only (the one the site uses):
-#   make            # cv/tex/main.tex → cv/pdf/main.pdf
+#   make                    # cv/tex/main.tex → cv/pdf/main.pdf
+#   make pdf/academic.pdf   # academic CV variant (preview; not the site download)
 #
 # Other .tex files in tex/ are for Cursor preview; do not need a PDF unless you
 # later want one on the site — then: make pdf/resume-uniA.pdf
@@ -29,3 +30,4 @@ clean:
 	cd tex && $(LATEXMK) -c
 	rm -f tex/*.fls tex/*.fdb_latexmk tex/*.synctex.gz
 	rm -f pdf/*.aux pdf/*.log pdf/*.out pdf/*.fls pdf/*.fdb_latexmk pdf/*.synctex.gz
+	rm -rf .latex-build

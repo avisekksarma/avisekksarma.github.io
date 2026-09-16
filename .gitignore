@@ -17,7 +17,10 @@ output/playwright/
 test-results/
 vendor
 
-# LaTeX junk (keep cv/pdf/*.pdf)
+# LaTeX junk (commit only the résumé PDF)
+cv/pdf/*
+!cv/pdf/*.pdf
+cv/.latex-build/
 cv/**/*.aux
 cv/**/*.log
 cv/**/*.out

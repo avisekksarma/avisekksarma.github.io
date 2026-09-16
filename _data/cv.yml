@@ -73,7 +73,7 @@ cv:
           - Aman Shakya
         publisher: IEEE ICICT
         releaseDate: 2025-04
-        url: /projects/1_nepali-topic-modeling/
+        url: https://ieeexplore.ieee.org/document/11004776
 
     Projects:
       - name: Quasar
@@ -92,6 +92,8 @@ cv:
         summary: Compared LDA, NMF, LSA, and BERTopic on Nepali political news. Paper at IEEE ICICT 2025.
         highlights:
           - LDA
+          - NMF
+          - LSA
           - BERTopic
           - spaCy
           - gensim

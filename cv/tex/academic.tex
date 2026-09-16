@@ -1,0 +1,267 @@
+% !TEX root = academic.tex
+%------------------------
+\documentclass[letterpaper,11pt]{article}
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Abhishek Sharma — Academic CV},
+    pdfpagemode=FullScreen,
+    }
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    \textbf{\Huge \scshape Abhishek Sharma} \\ \vspace{6pt}
+    \small \href{mailto:sharmabhishek1710@gmail.com}{\underline{sharmabhishek1710@gmail.com}} $|$ 
+    \href{https://www.linkedin.com/in/aviseksarma/}{\underline{linkedin.com/in/aviseksarma}} $|$
+    \href{https://github.com/avisekksarma}{\underline{github.com/avisekksarma}} $|$
+    \href{https://sharmaabhishek.com.np/}{\underline{sharmaabhishek.com.np}}
+\end{center}
+
+%-----------RESEARCH INTERESTS-----------
+\section{Research Interests}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+    Systems for large-scale AI/ML workloads --- distributed and replicated systems (consensus, fault tolerance, linearizability), infrastructure for LLM serving and orchestration, and performance/reliability engineering for data-intensive and high-performance computing pipelines.
+    }}
+ \end{itemize}
+
+%-----------EDUCATION-----------
+\section{Education}
+\begin{itemize}
+    \item \textbf{IOE Pulchowk Campus, Lalitpur, Nepal} \hfill \textit{Nov. 2019 -- Apr. 2024} \\
+    Bachelor in Computer Engineering \hfill 76\% average
+    \item \textbf{SOSHGS, Gandaki, Pokhara, Nepal} \hfill \textit{2017 -- 2019} \\
+    +2 Mathematics \hfill 3.85 GPA (CGPA 3.72)
+\end{itemize}
+
+%-----------PUBLICATIONS-----------
+\section{Publications}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Topic Modeling for Nepali Political News} --- \textit{IEEE ICICT 2025} $|$ \href{https://doi.org/10.1109/ICICT64420.2025.11004776}{Paper} $|$ \href{https://github.com/adh-aashish/topic_modeling}{Code} \\
+     Compared probabilistic (LDA), algebraic (NMF, LSA), and transformer-based (BERTopic) methods on a 2018--2023 Nepali political news corpus; LDA produced more coherent topics than pretrained transformers in this low-resource language.
+    }}
+ \end{itemize}
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+      \resumeProjectHeading
+          {\textbf{Quasar: Linearizable Replicated Key-Value Store} $|$ \href{https://github.com/avisekksarma/nebula/tree/main/projects/quasar}{Link} $|$ \emph{Raft, SMR, WAL, FastAPI, Python}}{}
+          \resumeItemListStart
+            \resumeItem{Implemented a Raft replicated state machine with term-based leader election, log-matching replication, majority-quorum commit, plus crash-durable WAL, snapshot compaction, and InstallSnapshot catch-up under crash and partition.}
+            \resumeItem{Served linearizable reads via a majority quorum check so an isolated leader cannot return stale state; built an interactive lab to step through election, partition, crash, and stale-leader recovery on a live three-node cluster.}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{Videolize: Text Script to Video Generator} $|$ \href{https://github.com/avisekksarma/slerp-diffusion}{Link} $|$ \emph{Stable Diffusion, Gemini API}}{}
+          \resumeItemListStart
+            \resumeItem{Script-to-video pipeline using Stable Diffusion, spherical latent interpolation, and Gemini API; 1st prize, GenAI category, Locus Hack-A-Week 2023.}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{Information Extraction from Invoices using LLM} $|$ \emph{GPT-4 Vision, YOLO, Table-Transformers}}{}
+          \resumeItemListStart
+            \resumeItem{Table and key-value extraction with GPT-4 Vision and fine-tuned Table-Transformers/YOLO; 1st prize, LLM category, Kathmandu University AI Competition 2023.}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{Checkers} $|$ \href{https://github.com/avisekksarma/BoardGames}{Link} $|$ \emph{C++, Minimax, Alpha--beta pruning}}{}
+          \resumeItemListStart
+            \resumeItem{C++ board-game engine with Minimax and alpha-beta pruning as an AI opponent.}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{Procedural Terrain Generator} $|$ \href{https://github.com/avisekksarma/Procedural-Terrain-Generator}{Link} $|$ \emph{C++, Perlin noise}}{}
+          \resumeItemListStart
+            \resumeItem{Hill terrain from Perlin noise, with controls for randomness, clipping, and wireframe rendering.}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{University Network Infrastructure Design} $|$ \href{https://github.com/avisekksarma/Computer-Network-Project}{Link} $|$ \emph{Cisco Packet Tracer}}{}
+          \resumeItemListStart
+            \resumeItem{Campus topology with subnetting, VLANs, DNS/web servers, and OSPF dynamic routing in Cisco Packet Tracer.}
+          \resumeItemListEnd
+    \resumeSubHeadingListEnd
+
+%-----------PROFESSIONAL EXPERIENCE-----------
+\section{Professional Experience}
+\resumeSubHeadingListStart
+
+\resumeSubheading
+{Founding Software Engineer}{April 2025 -- Present}
+{\href{https://zerotb.ai}{ZeroTB}}{San Francisco, California}
+
+\resumeItemListStart
+    \resumeItem{Developed AI-powered workflows using RAG and LLM orchestration frameworks (LangChain, LlamaIndex) for automated compliance document processing.}
+    \resumeItem{Built core backend infrastructure and APIs from the ground up, owning system architecture and scalability decisions in an early-stage startup environment.}
+    \resumeItem{Engineered the database schema, optimized database performance, and executed large-scale data migrations and third-party system integrations for production workloads.}
+    \resumeItem{Collaborated across product and engineering to rapidly prototype and ship backend/AI-infrastructure features in a fast-paced startup setting.}
+\resumeItemListEnd
+
+\resumeSubheading
+{Associate Software Engineer (ML)}{April 2024 -- April 2025}
+{\href{https://www.docsumo.com}{Docsumo}}{Chabahil, Kathmandu}
+
+\resumeItemListStart
+    \resumeItem{Performed critical performance analysis on the key-value extraction pipeline and reduced extraction latency by \(\sim 27\%\) (7--8 seconds), significantly improving system throughput.}
+    \resumeItem{Worked closely with the SRE team to improve reliability and scalability of distributed systems using GCP, Kubernetes, Docker, and Redis.}
+    \resumeItem{Contributed to the core document-extraction pipeline for key-value and OMR extraction systems, including research, implementation, optimization, and refactoring of production APIs.}
+    \resumeItem{Built and maintained scalable backend services and APIs using Flask and MongoDB, supporting high-volume document-processing workflows.}
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------TEACHING EXPERIENCE-----------
+\section{Teaching Experience}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Instructor}{2023}
+      {LOCUS Fellowship, Pulchowk Campus}{}
+      \resumeItemListStart
+        \resumeItem{Co-designed curriculum and taught the mathematical foundations of machine learning (linear algebra, optimization, supervised algorithms) to 100+ students, including implementations from first principles.}
+      \resumeItemListEnd
+    \resumeSubheading
+      {Programming Instructor}{2021 -- 2022}
+      {IT Club and PDSC, Pulchowk Campus}{}
+      \resumeItemListStart
+        \resumeItem{Taught Django web development to 250+ students (PDSC) and Git/GitHub workflows to 40+ students in an in-person IT Club workshop.}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+%-----------LEADERSHIP \& MEMBERSHIP-----------
+\section{Leadership \& Membership}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {President}{Apr 2023 -- Feb 2024}
+      {Society of Kaski Engineering Students (SOKES), Pulchowk Campus}{}
+      \resumeItemListStart
+        \resumeItem{Led a student society of 200+ engineering students from Kaski District at Pulchowk Campus.}
+      \resumeItemListEnd
+    \resumeSubheading
+      {Secretary}{Jan 2022 -- May 2023}
+      {IT Club, Pulchowk Campus}{}
+      \resumeItemListStart
+        \resumeItem{Department representative for Electronics and Computer Engineering; organized Git and design workshops and expanded outreach to students from other campuses.}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+%-----------Awards-----------
+\section{Awards \& Achievements}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Winner} --- LLM category in AI Competition organized by Kathmandu University [ Dec. 2023 ] $|$ \href{https://drive.google.com/file/d/17n9UAwc-aAJ3otnM_pIHE0vDmtzOqq-n/view?usp=sharing} {Link} \\
+     \textbf{Winner} --- Generative AI category in LOCUS 2024 HackAWeek ( Hackathon ) [ Jan. 2024 ]  \\
+     \textbf{Full Scholarship UnderGrad} --- \textbf{Rank 34} in IOE Examination ( over 14000+ students ) $|$ \href{https://drive.google.com/file/d/1_MvcP7meGE8mIQxZAO7Hz9Vbxk0pSP1K/view?usp=sharing}{Link} \\ 
+     \textbf{Rank 1} --- Entrance Exam of Kathmandu University [ Electronics Department rank ] ( over 10000+ students ) $|$ \href{https://drive.google.com/file/d/1X-Y8wiW2V9wkpL8saZtm-m9GjEmd4ucw/view?usp=sharing}{Link}  \\
+     \textbf{Golden Jubilee Scholarship} --- Awarded By Embassy of India in Kathmandu, Nepal \\ 
+     \textbf{Position Holder} --- National Level Math Competition ( Budanilkantha Math League ) $|$ \href{https://drive.google.com/file/d/1m9y8K__JwSjUIRcTCnVE2ZA3ZiraBUZE/view?usp=sharing}{Link} \\
+     \textbf{Entrance Topper} --- High School examination out of over 3000+ students  \\
+     \textbf{College Topper} --- High School (Grade 12) Board Examination \textbf{[ 3.85 GPA ]}  \\
+     \textbf{School Topper} --- SEE Level Examination \textbf{[ 3.8 GPA ]}  \\
+    }}
+ \end{itemize}
+
+%-----------Certifications-----------
+ \section{Certifications}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Machine Learning Specialization} --- Coursera \& DeepLearning.AI $|$ \href{https://www.coursera.org/account/accomplishments/specialization/certificate/UCBXAJSNHGZT}{Link} \\
+     \textbf{Deep Learning Specialization}  --- Coursera \& DeepLearning.AI $|$ \href{https://www.coursera.org/account/accomplishments/specialization/certificate/UCBXAJSNHGZT}{Link}\\
+     \textbf{Annual Nepal AI School} --- NAAMII,Nepal $|$ \href{https://drive.google.com/file/d/15_pX-sWftYpIucRH2JgwiGVqRODABdjE/view?usp=sharing}{Link}  \\
+     \textbf{AWS Academy Graduate - AWS Academy Cloud Architecting} --- AWS $|$ \href{https://www.credly.com/badges/6e20049c-2d60-4e8e-b8df-80c5c2185a11/linked_in_profile}{Link}\\
+     \textbf{AWS Academy Graduate - AWS Academy Data Engineering} --- AWS $|$ \href{https://drive.google.com/file/d/1Bd9PVuHlZdQLId6qMDCBYZ_S0cNnpoNK/view?usp=sharing}{Link}\\
+    }}
+ \end{itemize}
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, C/C++, JavaScript, SQL,  Dart, HTML/CSS } \\
+     \textbf{Frameworks}{:  Flask, FastAPI, Django,  PyTorch, Node.js, Express.js, Flutter} \\  
+     \textbf{Knowledge}{: Linux/Unix, Distributed Systems (Raft, SMR, linearizability), Computer Networks, Web Dev, Computer Vision (YOLO, CNN, ResNets, U-Net, etc.), Mathematical Domain (Linear Algebra, Probability and Statistics,etc.), NLP (RNNs, LSTMs), Transformer, DSA} \\
+     \textbf{Developer Tools}{: Git, Docker, Selenium, Postman, VS Code, Visual Studio, Cisco Packet Tracer } \\
+     \textbf{Libraries}{: gensim, spaCy, NLTK, scikit-learn, NumPy, Matplotlib,  seaborn, Pandas} \\
+     \textbf{Databases}{: SQL ( PostgreSQL, MySQL, SQLite ), NoSQL ( MongoDB ) } \\
+     \textbf{Cloud Services}{: GCP, AWS (S3, EC2, Lambda, etc.)} \\
+    }}
+ \end{itemize}
+
+\end{document}
