@@ -88,7 +88,8 @@
 
 .proj-entry-title {
   margin: 0;
-  flex: 1 1 12rem;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 1.08rem;
   font-weight: 600;
   letter-spacing: -0.015em;
