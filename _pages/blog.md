@@ -22,6 +22,10 @@ pagination:
       {% if blog_description_size > 0 %}
         <p>{{ site.blog_description }}</p>
       {% endif %}
+      <p class="writing-note">
+        Many, though not all, parts of these writings are AI-assisted. I mainly use AI tools for the deeper essays—helping with diagrams, explanations, and organizing the notes and chats I’ve made while learning each topic into a single place. I only write about things I’ve actually read.
+   
+      </p>
     </header>
   {% endif %}
 
