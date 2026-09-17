@@ -1,274 +1,174 @@
 ---
 layout: post
 title: "Transformer Inference Arithmetic — A Worked Walkthrough"
-subtitle: "KV-cache memory, batching, tensor parallelism, communication, and latency—derived with one 52B example."
+subtitle: "How KV cache, batching, memory bandwidth, and multi-GPU serving fit together—using one 52B model and one running workload."
 date: 2026-09-16
 categories: [Tech, machine-learning, llm]
 tags: [machine-learning, llm, transformers, inference, gpu]
-reading_time: 36
-description: "A first-principles walkthrough of Transformer inference arithmetic: KV-cache size, weight bandwidth, batching, tensor parallelism, communication, FLOPs, and real-hardware corrections."
+reading_time: 26
+description: "A beginner-first walkthrough of Transformer inference: what problem each mechanism solves, how the important costs connect, and what the numbers mean in one 52B example."
 featured: true
 ---
 
-_My notes on [kipply's "Transformer Inference Arithmetic"](https://kipp.ly/p/transformer-inference-arithmetic), rebuilt from first principles with one consistent example, full derivations, and no magic numbers._
+_My notes on [kipply's "Transformer Inference Arithmetic"](https://kipp.ly/p/transformer-inference-arithmetic), rebuilt around one question: what makes an LLM request use memory, compute, and time?_
 
 **Want the short version? [Jump straight to the TL;DR.](#tldr)**
 
 ---
 
-## Why this matters
+## The question this post answers
 
-Imagine an inference server receiving prompts from many users. For each request, it must first read the prompt, remember the useful attention state, and then generate new tokens one at a time. While doing that, it repeatedly moves tens of gigabytes of weights, grows a per-request cache, and—if the model spans several GPUs—exchanges partial results between devices.
+Imagine eight people chatting with the same model. Each has already sent a 2,048-token prompt, and the server is generating the next token for all eight conversations.
 
-That description gives us four resources to account for:
+What must the server do?
 
-1. **weight memory** — can the model be loaded at all?
-2. **KV-cache memory** — how many live tokens from active requests can be remembered?
-3. **compute and HBM bandwidth** — how quickly can a forward step run?
-4. **inter-GPU communication** — how much does splitting the model cost?
+1. keep the model's learned numbers in GPU memory;
+2. remember useful attention data for every token in every conversation;
+3. move the model's weights to the compute units on each decode step;
+4. combine partial results if the model is split across GPUs.
 
-The arithmetic answers practical questions:
+Those four jobs create the four costs we will explain: **weight memory, KV-cache memory, computation, and communication**.
 
-- How many requests can fit in one batch?
-- What does one more token of context cost?
-- Is this step limited by math, HBM bandwidth, or GPU-to-GPU communication?
-- Will adding another GPU reduce latency, or only add communication?
+The important part is how they connect:
 
-The goal is not to predict latency to the microsecond. It is to build a model simple enough to calculate by hand and accurate enough to identify the right bottleneck.
+> Model size decides whether the weights fit. The memory left after the weights fit decides how many conversations can stay active. Active conversations create the batch. The batch decides whether weight movement or arithmetic is slower. Splitting across GPUs helps the first two problems but adds communication.
 
-### The story we will follow
-
-Every section extends the same story rather than starting over:
-
-1. text becomes token vectors;
-2. a Transformer block turns those vectors into context-aware vectors;
-3. the prompt is processed once (**prefill**) and its keys and values are cached;
-4. new tokens are generated sequentially (**decode**);
-5. requests are batched so they can share one pass over the weights;
-6. the model is split across GPUs when one GPU cannot hold it;
-7. a real benchmark shows which idealizations break first.
-
-If a term in that list is unfamiliar, the glossary below defines it before any formulas appear.
+Every formula below answers one question in that chain. You do not need to memorize every number. On a first reading, follow the **question** and **carry-forward** notes; the derivations are there so the conclusions do not feel magical.
 
 ---
 
-## Part 0 — Vocabulary and notation
+## Part 0 — The minimum vocabulary
 
-### 0.1 Model words
+These are the only terms needed to start:
 
-**Inference** means using an already-trained model to produce an output. Training changes the model's parameters; inference keeps them fixed and repeatedly applies them.
+- A **token** is one text piece understood by the model. It can be a word, part of a word, punctuation, or whitespace.
+- A **vector** is a list of numbers. One token is represented inside this model by 8,192 numbers.
+- An **embedding** is the learned lookup that turns a token ID into that first vector.
+- A **parameter** or **weight** is one learned number in the model. Most weights are arranged in rectangular grids called **matrices**.
+- A **FLOP** is one floating-point operation. One multiplication plus one addition counts as roughly two FLOPs.
+- A **Transformer block** is one repeated processing unit. **Attention** lets token positions gather information from one another. The **MLP** (multilayer perceptron) widens each token vector, transforms it, and shrinks it back.
+- **Prefill** processes the known prompt. **Decode** generates new tokens afterward, one step at a time.
+- A **KV cache** remembers attention data from earlier token positions so decode does not rebuild it.
+- A **batch** contains token positions processed together. During decode, batch size `B=8` usually means eight conversations each producing one current token.
+- **Latency** is how long one request or step waits. **Throughput** is how many total tokens the server produces per second.
+- **HBM** is the GPU's large attached memory. **Capacity** asks how many bytes fit; **bandwidth** asks how many bytes can move per second.
+- **Tensor parallelism** splits one model across several GPUs. Each GPU computes a piece, and some pieces must then be combined.
+- **BF16** is the two-byte number format used for weights and cache values in this example.
 
-**Token** means one item from the model's vocabulary. A token may be a whole word, part of a word, punctuation, whitespace, or even a byte-like fragment. The tokenizer turns text into integer token IDs before the neural network runs.
+The recurring symbols are:
 
-**Vector** means an ordered list of numbers. Inside the model, one token is represented by a vector of width `d_model`. In our example, that is a list of 8,192 numbers.
+- `d = d_model`: width of one token vector;
+- `L = n_layers`: number of Transformer blocks;
+- `S`: prompt length;
+- `t`: earlier tokens visible during one decode step;
+- `B`: token positions processed together;
+- `N`: GPUs sharing the model.
 
-**Embedding** means both the lookup table that maps token IDs to vectors and, informally, the resulting vectors. The table has one learned row per vocabulary item.
+### Our model and workload
 
-**Matrix** means a rectangular grid of numbers. Most model parameters live in large matrices. Multiplying a token vector by one of these matrices transforms the vector into a new representation.
+The main walkthrough uses one illustrative 52B shape. Part 8 briefly switches to a published 13B benchmark only to compare theory with a real measurement.
 
-**Parameter** (or **weight**) means one learned number stored in the model. "52B parameters" means roughly 52 billion learned numbers—not 52 billion operations and not 52GB.
+| Model or hardware quantity       |                                          Value |
+| -------------------------------- | ---------------------------------------------: |
+| Parameters                       |                                     52 billion |
+| Token-vector width, `d_model`    |                                          8,192 |
+| Transformer blocks, `n_layers`   |                                             64 |
+| Attention                        | 64 query heads and 64 KV heads, each width 128 |
+| MLP hidden width                 |                                  `4d = 32,768` |
+| Vocabulary size                  |                                         50,257 |
+| Weight and cache format          |                        BF16, 2 bytes per value |
+| GPU                              |                               NVIDIA A100 40GB |
+| Peak BF16 compute                |                           312 trillion FLOPs/s |
+| HBM bandwidth                    |                           1.5 trillion bytes/s |
+| One-direction GPU-link bandwidth |                            300 billion bytes/s |
 
-**FLOP** means one floating-point operation. By the convention used in GPU specifications, one multiplication plus one addition counts as two FLOPs. A fused multiply-add instruction may execute both together, but it is still reported as two operations.
+Our running workload is:
 
-**Transformer block** means one repeated structural unit containing attention, an MLP, normalization, residual connections, and related operations. People often call a whole block a "layer," even though the block itself contains several linear layers.
+- **4 A100 GPUs** sharing the model;
+- **8 active conversations**;
+- **2,048 cached tokens per conversation**;
+- therefore **`B=8`** during a decode step.
 
-**Self-attention** is the mechanism that lets one token read information from other token positions. It decides both _which_ earlier positions matter and _what_ information to gather from them.
+This is an intentionally simple teaching example, not a claim that it is the best production configuration. Peak compute and bandwidth rates are upper limits, so time estimates derived from them are optimistic lower bounds.
 
-**Residual stream** is the `d_model`-wide vector carried from block to block. Each attention or MLP sublayer adds an update to this stream instead of replacing it outright; that addition is a **residual connection**.
-
-**MLP** (multilayer perceptron) is the per-token feed-forward network inside each block. Unlike attention, it does not mix information between token positions. In this example it expands each vector from 8,192 to 32,768 values and projects it back.
-
-**LayerNorm** rescales a token's vector into a numerically well-behaved range. It has little arithmetic compared with a large matrix multiplication, but it still moves data and therefore takes time.
-
-**LM head** is the final projection from the residual-stream width to one score per vocabulary item. Those raw scores are called **logits**. Softmax converts them into probabilities from which the next token can be selected.
-
-### 0.2 Serving and hardware words
-
-**Prefill** is the first forward pass over all tokens in a prompt. The entire prompt is known, so many token positions can be processed in parallel. Prefill creates the initial KV cache and largely determines **time to first token**.
-
-**Decode** is the loop that follows prefill. Each iteration generates one new token per active request, appends its K/V state to the cache, and then starts the next iteration. Tokens within one response remain sequential: token 101 cannot be generated until token 100 is known.
-
-**KV cache** stores the keys and values already computed for live token positions. It trades memory for avoiding repeated prefix computation.
-
-**Batching** means processing token positions from multiple requests together. During decode, a batch of 100 usually means 100 active sequences each contributing one current token—not 100 future tokens from one sequence.
-
-**Latency** is elapsed time for an individual request or step. **Throughput** is aggregate work completed per second across the server. Waiting briefly to form a larger batch may improve throughput while slightly worsening one request's latency.
-
-**GPU** means the complete accelerator package. **HBM** (high-bandwidth memory, often called VRAM) is the GPU's attached large-capacity memory. **On-chip memory and compute units** are much smaller and faster structures inside the GPU where arithmetic actually happens.
-
-**Capacity** answers "how many bytes fit?" **Bandwidth** answers "how many bytes move per second?" A 40GB GPU has a capacity of 40GB; its 1.5TB/s HBM bandwidth is a transfer rate, not another amount of storage.
-
-**Tensor parallelism** splits individual weight matrices across GPUs. Every GPU performs part of a matrix multiplication. Some sharded intermediates can feed directly into the next local operation; a collective is required when partial sums must be combined or a replicated residual-stream result is needed.
-
-### 0.3 Symbols used throughout
-
-| Symbol            | Meaning                                                        |
-| ----------------- | -------------------------------------------------------------- |
-| `d` or `d_model`  | width of one token's residual-stream vector                    |
-| `V`               | vocabulary size                                                |
-| `L` or `n_layers` | number of Transformer blocks                                   |
-| `S`               | number of token positions processed in a full sequence/prefill |
-| `t`               | number of earlier positions visible at the current decode step |
-| `B`               | token positions processed together in one batched operation    |
-| `N`               | number of GPUs in the tensor-parallel group                    |
-| `b`               | bytes used to store one number                                 |
-
-The distinction between `S`, `t`, and `B` matters. Sequence length tells us how far attention looks; batch size tells us how many current token positions share the same weight read.
-
-### 0.4 Our running example
-
-| Quantity                                   |                   Value |
-| ------------------------------------------ | ----------------------: |
-| Model size                                 |          52B parameters |
-| `d_model` (one token vector's width)       |                   8,192 |
-| `n_layers` (stacked Transformer blocks)    |                      64 |
-| `n_heads × d_head`                         |      `64 × 128 = 8,192` |
-| `vocab_size` (distinct token IDs)          |                  50,257 |
-| Weight/cache format                        | BF16, 2 bytes per value |
-| GPU                                        |        NVIDIA A100 40GB |
-| Peak BF16 compute                          |    312 trillion FLOPs/s |
-| HBM bandwidth                              |    1.5 trillion bytes/s |
-| Effective one-direction GPU link bandwidth |     300 billion bytes/s |
-
-This is the same illustrative 52B shape used in kipply's post. It assumes ordinary multi-head attention and a two-matrix MLP with a `4d` hidden width. Modern models may use grouped-query attention (GQA), gated MLPs, RoPE, quantized weights, or different accelerators. Those change constants, not the method.
-
-> **Important:** hardware peak numbers produce **lower bounds**, not promises. Unless stated otherwise, GB and TB below are decimal units, while "MiB" and "GiB" are binary units.
+GB uses decimal powers of 1,000; GiB and MiB use binary powers of 1,024. The distinction only changes small numerical details here, but the labels are kept explicit.
 
 ---
 
-## Part 1 — What happens when the model produces a token
+## Part 1 — From a prompt to one next token
 
-### 1.1 Text becomes IDs, then vectors
+> **Question:** What work is the server repeating when it generates text?
 
-Suppose the prompt is:
+Suppose a user writes:
 
 > The capital of France is
 
-The tokenizer might divide it into several pieces and assign each piece an integer ID. The exact split depends on the tokenizer. These IDs are addresses, not semantic vectors; ID 42 is not "twice as meaningful" as ID 21.
+The model cannot read text directly. The request follows this path:
 
-An embedding table
+1. **Tokenize:** split the text into token pieces and replace each piece with an integer ID.
+2. **Embed:** use each ID to look up an 8,192-number vector.
+3. **Add position information:** tell the model where each token appears, because word order matters.
+4. **Run 64 Transformer blocks:** each block refines the token vectors.
+5. **Produce vocabulary scores:** turn the final vector into 50,257 scores, one for every possible next token.
+6. **Choose one token:** append it to the sequence and repeat the process.
 
-$$E \in \mathbb{R}^{V \times d}$$
+For a prompt containing `S` tokens, the model carries an `S × 8,192` grid of numbers through the blocks. Each block keeps the same outer shape. It adds two kinds of updates:
 
-maps each ID to one learned row. If token `i` has ID `id_i`, its initial vector is simply
+- **attention** gathers useful information from other token positions;
+- the **MLP** transforms each position on its own.
 
-$$x_i = E[\text{id}_i].$$
-
-In our example, each row contains 8,192 BF16 values. For an `S`-token prompt, stacking those rows gives
-
-$$X \in \mathbb{R}^{S \times d} = \mathbb{R}^{S \times 8192}.$$
-
-The model also needs position information; otherwise the same words in different orders would look like an unordered set. Some architectures add learned position vectors. Many modern models instead apply RoPE while constructing queries and keys. Either way, the model gains a notion of order.
-
-### 1.2 One pass through the complete model
-
-From top to bottom:
-
-1. **Tokenize:** text becomes `S` integer IDs.
-2. **Embed:** each ID selects one `d`-wide vector.
-3. **Run 64 Transformer blocks:** every block reads and writes an `S × d` residual stream.
-4. **Apply the final LayerNorm:** the shape remains `S × d`.
-5. **Apply the LM head:** the last useful hidden vector is projected from width `d` to width `V`.
-6. **Select a token:** softmax turns the `V` logits into probabilities; greedy decoding, top-k, top-p, or another strategy chooses one ID.
-7. **Append and repeat:** that ID becomes part of the sequence for the next decode step.
+**Normalization** rescales a vector's values into a stable range. A **residual addition** adds a block's update to the incoming vector instead of replacing it. Both help information flow through 64 blocks without changing the 8,192-wide shape.
 
 <img src="/assets/img/transformer-param-count/01-architecture.svg" alt="Decoder-only Transformer: tokenization and embedding, repeated attention and MLP blocks, then a vocabulary head." style="width: 100%; max-width: 54rem; height: auto; display: block; margin: 1.5rem auto;" />
 
-The residual-stream shape is deliberately stable:
+### 1.1 Why attention creates Q, K, and V
 
-$$[S,d]\rightarrow[S,d]\rightarrow\cdots\rightarrow[S,d].$$
+Each block makes three different projections of a token vector:
 
-That `S × d` picture describes prefill. During cached decode, each block computes residual-stream updates only for the newest position from each active request, while attention reads old K/V from the cache. In both phases, every live token vector remains width `d`.
+$$Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V.$$
 
-Only the LM head changes the width from `d` to `V`, because only there do we need one score for every possible next token. During decode, the server normally needs logits only for the newest position—not a fresh prediction from every old position.
+Here `X` contains the current token vectors. Each `W` is a different learned matrix. A **projection** simply means multiplying by one of those matrices to create a new set of vectors.
 
-### 1.3 Inside one Transformer block
+A useful mental model is:
 
-Ignoring small architectural variations, a modern pre-normalized block is approximately:
+- **query:** what is the current position looking for?
+- **key:** what does an earlier position advertise about itself?
+- **value:** what content can that earlier position contribute?
 
-$$
-\begin{aligned}
-u &= x + \operatorname{Attention}(\operatorname{LayerNorm}(x)),\\
-y &= u + \operatorname{MLP}(\operatorname{LayerNorm}(u)).
-\end{aligned}
-$$
+For the current token, attention works in three steps:
 
-Read those equations as a sequence:
+1. compare its query with every visible key, producing one relevance score per position;
+2. turn those scores into weights that sum to one;
+3. take a weighted sum of the corresponding value vectors.
 
-1. normalize the incoming residual stream;
-2. let attention gather information from other positions;
-3. add that update back to the original stream;
-4. normalize again;
-5. transform each token independently with the MLP;
-6. add that update back too.
+The distinction matters:
 
-The residual additions are why each block can contribute an update without changing the `d_model` width. Exact normalization placement differs by architecture, but the large-matrix arithmetic below is unchanged by that detail.
+> `q · k` produces a relevance score, not a value. The score decides how much of the separately computed `v` to use.
 
-Under this post's simplified architecture, the block's six large matrices are:
+The model splits this work across 64 attention heads so different heads can learn different kinds of relationships. Their outputs join back into one 8,192-wide vector.
 
-- attention: `Wq`, `Wk`, `Wv`, and `Wo`, each `d × d`;
-- MLP: `W1`, shape `d × 4d`, and `W2`, shape `4d × d`.
+### 1.2 Prefill and decode
 
-Attention mixes information **between token positions**. The MLP transforms each position **independently**. LayerNorm, residual additions, positional operations, masking, activations, and softmax also run; they contain far fewer parameters but still move data, so they are not necessarily free in wall-clock time.
+The same model has two noticeably different inference phases.
 
-### 1.4 Self-attention, one step at a time
+**Prefill** processes the known prompt. All `S` prompt positions are available, so the GPU can process many of them in parallel. This phase also creates K and V for every prompt position.
 
-For one block, the residual stream is projected three different ways:
+**Decode** begins after prefill:
 
-$$Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,$$
+1. use the current token to compute its new Q, K, and V;
+2. let its query attend to the cached earlier K/V entries plus its own new K/V;
+3. choose the following token;
+4. save the current K/V and repeat.
 
-where
+One conversation cannot generate all its future tokens in parallel: token 101 depends on token 100. Our eight conversations _can_ advance together, however. Each contributes one current position, giving the server a decode batch of `B=8`.
 
-$$W_Q,W_K,W_V\in\mathbb{R}^{d\times d}.$$
-
-A useful—though imperfect—mental model is:
-
-- **query:** what information is this position looking for?
-- **key:** what kind of information does this position offer?
-- **value:** what content should this position contribute if selected?
-
-The most common misunderstanding is worth removing explicitly:
-
-> `q · k` does **not** produce `v`. It produces one scalar relevance score. The value vector was computed independently using `Wv`.
-
-For one current position and one attention head:
-
-1. take the current query `q`;
-2. dot it with every allowed key `k_i`, producing one score per visible position;
-3. divide by `√d_head` to keep score magnitudes numerically stable;
-4. mask future positions so they cannot be read;
-5. softmax the scores into non-negative weights that sum to one;
-6. multiply each `v_i` by its weight and add the results.
-
-In compact notation,
-
-$$A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_{\text{head}}}}+M_{\text{causal}}\right),\qquad Z=AV.$$
-
-The model runs this mechanism in 64 heads. Each head projects from the full 8,192-wide residual stream into its own 128-wide Q/K/V output slice and can specialize in different relationships. The heads partition the **projected output width**, not the original input features. Their outputs are concatenated back to width 8,192 and mixed through `Wo`.
-
-### 1.5 Prefill and decode use the same model differently
-
-This distinction drives most inference arithmetic.
-
-**During prefill**, all `S` prompt tokens are known. For one head:
-
-$$Q,K,V\in\mathbb{R}^{S\times d_{\text{head}}},\qquad QK^\top\in\mathbb{R}^{S\times S}.$$
-
-The causal mask hides the upper triangle, but the prompt's positions can still be processed in large parallel kernels. Prefill creates K and V for every prompt position.
-
-**During decode**, only one new token per request is known at a time. If `t` earlier positions are already cached:
-
-$$q_{\text{new}}\in\mathbb{R}^{1\times d_{\text{head}}},\qquad K_{\text{cache}},V_{\text{cache}}\in\mathbb{R}^{t\times d_{\text{head}}}.$$
-
-The block first computes K and V for the current position. Attention temporarily combines them with the `t` prior entries, so the new query produces a `1 × (t+1)` score row and is allowed to attend to itself. The current K/V pair then becomes part of the persistent cache. The logits from that position predict the **following** token, which starts the next iteration.
-
-Prefill is highly parallel within one request. Decode is sequential within one request but can be parallel **across many requests** through batching.
+> **Carry forward:** Earlier K and V vectors are needed again on every later decode step. Recomputing them would repeat known work, so the server needs somewhere to remember them.
 
 ---
 
 ## Part 2 — The KV cache, quantified
 
-### 2.1 Why K and V persist, but Q does not
+> **Question:** Why does serving memory grow as conversations get longer?
 
 For a token at position `i`, its query is needed while computing position `i`'s attention output. A later position `t` creates its own query, so it has no use for `q_i`.
 
@@ -278,136 +178,103 @@ Causality makes storage safe. At a given layer, position `i` cannot see position
 
 <img src="/assets/img/transformer-inference-arithmetic/01-kv-cache.svg" alt="A token's query is used once and discarded, while its key and value persist in the cache and are reused by future queries." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;" />
 
-The cache is therefore memoization: keep an expensive intermediate result because later steps will request exactly the same result. It does not approximate attention or change model quality.
+The KV cache is simply saved work: keep an intermediate result because later steps will request exactly the same result. It does not change the model's answer.
 
-### 2.2 Bytes stored per token
+### 2.1 What one cached token costs
 
-For ordinary multi-head attention, each token stores one K vector and one V vector at every layer:
+With the standard multi-head attention assumed in our model table, each token needs one K vector and one V vector in every block. In BF16:
 
 $$
 \begin{aligned}
 \text{KV bytes/token}
 &= 2_{\text{K,V}}
-   \cdot b_{\text{bytes/value}}
-   \cdot n_{\text{layers}}
-   \cdot n_{\text{heads}}
-   \cdot d_{\text{head}} \\
+   \cdot 2_{\text{bytes/value}}
+   \cdot 64_{\text{blocks}}
+   \cdot 64_{\text{heads}}
+   \cdot 128_{\text{values/head}} \\
 &= 2 \cdot 2 \cdot 64 \cdot 64 \cdot 128 \\
 &= 2{,}097{,}152\text{ bytes} \\
 &= 2\text{ MiB}.
 \end{aligned}
 $$
 
-Each factor answers a different question:
+The factors have a direct meaning: two saved objects (`K` and `V`), two bytes per number, 64 blocks, and `64 × 128 = 8,192` values in each complete K or V vector.
 
-- `2_K,V`: two vectors are retained;
-- `2_bytes/value`: BF16 stores each component in two bytes;
-- `64_layers`: every block has its own attention state;
-- `64_heads × 128_values/head`: one complete 8,192-wide K or V vector per layer.
-
-Because `n_heads · d_head = d_model`, the BF16 formula simplifies to
+Because this model has 64 KV heads whose widths add back to `d_model`, the shortcut is
 
 $$\boxed{\text{KV bytes/token} = 4\,n_{\text{layers}}d_{\text{model}}.}$$
 
-That means one 2,048-token request needs
+One 2,048-token conversation therefore needs
 
 $$2\text{ MiB/token} \times 2048 = 4\text{ GiB}$$
 
-of KV cache across the tensor-parallel group.
+of cache. Our eight active conversations need
 
-That 4GiB belongs to **one** 2,048-token sequence. Eight such live requests would need about 32GiB in this simplified model, even before they generate another token. A scheduler must therefore count the sum of cached tokens across all active requests:
+$$8\times4\text{ GiB}=32\text{ GiB}.$$
 
-$$M_{\text{KV,total}}=M_{\text{KV/token}}\sum_r t_r.$$
+Every decode step adds one cached token to each conversation, so the eight-request batch grows by another
 
-Under tensor parallelism, the cache is normally sharded by KV heads. Each GPU stores only its shard, while the values above describe the aggregate cache across the group.
+$$8\times2\text{ MiB}=16\text{ MiB per step}.$$
 
-For GQA or multi-query attention, replace `n_heads` with the smaller `n_kv_heads`:
+This is why a memory manager counts **live tokens**, not merely requests. Eight short conversations and eight very long conversations have completely different cache costs.
 
-$$\text{KV bytes/token} = 2b\,n_{\text{layers}}n_{\text{kv-heads}}d_{\text{head}}.$$
+### 2.2 What the cache saves—and what it does not
 
-This is one reason serving-oriented models use fewer KV heads.
+Without a cache, every new decode step would rebuild old intermediate state that has not changed. With the cache, the large projections and MLP work run only for the current token positions.
 
-### 2.3 Projection FLOPs saved by caching
+The cache does not make old context free. The new query must still:
 
-For one token at one layer, `Wk` and `Wv` are each `d × d`. Applying one such matrix costs approximately `2d²` FLOPs, so applying both across all layers costs
+- read earlier K/V entries;
+- compare against the earlier keys;
+- combine the earlier values.
 
-$$
-2_{\text{matmul}}
-\cdot 2_{\text{K,V}}
-\cdot n_{\text{layers}}
-\cdot d^2
-= 4 \cdot 64 \cdot 8192^2
-= 17{,}179{,}869{,}184
-$$
+Longer context therefore still increases attention work and cache traffic. The cache removes wasteful recomputation; it does not remove the cost of looking back.
 
-or about **17.18 GFLOPs per old token**.
-
-The six large matrices in a complete block stack cost about 103.08 GFLOPs per token (derived in Part 8), so K and V projections are exactly one-sixth of that dense-matmul baseline.
-
-This does **not** mean a KV cache always reduces latency by exactly one-sixth. At position `t`, the important saving is that the server does not recompute old prefix state repeatedly. Meanwhile, the cache introduces memory reads of its own, and the current token still needs a complete pass through the model.
-
-At decode position `t`, the cache avoids repeating those K/V projections for the previous `t` positions. It still:
-
-1. computes K and V for the **new** token;
-2. reads old K/V from the cache;
-3. computes the new query against the `t` old keys plus its current key;
-4. forms a weighted sum of the old values plus its current value.
-
-### 2.4 A complexity correction worth remembering
-
-It is tempting to say that a KV cache changes generation from quadratic to linear. That is not quite right.
-
-- Without a cache, each decode step reruns projections over the whole prefix.
-- With a cache, dense projection/MLP work is done only for the new token.
-- But the new query still scans `t` cached keys and values.
-
-So the **attention scan per decode step remains `O(t)`**. For a prompt of length `S` followed by `n` decode steps, the prior-context scans total
-
-$$nS+\frac{n(n-1)}{2}=\Theta(nS+n^2).$$
-
-The cache removes repeated prefix computation; it does not make attention itself constant-time.
-
-Why is it still transformative? The expensive `d²` projections and MLP work no longer repeat for every old position. Only the context-dependent `t·d` attention scan grows each step. For wide models and ordinary context lengths, avoiding repeated `d²` work is an enormous reduction even though the remaining sequence-length complexity is not linear overall.
-
-In practice, for a very wide model and moderate context, streaming the dense weights can dominate enough that consecutive decode steps look almost flat. At long contexts, KV-cache reads and attention become visible.
+> **Carry forward:** The cache solves a compute problem by creating a memory problem. We already need 32GiB for our eight conversations, and we have not yet counted the model's weights.
 
 ---
 
-## Part 3 — Where compute actually happens
+## Part 3 — Why decode often waits on memory, not math
+
+> **Question:** An A100 can perform 312 trillion operations per second. Why can generating one token still take many milliseconds?
 
 The phrase "load the model" hides two very different data movements.
 
 **Event 1: storage → HBM.** At server startup, the checkpoint moves from disk or host memory into GPU HBM. This can take seconds, but it happens before requests are served, so it is not part of normal per-token latency.
 
-**Event 2: HBM → on-chip memory and compute units.** During every forward pass, kernels fetch small tiles of weights into caches, shared memory, and registers close to the arithmetic units. The checkpoint remains resident in HBM, but the GPU cannot keep the entire model in its much smaller on-chip storage.
+**Event 2: HBM → compute units.** During every forward pass, the GPU fetches small weight tiles into its much smaller on-chip storage, uses them, and makes room for the next tiles.
 
 <img src="/assets/img/transformer-inference-arithmetic/04-hardware-data-path.svg" alt="Model weights move from storage to GPU HBM once at startup, then weight tiles stream from HBM through small on-chip memory to compute units on every forward pass." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;" />
 
 _[Open the hardware data-path diagram at full size](/assets/img/transformer-inference-arithmetic/04-hardware-data-path.svg)._
 
-Think of HBM as a warehouse next to a factory. Loading the checkpoint stocks the warehouse once. Serving a token still requires bringing each needed pallet to the factory floor. The same weights remain in the warehouse between requests, but most cannot remain beside the arithmetic units.
-
-Real GPUs reuse tiles while a kernel works and may retain a small fraction in cache. "Streaming the weights" is a first-order model of the aggregate traffic: the model is far larger than on-chip storage, so a decode pass must fetch roughly one model's worth of dense weights from HBM.
+Think of HBM as a warehouse beside a factory. Startup stocks the warehouse once. Every decode step still brings the needed pallets to the factory floor. The weights remain on the GPU, but they are not all beside the arithmetic units.
 
 For 52B BF16 parameters:
 
 $$52\text{e}9\text{ parameters}\times2\text{ bytes/parameter}=104\text{e}9\text{ bytes}=104\text{ GB}.$$
 
-On a hypothetical single A100 with enough capacity, the ideal bandwidth floor for reading those bytes once would be
+Reading that much data through one A100's 1.5TB/s HBM interface would take at least
 
 $$T_{\text{weights,1}} = \frac{104\text{e}9}{1.5\text{e}12} = 69.3\text{ ms}.$$
 
-The real model does not fit on one 40GB A100. With four-way tensor parallelism, each GPU reads roughly 26GB:
+The model does not actually fit on one 40GB A100. Across four GPUs, each GPU owns and reads roughly 26GB:
 
 $$T_{\text{weights,4}} = \frac{26\text{e}9}{1.5\text{e}12} = 17.3\text{ ms}.$$
 
-These are ideal **weight-read floors**, not full step latencies. Attention, cache reads, communication, and software overhead are added later.
+Now compare that with arithmetic. The model's six large matrices need about 103.08 billion FLOPs per token; Part 7 derives this number. Split across four ideal A100s:
+
+$$T_{\text{math,token}}=\frac{103.08\text{e}9}{4\times312\text{e}12}\approx0.083\text{ ms}.$$
+
+For our eight-conversation batch:
+
+$$T_{\text{math},B=8}=8\times0.083\approx0.66\text{ ms}.$$
+
+The GPUs need only 0.66ms of ideal arithmetic but about 17.3ms to stream their weight shards. **Weight movement is the bottleneck.** This is the problem batching tries to solve.
 
 ### 3.1 Why batching amortizes weight traffic
 
-Start with one BF16 weight. Reading it costs two bytes. Using it for one token contributes roughly one multiplication and one addition: two FLOPs. That is only about one FLOP per byte, far below the A100's available compute-to-bandwidth balance.
-
-Now let `B` token positions use the same matrix together. The matrix is still fetched once for the operation, but every weight is reused across `B` rows of activations. Weight traffic stays roughly fixed while useful arithmetic scales with `B`:
+If `B` positions use a matrix together, the GPU reads the weights once for that operation and applies them to all `B` positions. The weight traffic stays roughly fixed while useful arithmetic grows with `B`. Let `P` mean the number of weights in that matrix:
 
 $$
 \text{arithmetic intensity} \approx
@@ -415,86 +282,91 @@ $$
 = B\text{ FLOPs/byte}.
 $$
 
-Arithmetic intensity means "useful work performed per byte fetched." The A100 can ideally sustain the following hardware balance:
+**Arithmetic intensity** means useful operations performed per byte moved.
+
+In plain language, a batch of 8 gets about eight uses from each fetched weight; a batch of 208 gets about 208 uses. The A100's own compute-to-bandwidth balance is
 
 $$\frac{312\text{e}12\text{ FLOP/s}}{1.5\text{e}12\text{ byte/s}} \approx 208\text{ FLOPs/byte}.$$
 
-Equating the workload's `B` FLOPs/byte with the hardware's 208 FLOPs/byte gives the ideal dense-matmul **ridge point** near `B=208`:
+Matching the workload's `B` FLOPs/byte with the hardware's 208 FLOPs/byte gives the ideal **crossover** near `B=208`:
 
 - **Below 208:** weights cannot arrive quickly enough to keep all arithmetic units busy. The operation is memory-bandwidth-bound.
 - **Near 208:** weight delivery and arithmetic take similar time. Hardware utilization is best in this simplified model.
 - **Above 208:** the arithmetic units are full, so adding more positions increases step time. The operation is compute-bound.
 
-For decode, `B` usually means concurrent sequences contributing one new token each. It does **not** mean the server generates 208 sequential future tokens from one request simultaneously. Prefill also processes many positions together, although attention and exact matrix shapes make it less identical to simple batching than this roofline suggests.
+During decode, `B` means concurrent conversations contributing one current token each. It does **not** mean one conversation generates 208 future tokens simultaneously.
 
 <img src="/assets/img/transformer-inference-arithmetic/02-batching-crossover.svg" alt="Ideal batching roofline for the 52B model on four A100 GPUs: a 17.3 millisecond weight-streaming floor meets the compute line near a batch of 208." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;" />
 
 _[Open the batching crossover graph at full size](/assets/img/transformer-inference-arithmetic/02-batching-crossover.svg)._
 
+The graph uses `TP=4` as shorthand for four-way tensor parallelism.
+
 Using only the six large matrices:
 
-| Positions processed together (`B`) | Weight floor, TP=4 | Ideal math time, TP=4 | Dense-matmul lower bound |
-| ---------------------------------: | -----------------: | --------------------: | -----------------------: |
-|                                  1 |            17.3 ms |              0.083 ms |                  17.3 ms |
-|                                 50 |            17.3 ms |               4.13 ms |                  17.3 ms |
-|                                100 |            17.3 ms |               8.26 ms |                  17.3 ms |
-|                            **208** |        **17.3 ms** |           **17.2 ms** |             **≈17.3 ms** |
-|                                500 |            17.3 ms |               41.3 ms |                  41.3 ms |
+| Positions processed together (`B`) | Weight floor, 4 GPUs | Ideal math time, 4 GPUs | Large-matrix lower bound |
+| ---------------------------------: | -------------------: | ----------------------: | -----------------------: |
+|                                  1 |              17.3 ms |                0.083 ms |                  17.3 ms |
+|                       **8 (ours)** |          **17.3 ms** |             **0.66 ms** |              **17.3 ms** |
+|                            **208** |          **17.3 ms** |             **17.2 ms** |             **≈17.3 ms** |
+|                                500 |              17.3 ms |                 41.3 ms |                  41.3 ms |
 
-The tiny 17.3ms-versus-17.2ms mismatch comes from using the rounded full 52B weight footprint for the memory line but the 51.54B block-matrix count for the math line. Using the same set of dense weights in numerator and denominator makes the ideal crossover exactly the hardware ratio, 208; it does not change the regime analysis.
+The `B=500` row only shows what happens beyond the crossover. Four A100s could not hold 500 of our 2,048-token conversations; such a batch would require much shorter contexts or substantially more memory.
 
-Read the last column as
+The lower bound uses
 
-$$T_{\text{dense}}\approx\max(T_{\text{weight read}},T_{\text{math}}),$$
+$$T_{\text{large matrices}}\approx\max(T_{\text{weight read}},T_{\text{math}}),$$
 
-because optimized matrix kernels overlap fetching tiles with computing on earlier tiles. This does **not** make additional positions literally free below 208. It means the idealized dense matmuls use arithmetic capacity that would otherwise wait on weight delivery. KV reads, attention, activation traffic, communication, imperfect kernels, and batching overhead give the supposedly flat line a slope in reality.
+because optimized GPU programs overlap weight fetching with arithmetic. Positions below 208 are not literally free; they use compute capacity that would otherwise sit idle while weights arrive. Cache reads, attention, communication, and software still add cost.
+
+> **Carry forward:** Our `B=8` workload is far below the ideal 208-position crossover. More concurrent conversations could improve throughput—but every additional conversation needs KV-cache memory.
 
 ---
 
 ## Part 4 — Capacity: does it fit?
 
-Weights alone require
+> **Question:** We want a larger batch, but can the weights and all live caches fit in HBM together?
+
+The weights alone need at least
 
 $$\left\lceil\frac{104}{40}\right\rceil = 3\text{ A100-40GB GPUs}.$$
 
-The remaining aggregate HBM is the first approximation of the KV-cache budget:
+But "the weights fit" is not enough. Whatever remains must hold the KV cache and the runtime's temporary buffers:
 
 | GPUs | Total HBM | Weight memory | Theoretical remainder | Theoretical KV-token capacity |
 | ---: | --------: | ------------: | --------------------: | ----------------------------: |
 |    3 |    120 GB |        104 GB |                 16 GB |                 ≈7,629 tokens |
 |    4 |    160 GB |        104 GB |                 56 GB |                ≈26,703 tokens |
 
-The final column is simply `remainder / 2,097,152 bytes per token`.
+Our eight conversations already contain
 
-Three GPUs are only the **capacity floor**. They are not automatically a usable or efficient tensor-parallel configuration. Our 64 attention heads divide cleanly across 4 or 8 GPUs but not 3, and many GPU servers have power-of-two link topologies. Four GPUs are therefore the more natural configuration for this example.
+$$8\times2{,}048=16{,}384\text{ live tokens}.$$
 
-With four GPUs, the 56GB remainder is aggregate memory—about 14GB per GPU before runtime overhead. Because attention heads and their cache are sharded, each device stores its corresponding fraction.
+So three GPUs can hold the weights but **cannot hold our workload's cache**. Four GPUs can: the cache uses 32GiB (about 34.4GB in decimal units), leaving roughly 21.6GB before runtime overhead.
 
-As a concrete workload, eight requests with 2,048 cached tokens each consume
+The 26,703-token ceiling also reveals something important about batching. If every conversation is 2,048 tokens long, four GPUs can theoretically retain only
 
-$$8\times2048\times2\text{ MiB}=32\text{ GiB}.$$
+$$\left\lfloor\frac{26{,}703}{2{,}048}\right\rfloor=13\text{ such conversations}.$$
 
-They fit below the theoretical four-GPU ceiling, but generation grows every request's cache one token at a time. The scheduler must leave room for that growth or evict, swap, or reject work.
+That would give a decode batch around 13—still nowhere near the ideal 208-position crossover from Part 3. Long contexts consume the memory that would otherwise support more concurrent requests.
 
-These are **ceilings**, not safe scheduler limits. A serving runtime also needs:
+And 13 is only a mathematical ceiling. Real serving also needs memory for temporary activations (intermediate token vectors), communication buffers, the GPU runtime, and unused safety space. The safe limit is lower.
 
-- temporary activations and workspaces;
-- communication buffers;
-- allocator headroom and memory lost to fragmentation;
-- CUDA context and kernel-library allocations;
-- possibly untied vocabulary-head weights.
+This leads to the practical tradeoff:
 
-Consequently, a practical four-GPU limit can be noticeably below 26,700 cached tokens. This is not a rounding issue; it is reserved and fragmented memory.
+- longer conversations consume more cache per request;
+- fewer active requests mean smaller decode batches;
+- smaller batches reuse each weight load less efficiently.
 
-Paged KV-cache allocators reduce fragmentation by managing cache memory in blocks rather than demanding one large contiguous region per request. They improve utilization but cannot exceed the physical byte budget.
-
-The scheduling consequence is still clear: after the weights fit, extra HBM can increase concurrency, and concurrency lets the server build larger efficient batches. Capacity is therefore not separate from throughput; it determines how many requests are available to batch.
+> **Carry forward:** Four GPUs solve our capacity problem. But no single GPU now computes the full answer, so the devices must exchange partial results.
 
 ---
 
 ## Part 5 — Splitting weights across GPUs
 
-Tensor parallelism shards each large matrix. With four GPUs, each package owns roughly one quarter of the weight bytes and performs roughly one quarter of the matmul work:
+> **Question:** If four GPUs each compute only part of a matrix multiplication, how does the model recover one correct answer?
+
+Tensor parallelism shards each large matrix. With four GPUs, each package owns roughly one quarter of the weight bytes and performs roughly one quarter of the matrix-multiplication work:
 
 $$104\text{ GB}/4=26\text{ GB of weights per GPU}.$$
 
@@ -502,446 +374,260 @@ Because every GPU has its own HBM channels and compute units, this is more than 
 
 <img src="/assets/img/transformer-inference-arithmetic/03-tensor-parallel.svg" alt="Four tensor-parallel GPUs each read a 26GB weight shard, compute a partial output, and exchange partials in a collective to reconstruct the full activation." style="width: 100%; height: auto; display: block; margin: 1.5rem auto;" />
 
-### 5.1 Why communication is required
-
 Imagine splitting a long arithmetic sum among four people. Each person can calculate one quarter independently, but nobody has the final total until the four partial sums are combined. Sharded matrix multiplication has the same dependency.
 
-Depending on which matrix dimension is partitioned, each GPU may produce:
-
-- a distinct slice that can be concatenated; or
-- a partial sum that must be reduced across GPUs.
-
-A common Megatron-style Transformer block arranges the sharding so that it needs **two logical activation all-reduces per block**:
+In one common sharding arrangement, a Transformer block needs two logical combine operations:
 
 1. after attention's output projection;
 2. after the MLP's down-projection.
 
-An all-reduce is itself implemented as multiple network phases—for example, reduce-scatter plus all-gather. This is why some descriptions count four communication phases per block. Calling all four phases "four all-reduces" would overcount the logical synchronization points.
+The operation that exchanges and sums the partial answers is called an **all-reduce**. With 64 blocks, one decode step reaches
 
-Why can the other projections avoid immediate synchronization? `Wq`, `Wk`, `Wv`, and the MLP up-projection can produce sharded intermediate features that the same GPU continues processing locally. The output projection `Wo` and MLP down-projection `W2` convert those shards back into residual-stream updates; their partial sums must be combined before the next dependent operation.
+$$2\times64=128\text{ logical all-reduces}.$$
 
-### 5.2 A simple communication-volume model
+That sounds expensive, but communication has two separate costs.
 
-One residual-stream activation contains `B × d` BF16 values, so its payload is
+### 5.1 Small messages pay startup cost
 
-$$M_{\text{payload}} = 2Bd\text{ bytes}.$$
+Starting a collective has a fixed latency even when its payload is small—like establishing a phone call before speaking.
 
-For `B=500` and `d=8192`,
+For our `B=8` workload, one **activation payload**—the current `B × d` grid of intermediate token vectors—is only
 
-$$M_{\text{payload}} = 2 \cdot 500 \cdot 8192 = 8.192\text{ MB}.$$
+$$2\text{ bytes}\times8\times8192=131{,}072\text{ bytes}=128\text{ KiB}.$$
 
-For a ring all-reduce over `N` GPUs, a common estimate for bytes **sent per GPU** is
+If one collective has an optimistic `8μs` startup cost, 128 calls contribute roughly
 
-$$M_{\text{ring}} \approx 2\frac{N-1}{N}M_{\text{payload}}.$$
+$$128\times8\mu\text{s}\approx1.0\text{ ms}.$$
 
-The factor `2(N-1)/N` accounts for data sent during the reduce-scatter and all-gather phases. Each GPU receives the same amount concurrently on a full-duplex link. It approaches two sent payloads per GPU as the group grows.
+At this small batch, fixed startup matters more than the tiny amount of data.
 
-At `N=4`, that is about **12.288 MB per logical all-reduce**. Two reductions per layer across 64 layers move about 1.57GB per GPU:
+### 5.2 Large messages also pay for bytes moved
 
-$$12.288\text{ MB} \times 2 \times 64 \approx 1.57\text{ GB}.$$
+For the same hypothetical `B=500` point shown on the graph—possible only with shorter contexts or more memory—one activation payload grows to
 
-At an idealized effective 300GB/s, the bandwidth term is
+$$2\times500\times8192=8.192\text{ MB}.$$
 
-$$T_{\text{comm,volume}} \approx \frac{1.57\text{e}9}{300\text{e}9} = 5.24\text{ ms}.$$
+A simple four-GPU ring estimate gives about **5.24ms** of communication-by-volume across all 128 collectives, before their startup cost. The exact value depends on links, topology, and the collective implementation; the important idea is the shape of the cost:
 
-This is only the bandwidth term. Every collective also has startup latency, and each layer must wait for required results before proceeding. The exact number depends on topology, collective algorithm, whether bandwidth is quoted per direction or aggregate, message size, and overlap.
+- small batch: mostly "start 128 exchanges";
+- large batch: startup **plus** moving much larger activations.
+
+<details markdown="1">
+<summary>Optional: where the 5.24ms estimate comes from</summary>
+
+For a ring all-reduce over `N` GPUs, bytes sent per GPU are approximately
+
+$$M_{\text{ring}}\approx2\frac{N-1}{N}M_{\text{payload}}.$$
+
+At `N=4`, one 8.192MB payload causes about 12.288MB to be sent per GPU. Across 128 collectives:
+
+$$12.288\text{ MB}\times128\approx1.57\text{ GB}.$$
+
+At 300GB/s:
+
+$$1.57\text{ GB}/300\text{ GB/s}\approx5.24\text{ ms}.$$
+
+</details>
+
+### 5.3 Why more GPUs do not keep halving latency
+
+Moving from four to eight GPUs halves each weight shard from 26GB to 13GB, so the ideal weight-read floor falls from 17.3ms to about 8.7ms. But the 8,192-wide activation still has to be combined, and now more GPUs participate.
+
+More GPUs reduce local memory traffic and arithmetic. They do not remove collective startup or make the exchanged activation disappear. Eventually communication becomes large relative to each GPU's shrinking amount of local work.
+
+> **Carry forward:** A decode step is not "compute time plus every other number." Weight reads and arithmetic overlap, while some communication is exposed between dependent stages. We need one latency model that keeps those relationships straight.
 
 ---
 
-## Part 6 — A latency model that does not contradict itself
+## Part 6 — Putting step latency together
 
-There is no single "model latency." A serving system usually tracks at least:
+> **Question:** Which costs overlap, which costs add delay, and what do they mean for one user versus the whole server?
 
-- **prefill latency / time to first token:** how long until generation begins;
-- **inter-token latency:** time between consecutive output tokens for one request;
-- **batch step time:** how long one scheduler iteration takes;
-- **throughput:** total output tokens completed per second across all requests.
+Start with the six large matrices. Their ideal time is the slower of weight delivery and arithmetic:
 
-A useful step-time decomposition is
+$$
+T_{\text{large matrices}}
+\approx
+\max(T_{\text{weight read}},T_{\text{math}}).
+$$
+
+We take the maximum—not the sum—because an optimized matrix-multiplication program computes on one tile while fetching another. The slower stream determines the floor.
+
+A complete step then looks like
 
 $$
 T_{\text{step}}
-\approx T_{\text{dense roofline}}
-+ T_{\text{attention/cache}}
-+ T_{\text{communication on critical path}}
-+ T_{\text{fixed overhead}}.
+\approx T_{\text{large matrices}}
++ T_{\text{exposed communication}}
++ T_{\text{attention and cache}}
++ T_{\text{software overhead}}.
 $$
 
-For the dense matrices,
+Only communication that cannot hide behind useful work belongs in the exposed term. This is why neither "add every time" nor "take one maximum for the entire model" is always correct.
 
-$$
-T_{\text{dense roofline}}
-\approx
-\max\left(
-\frac{\text{weight bytes}}{N\cdot\text{HBM bandwidth}},
-\frac{\text{dense FLOPs}\cdot B}{N\cdot\text{peak FLOP/s}}
-\right).
-$$
+### 6.1 Our eight-conversation step
 
-Communication may overlap with independent compute, but collectives also sit between dependent stages. Therefore:
+We already calculated:
 
-$$
-\max(T_{\text{compute}},T_{\text{comm}})
-\leq T_{\text{compute+comm}}
-\leq T_{\text{compute}}+T_{\text{comm}}.
-$$
+- weight-read floor: **17.3ms**;
+- ideal math for `B=8`: **0.66ms**.
 
-Neither "always add them" nor "always take the maximum" is universally correct.
+Therefore the large-matrix part is about 17.3ms. Now include the long context: across all eight conversations, standard attention reads roughly the 32GiB K/V cache during one decode step. Sharded evenly across four GPUs, that is 8GiB per GPU. At an ideal 1.5TB/s:
 
-Inside one optimized matrix kernel, weight reads and arithmetic overlap, which motivates the `max` in the dense roofline. Between dependent Transformer stages, however, a required collective can remain on the critical path. Real runtimes overlap whatever they safely can, so the final answer lies between perfect overlap and complete serialization.
+$$T_{\text{KV read}}\approx\frac{8\text{ GiB}}{1.5\text{ TB/s}}\approx5.7\text{ ms}.$$
 
-### 6.1 Small decode batch
+The weights and cache share the same HBM bandwidth, so together they create a memory-traffic floor near
 
-For `B=1`, TP=4:
+$$17.3+5.7=23.0\text{ ms}.$$
 
-- ideal weight-streaming floor: **17.3ms**;
-- ideal math time: **0.083ms**;
-- collective startup: if one logical collective costs an optimistic `8μs`, then
+Communication may partly overlap. If the toy 1.1ms communication cost is fully exposed, the estimate becomes 24.1ms before software overhead. Implementations can change exact traffic and overlap, but this calculation proves that long-context cache reads are not a rounding error.
 
-$$2 \cdot 64 \cdot 8\mu\text{s} \approx 1.0\text{ ms}.$$
+The step produces eight next-token positions, so the 23.0ms memory floor gives an aggregate throughput ceiling near
 
-If that collective startup is fully exposed, the illustrative serialized estimate is **17.3 + 1.0 ≈ 18.3ms** before long-context cache reads and runtime overhead. With perfect overlap, the corresponding bound is about 17.3ms, so this toy model gives a **17.3–18.3ms range**. The `8μs` figure is only an assumption; real collective latency depends strongly on generation, topology, and implementation.
+$$8/0.0230\approx348\text{ tokens/s}.$$
 
-### 6.2 Large batch: `B=500`
+With fully exposed communication, that falls to about 331 aggregate tokens/s, or 41 tokens/s per continuously active conversation. Real throughput will be lower after software overhead.
 
-The dense math term is
+### 6.2 Why a larger batch helps throughput but can hurt latency
 
-$$
-\frac{103.08\text{e}9 \cdot 500}{4 \cdot 312\text{e}12}
-\approx 41.3\text{ ms}.
-$$
+Suppose the requests had much shorter contexts—or the server had more memory—so it could form `B=208`. The large-matrix weight and math terms would both be about 17.3ms, giving a large-matrix-only ceiling near 12,000 positions/s before cache, communication, and software costs.
 
-The ring-volume estimate from Part 5 is about **5.24ms**. There are also `2 × 64 = 128` collective startups. Writing startup latency as `α`, a serialized estimate is
+That is far more aggregate work than our `B=8` case, but a request may wait while the scheduler forms the batch. The tradeoff is:
 
-$$41.3\text{ ms}+5.24\text{ ms}+128\alpha.$$
+- **larger batch:** better total hardware efficiency;
+- **individual request:** potentially more queueing and a longer step.
 
-With the same toy `α=8μs` assumption, this is about **47.6ms**, plus attention, cache, and software overhead. With useful overlap it could be closer to 41.3ms; with inefficient collectives it could be higher than 47.6ms.
+Batching improves throughput only when enough live work exists and the cache for that work fits. It never lets one conversation skip the sequential dependency between its own output tokens.
 
-For scale, 500 separate idealized `B=1` steps at 18.3ms would occupy about
-
-$$500\times18.3\text{ ms}=9.15\text{ s},$$
-
-whereas one `B=500` step is on the order of 47.6ms before omitted costs—roughly a 192× gain in aggregate work per unit time.
-
-That comparison means **500 active requests each produce one next token**. It does not mean one request produces 500 sequential tokens in 46.5ms. Batching improves aggregate throughput; it cannot remove the dependency between consecutive tokens of the same response.
+> **Carry forward:** The 103.08-GFLOP figure has powered every math-time estimate so far. Next we derive it from the model's matrices so it is not just a magic number.
 
 ---
 
-## Part 7 — When does communication become the bottleneck?
+## Part 7 — Where "FLOPs per token ≈ 2 × parameters" comes from
 
-Picture each GPU as a factory and the interconnect as a fleet of trucks. A factory computes one partial activation; the trucks exchange those partials so every factory can continue with the combined result. If local computation takes much longer than communication, transfer is a small tax. If sharding makes each factory's job tiny while the shipment stays activation-sized, the trucks become the limiting resource.
+> **Question:** Why did we use 103.08 billion FLOPs per token in Parts 3 and 6?
 
-The A100's compute-to-link ratio is
-
-$$\frac{312\text{e}12\text{ FLOP/s}}{300\text{e}9\text{ byte/s}} \approx 1040\text{ FLOPs/byte}.$$
-
-This is a second roofline. A stage that performs fewer than about 1040 useful FLOPs per communicated byte is at risk of becoming communication-bound.
-
-Focus first on attention's row-parallel output projection, `Wo`. Each GPU multiplies an input slice of width `d/N` into a full-width partial output. For `B` positions, that is
-
-$$F_{\text{Wo,GPU}}=\frac{2Bd^2}{N}\text{ FLOPs}.$$
-
-Part 5's ring all-reduce sends
-
-$$M_{\text{ring}}=2\frac{N-1}{N}(2Bd)=4Bd\frac{N-1}{N}\text{ bytes per GPU}.$$
-
-Dividing the local work by the bytes it must send gives
-
-$$I_{\text{Wo,link}}=\frac{F_{\text{Wo,GPU}}}{M_{\text{ring}}}=\frac{d}{2(N-1)}\text{ FLOPs/byte}.$$
-
-The MLP down-projection starts from width `4d`, so it performs four times as much local math for the same `B × d` residual-stream payload:
-
-$$I_{\text{W2,link}}=\frac{2d}{N-1}\text{ FLOPs/byte}.$$
-
-Applying those formulas:
-
-| Tensor-parallel size | `Wo` intensity | `W2` intensity | Comparison with 1040 FLOPs/byte                |
-| -------------------: | -------------: | -------------: | ---------------------------------------------- |
-|                    4 |          1,365 |          5,461 | `Wo` has a narrow theoretical compute cushion  |
-|                    8 |            585 |          2,341 | `Wo` communication is exposed                  |
-|                   16 |            273 |          1,092 | `Wo` is strongly exposed; `W2` is near balance |
-
-This is not a universal cutoff. Faster links, topology-aware collectives, overlap, quantized communication, and different matrix shapes move it. But it explains the tradeoff:
-
-> More GPUs reduce each GPU's weight traffic and math, while making the fixed-size activation exchange large relative to each GPU's shrinking share of work.
-
-The minimum GPU count is a capacity question. The best GPU count is a latency-throughput-cost question.
-
-Notice the direction of both trends:
-
-- increasing `N` divides weight traffic and dense FLOPs by more GPUs;
-- the residual-stream activation being combined does not shrink at the same rate;
-- startup latency also does not disappear.
-
-That is why adding GPUs gives diminishing returns even before cost is considered.
-
----
-
-## Part 8 — Where "FLOPs per token ≈ 2 × parameters" comes from
-
-### 8.1 The one matmul rule
+### 7.1 One small matrix explains the rule
 
 Multiplying an `m × n` matrix by a length-`n` vector performs approximately
 
 $$2mn\text{ FLOPs},$$
 
-counting one multiply and one add per matrix element. The matrix itself contains `mn` parameters. Therefore, if a weight is used once in a matmul,
+counting one multiply and one add per matrix element. The matrix itself contains `mn` parameters. Therefore, if a weight is used once in a matrix-vector multiplication,
 
 $$\text{FLOPs} \approx 2 \times \text{parameters}.$$
 
-A tiny example makes the rule concrete. Let
+For example, a `2 × 3` matrix contains six parameters. A literal matrix-vector multiply uses six multiplications and four additions. The conventional `2mn` estimate rounds this to 12 FLOPs by treating each weight as one multiply-accumulate pair. The two-operation difference disappears at the thousands-wide dimensions used here.
+
+### 7.2 Apply the same rule to one Transformer block
+
+We can group the six large matrices instead of memorizing them individually:
+
+| Part of one block | Large matrices                             | Parameters | FLOPs per token |
+| ----------------- | ------------------------------------------ | ---------: | --------------: |
+| Attention         | Q, K, V, and output: four `d × d` matrices |      `4d²` |           `8d²` |
+| MLP               | one `d × 4d` and one `4d × d` matrix       |      `8d²` |          `16d²` |
+| **Total**         | six matrices                               | **`12d²`** |      **`24d²`** |
+
+For `d=8192`, one block costs
 
 $$
-W=
-\begin{bmatrix}
-w_{11}&w_{12}&w_{13}\\
-w_{21}&w_{22}&w_{23}
-\end{bmatrix},
-\qquad
-x=
-\begin{bmatrix}
-x_1\\x_2\\x_3
-\end{bmatrix}.
+24\times8192^2
+\approx1.61\text{ billion FLOPs/token}.
 $$
 
-`W` contains `2 × 3 = 6` parameters. Producing `Wx` uses every parameter once: six multiplications and approximately six additions, or about 12 FLOPs. The exact elementary count is `2mn-m` because the first term in each sum needs no preceding addition; at dimensions like 8,192, the difference from `2mn` is negligible. Hardware specifications also conventionally report a multiply-accumulate as two FLOPs.
-
-### 8.2 The six large matrices in one block
-
-| Matrix | Shape          |  Parameters | FLOPs/token |
-| ------ | -------------- | ----------: | ----------: |
-| `Wq`   | `8192 × 8192`  |  67,108,864 | 134,217,728 |
-| `Wk`   | `8192 × 8192`  |  67,108,864 | 134,217,728 |
-| `Wv`   | `8192 × 8192`  |  67,108,864 | 134,217,728 |
-| `Wo`   | `8192 × 8192`  |  67,108,864 | 134,217,728 |
-| `W1`   | `8192 × 32768` | 268,435,456 | 536,870,912 |
-| `W2`   | `32768 × 8192` | 268,435,456 | 536,870,912 |
-
-The 64 attention heads do not create another factor of 64 here. `Wq`, for example, can be viewed as 64 narrower `8192 × 128` projections placed side by side:
-
-$$64\times8192\times128=8192\times8192=d^2.$$
-
-Heads partition the output width; their widths sum back to `d_model`.
-
-One block therefore costs
+Across 64 blocks:
 
 $$
-4(2d^2) + 2(2d\cdot4d)
-= 24d^2
-= 1{,}610{,}612{,}736\text{ FLOPs/token}.
+24\times64\times8192^2
+\approx103.08\text{ billion FLOPs/token}.
 $$
 
-Across 64 layers:
+Those block matrices contain half as many parameters:
 
-$$
-24 \cdot 64 \cdot 8192^2
-= 103{,}079{,}215{,}104
-\approx 103.08\text{ GFLOPs/token}.
-$$
+$$103.08\text{B}/2=51.54\text{B parameters},$$
 
-Dividing by two recovers the block-weight count:
+which is almost the entire 52B model. That is where the useful rule comes from:
 
-$$\frac{103.08\text{B}}{2} = 51.54\text{B parameters}.$$
+$$\boxed{\text{dense FLOPs per token}\approx2\times\text{dense parameters}.}$$
 
-### 8.3 What the `2P` shortcut leaves out
+### 7.3 Why `2P` is a baseline, not the whole step
 
-The 103.08 GFLOPs figure is the dense **projection + MLP baseline**, not the whole decode step.
+Here `P` means parameter count, and **dense** means the ordinary full weight matrices counted above.
 
-**Cached attention.** With `t` earlier positions plus the current position, QK scores and the weighted-V operation add roughly
+The shortcut counts the six dominant matrices. It leaves out:
 
-$$4(t+1)d\,n_{\text{layers}}\approx4td\,n_{\text{layers}}\text{ FLOPs}.$$
+- attention over the cached context;
+- the final projection to vocabulary scores;
+- normalization, activation, sampling, and data movement.
 
-At `t=2048` earlier positions, that is
+At a 2,048-token context, cached attention adds about 4.30 billion FLOPs, roughly 4.2% of the 103.08-billion dense baseline. The vocabulary projection adds about 0.82 billion more. Both are real, but the six large block matrices still explain most arithmetic in this example.
 
-$$
-4 \cdot 2049 \cdot 8192 \cdot 64
-\approx 4.30\text{ GFLOPs},
-$$
-
-about 4.2% of the six-matrix baseline. At longer contexts it grows linearly per decode step.
-
-**Vocabulary head.** Projecting the final hidden state to 50,257 logits costs
-
-$$
-2Vd
-= 2 \cdot 50{,}257 \cdot 8192
-\approx 0.823\text{ GFLOPs}.
-$$
-
-The embedding table contains about 411.7M parameters. If embeddings are tied, those same parameters act as the vocabulary head and **do** participate in a matmul at output time, even though input embedding is only a lookup. If the head is untied, the model stores another matrix.
-
-**Other kernels.** LayerNorm, RoPE, residuals, activation functions, softmax, sampling, and cache reads add smaller FLOP counts but nonzero latency.
-
-So `2P` is powerful because most large-model parameters are used once per token in dense matmuls. It is not an exact law.
+> **Carry forward:** We can now trace the earlier 0.083ms math estimate directly back to six matrix groups. The remaining gap between our formulas and a real measurement comes from hardware never behaving like a perfect specification sheet.
 
 ---
 
-## Part 9 — Memory traffic the FLOP count misses
+## Part 8 — Why real hardware is slower than the clean formulas
 
-FLOP accounting makes LayerNorm, softmax, residual additions, and activations look trivial. On a GPU, an operation can do very little arithmetic and still spend time reading and writing tensors.
+> **Question:** If the arithmetic is correct, why do benchmarks report larger times?
 
-Three effects matter:
+Our equations deliberately calculate lower bounds. Real runs lose time in a few predictable places:
 
-1. **Intermediate activation traffic.** Unfused kernels may write a tensor to HBM only for the next kernel to read it back.
-2. **KV-cache traffic.** Each decode step reads all earlier K/V entries needed by attention.
-3. **Kernel launch and synchronization overhead.** Tiny kernels can be dominated by setup rather than arithmetic.
+1. **Sustained bandwidth is below the specification.** A real GPU operation rarely gets 100% of the advertised 1.5TB/s.
+2. **Small operations still move data.** Normalization, residual additions, and activations may write a tensor only for the next operation to read it back.
+3. **Long context means cache traffic.** Our 2,048-token request owns 4GiB of K/V state across all blocks, and attention reads the relevant parts during decode.
+4. **GPU operations and collectives have setup cost.** Launches and synchronization take time even when their arithmetic is tiny.
+5. **Matrix shape affects utilization.** A GPU does not reach 312TFLOP/s for every matrix dimension and batch size.
 
-For example, LayerNorm must at least read a token vector, compute statistics, and write a normalized vector. Even if each element needs only a handful of operations, the bytes still travel. If LayerNorm, a residual addition, and an activation are separate kernels, an intermediate vector may make several avoidable HBM round trips.
+Serving runtimes therefore combine small operations when possible, keeping intermediate data on-chip and reducing HBM round trips even when the mathematical operation count stays the same.
 
-Kernel fusion keeps an intermediate tile on-chip while applying several operations. It does not change the mathematical model or its parameter count; it reduces traffic between kernels.
+### 8.1 A real benchmark
 
-KV-cache traffic follows a different scaling rule. At context length 2,048, our one request owns 4GiB of cached K/V across all layers. A decode step attends over those earlier positions layer by layer, so cache reads can become a material bandwidth term even though no weights are added.
+kipply reported a FasterTransformer benchmark for a 13B-shaped model with width 5,120, 40 blocks, and a 512-token context. The same method predicts 25.17 billion dense FLOPs per token.
 
-The rough scaling intuition is still useful:
+| Workload                 |       Simple lower bound | Reported measurement | Why reality was slower                                      |
+| ------------------------ | -----------------------: | -------------------: | ----------------------------------------------------------- |
+| 1-GPU decode             |                   16.8ms |               22.0ms | lower sustained bandwidth, small operations, fixed overhead |
+| 2-GPU decode             | 8.4ms plus communication |               13.5ms | collectives and less efficient smaller shards               |
+| 1-GPU, 512-token prefill |                   41.3ms |               63.2ms | sub-peak matrix operations, attention, and cache writes     |
 
-- dense projections and MLPs scale mostly as `d²`;
-- normalization and elementwise work scale mostly as `d`;
-- cached attention and cache reads scale as `t·d`.
+The two-GPU result is especially useful. Halving each weight shard reduced the ideal weight time from 16.8ms to 8.4ms, but the measured time fell only from 22.0ms to 13.5ms. Communication and costs that were not divided across GPUs became a larger fraction of the step.
 
-That is why elementwise work often occupies a larger **fraction** of latency in narrow models, while long-context cache traffic can reappear as a bottleneck even in wide models.
+The lesson is not that the formulas failed. They correctly identified what should improve and which bottleneck would appear next. Their job is to classify the regime; profiling supplies the real constants.
 
-kipply cites a 336M-parameter, `d=1024` study where memory-bound intermediate operations made up roughly 43% of latency. Scaling width from 1024 to 8192 makes the `d²` work grow faster than the `d` work, but one should not simply divide 43% by eight and call the answer 5%.
-
-Even in an unrealistically simple two-component model, the original ratio is
-
-$$r=\frac{T_{\text{linear}}}{T_{\text{quadratic}}}=\frac{0.43}{0.57}\approx0.75.$$
-
-Increasing `d` eightfold would reduce that ratio to about `0.75/8≈0.094`, corresponding to a new share of `0.094/(1+0.094)≈8.6%`. That calculation is still only directional: fractions, kernel fusion, attention length, tensor shapes, and implementations all change together.
-
-This is where fused LayerNorm/activation kernels and FlashAttention-style IO-aware attention help: they reduce HBM round trips rather than merely reducing arithmetic.
+> **Carry forward:** We now have every piece. The final summary reconnects them in the order one request experiences them.
 
 ---
 
-## Part 10 — Reality check against a 13B FasterTransformer run
+## TL;DR — The whole story in one pass {#tldr}
 
-kipply also reported a FasterTransformer benchmark for a 13B-shaped model:
+1. **A request begins with prefill and continues with decode.** Prefill reads the known prompt and creates attention state. Decode then generates one token per active conversation per step; future tokens from one conversation cannot be generated simultaneously.
 
-| Quantity         |    Value |
-| ---------------- | -------: |
-| `d_model`        |    5,120 |
-| Layers           |       40 |
-| Heads            | 40 × 128 |
-| Context          |      512 |
-| Generated tokens |       10 |
+2. **The KV cache exists because K and V are reused.** A token's query is used for its own attention result, while later tokens repeatedly need its key and value. Saving K/V avoids rebuilding unchanged work. In this model the cache costs **2MiB per live token**.
 
-The six-matrix baseline is
+3. **Our workload already needs 32GiB of cache.** Each 2,048-token conversation needs 4GiB; eight conversations need 32GiB. Every eight-request decode step adds another 16MiB.
 
-$$
-24 \cdot 40 \cdot 5120^2
-= 25.17\text{ GFLOPs/token}.
-$$
+4. **The 52B BF16 weights need 104GB.** One 40GB A100 cannot hold them. Four A100s give each GPU a 26GB shard; after our 32GiB cache, about 21.6GB of aggregate HBM remains before runtime overhead.
 
-### 10.1 Decode, one GPU
+5. **Small-batch large-matrix computation waits mostly on weight movement.** On four A100s, reading the weight shards has an ideal 17.3ms floor while arithmetic for `B=8` needs only 0.66ms. Our long contexts add about 5.7ms of cache-read traffic, creating a 23.0ms memory floor; fully exposed toy communication raises the pre-software estimate to about 24.1ms.
 
-Ideal weight-bandwidth time:
+6. **Batching reuses one weight stream across more positions.** The ideal A100 crossover is near `B=208`. Below that point, a larger batch mainly fills otherwise-idle arithmetic capacity; above it, arithmetic starts increasing step time. `B` means concurrent current positions, not future tokens from one response.
 
-$$\frac{25.17\text{e}9\text{ bytes}}{1.5\text{e}12\text{ bytes/s}} = 16.8\text{ ms}.$$
+7. **Cache capacity limits how large a decode batch can become.** Four GPUs can theoretically retain about 26,700 of these cached tokens. At 2,048 tokens per conversation, that is only about 13 conversations before runtime overhead—far below the 208-position arithmetic sweet spot. Longer context can therefore reduce throughput by reducing concurrency.
 
-Reported measurement: **22.0ms per decode step**.
+8. **Tensor parallelism solves capacity and weight bandwidth but adds communication.** Four GPUs cut the ideal weight-read floor from a one-device equivalent of 69.3ms to 17.3ms. They also perform 128 logical combine operations per step in this model. Small batches mostly pay collective startup; large batches also pay to move larger activations.
 
-Using about 90% of peak HBM bandwidth raises the weight estimate to roughly 18.6ms. Profiled intermediate operations contributed about 2.2ms, and small remaining costs—launches, embeddings, and sampling—closed most of the gap.
+9. **Large-matrix FLOPs per token are about twice the large-matrix parameter count.** Every matrix weight contributes roughly one multiply and one add when used. The six large matrices across 64 blocks contain about 51.54B parameters and require about 103.08B FLOPs per token.
 
-### 10.2 Decode, two GPUs
+10. **The formulas identify the bottleneck; benchmarks give the real latency.** Actual hardware sustains less than peak bandwidth and compute, while cache traffic, small operations, communication, and software add time. A 13B run with a 16.8ms lower-bound estimate measured 22.0ms—different in magnitude, but for understandable reasons.
 
-The ideal weight floor halves to about **8.4ms**, but communication appears. The reported measurement was **13.5ms**, not half of 22ms. Smaller per-GPU tensors reached less bandwidth, intermediate kernels remained, and profiled communication contributed roughly 1.7ms.
+For another model or machine, ask these questions in order:
 
-This is the real tensor-parallel tradeoff in one result: weight time falls, but not every other term falls with it.
-
-### 10.3 Prefill, 512 tokens
-
-The ideal dense-matmul compute time is
-
-$$
-\frac{25.17\text{e}9 \cdot 512}{312\text{e}12}
-\approx 41.3\text{ ms}.
-$$
-
-The reported one-GPU context time was about **63.2ms**. At this larger matrix-matrix shape, actual kernels did not reach peak tensor-core throughput: the profile observed roughly 72% of peak for an MLP matmul and roughly 54% for an attention projection. Prefill also performs causal attention and writes the initial KV cache.
-
-The comparison in one view:
-
-| Workload                 |       Simple lower bound | Reported measurement | What became visible                                           |
-| ------------------------ | -----------------------: | -------------------: | ------------------------------------------------------------- |
-| 1-GPU decode             |                   16.8ms |               22.0ms | sustained HBM bandwidth, intermediate kernels, fixed overhead |
-| 2-GPU decode             | 8.4ms plus communication |               13.5ms | smaller-shard efficiency and collectives                      |
-| 1-GPU, 512-token prefill |        41.3ms dense math |               63.2ms | sub-peak matmul efficiency, attention, and cache writes       |
-
-### 10.4 The five recurring theory-to-reality gaps
-
-1. sustained HBM bandwidth is below the spec-sheet peak;
-2. intermediate and elementwise kernels are not free;
-3. kernel launches, sampling, and synchronization add fixed costs;
-4. real collectives have startup, topology, and bandwidth inefficiencies;
-5. matmul efficiency depends on exact dimensions and tiling.
-
-The arithmetic tells us **which regime to investigate**. Profiling tells us the constants for one model, runtime, and machine.
-
----
-
-## Part 11 — A compact serving checklist
-
-When sizing a deployment, calculate in this order.
-
-### 1. Weight capacity
-
-$$M_{\text{weights}} = P \cdot b_{\text{weight}}.$$
-
-This gives the minimum accelerator count before runtime headroom.
-
-### 2. KV-cache cost
-
-$$
-M_{\text{KV/token}}
-= 2b_{\text{cache}}n_{\text{layers}}n_{\text{kv-heads}}d_{\text{head}}.
-$$
-
-Multiply by the sum of all live prompt and generated tokens—not merely the request count.
-
-### 3. Dense roofline
-
-$$
-T_{\text{dense}}
-\approx
-\max\left(
-\frac{M_{\text{weights}}}{N\cdot BW_{\text{HBM}}},
-\frac{F_{\text{dense/token}}\cdot B}{N\cdot R_{\text{FLOP}}}
-\right).
-$$
-
-This predicts whether batching can still amortize weight reads.
-
-### 4. Context-dependent attention
-
-Estimate both
-
-$$F_{\text{attention/decode}} \approx 4(t+1)d\,n_{\text{layers}}\approx4td\,n_{\text{layers}}$$
-
-and the K/V bytes read. Long contexts can change a weight-bound decode into a cache-bandwidth-bound decode.
-
-### 5. Tensor-parallel communication
-
-Estimate payload size, collective count, topology, and startup latency. Then benchmark because collective efficiency is highly implementation-specific.
-
-### 6. Validate with the real stack
-
-Measure prefill latency, time to first token, inter-token latency, throughput, HBM use, and tail latency under the request-length distribution you actually expect.
-
----
-
-## TL;DR — Key takeaways {#tldr}
-
-- **A request has two phases.** Prefill processes the known prompt in parallel and creates the initial cache; decode generates one new token per active request per iteration.
-- **Q is used once; K and V are reused by later tokens.** Causal masking makes cached K/V immutable after computation.
-- **KV-cache memory is linear in live token count.** For ordinary BF16 MHA it is `4 · layers · d_model` bytes per token; GQA replaces attention-head count with the smaller KV-head count.
-- **The cache avoids repeated prefix projections, not the attention scan.** Cached decode still reads past K/V and attends over a growing context.
-- **Weights remain in HBM but are streamed through on-chip memory every step.** Reusing one weight stream across many token positions is why batching improves throughput.
-- **`peak FLOPs ÷ HBM bandwidth` is the dense-matmul ridge point.** For the assumed A100 numbers it is about 208 FLOPs/byte, corresponding ideally to about 208 token positions per weight read.
-- **During decode, batch size means concurrent current positions.** It does not let one response generate sequential future tokens in parallel.
-- **Capacity and throughput are connected.** HBM left after weights determines how many live KV tokens can be retained, which constrains concurrency and batch formation.
-- **Tensor parallelism divides weight traffic and math but introduces collectives.** Standard Megatron-style blocks have two logical activation reductions; each collective may contain multiple network phases.
-- **`FLOPs ≈ 2P` is a baseline, not the whole step.** Cached attention, the vocabulary head, normalization, cache movement, and sampling remain.
-- **More GPUs are not always faster.** Per-GPU work shrinks while activation communication does not shrink at the same rate.
-- **Use arithmetic to classify the bottleneck; use benchmarks to schedule production.** Clean formulas are excellent for direction and poor substitutes for profiling exact model shapes.
+1. Do the weights fit?
+2. How many live tokens fit after the weights?
+3. At the resulting batch size, is weight movement or arithmetic slower?
+4. What communication, cache, and software costs remain exposed?
+5. What does the real benchmark say?
 
 ---
 
@@ -953,4 +639,3 @@ Measure prefill latency, time to first token, inter-token latency, throughput, H
 - [NVIDIA FasterTransformer](https://github.com/NVIDIA/FasterTransformer)
 - [Korthikanti et al., "Reducing Activation Recomputation in Large Transformer Models"](https://arxiv.org/abs/2205.05198) — tensor-parallel communication structure
 - [Ivanov et al., "Data Movement Is All You Need"](https://arxiv.org/abs/2007.00072)
-- [Dao et al., "FlashAttention"](https://arxiv.org/abs/2205.14135)
