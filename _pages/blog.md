@@ -11,36 +11,41 @@ pagination:
 
 <div class="post writing-index">
 
-  {% assign blog_name_size = site.blog_name | size %}
-  {% assign blog_description_size = site.blog_description | size %}
+{% assign blog_name_size = site.blog_name | size %}
+{% assign blog_description_size = site.blog_description | size %}
 
-  {% if blog_name_size > 0 or blog_description_size > 0 %}
-    <header class="writing-header">
-      {% if blog_name_size > 0 %}
-        <h1>{{ site.blog_name }}</h1>
-      {% endif %}
-      {% if blog_description_size > 0 %}
-        <p>{{ site.blog_description }}</p>
-      {% endif %}
-      <p class="writing-note">
-        Many, though not all, parts of these writings are AI-assisted. I mainly use AI tools for the deeper essays—helping with diagrams, explanations, and organizing the notes and chats I’ve made while learning each topic into a single place. I only write about things I’ve actually read.
-   
+{% if blog_name_size > 0 or blog_description_size > 0 %}
+<header class="writing-header">
+{% if blog_name_size > 0 %}
+<h1>{{ site.blog_name }}</h1>
+{% endif %}
+{% if blog_description_size > 0 %}
+<p>{{ site.blog_description }}</p>
+{% endif %}
+<p class="writing-note">
+Many, though not all, parts of these writings are AI-assisted. I mainly use AI tools for the deeper essays—helping with diagrams, explanations, and organizing the notes and chats I’ve made while learning each topic into a single place. I only write about things I’ve actually read.
+
       </p>
     </header>
-  {% endif %}
 
-  {% assign blog_sections = site.data.blog_sections %}
+{% endif %}
 
-  {% if blog_sections and blog_sections.size > 0 %}
-    <nav class="writing-nav" aria-label="Writing sections">
-      {% for section in blog_sections %}
-        <a href="#{{ section.id }}">{{ section.title }}</a>
-      {% endfor %}
-    </nav>
-  {% endif %}
+{% assign blog_sections = site.data.blog_sections %}
 
-  {% for section in blog_sections %}
-    {% assign section_posts = site.posts | where_exp: "post", "post.categories contains section.category" | sort: "date" | reverse %}
+{% if blog_sections and blog_sections.size > 0 %}
+<nav class="writing-nav" aria-label="Writing sections">
+{% for section in blog_sections %}
+<a href="#{{ section.id }}">{{ section.title }}</a>
+{% endfor %}
+</nav>
+{% endif %}
+
+{% for section in blog_sections %}
+{% if section.tag %}
+{% assign section_posts = site.posts | where_exp: "post", "post.tags contains section.tag" | sort: "date" | reverse %}
+{% else %}
+{% assign section_posts = site.posts | where_exp: "post", "post.categories contains section.category" | sort: "date" | reverse %}
+{% endif %}
 
     {% if section_posts.size > 0 %}
       <section id="{{ section.id }}" class="writing-section">
@@ -89,7 +94,7 @@ pagination:
 
               {% if post.tags and post.tags.size > 0 %}
                 <ul class="writing-tags">
-                  {% for tag in post.tags limit: 3 %}
+                  {% for tag in post.tags limit: 5 %}
                     <li>
                       <a href="{{ tag | slugify | prepend: '/blog/tag/' | relative_url }}">{{ tag }}</a>
                     </li>
@@ -101,6 +106,7 @@ pagination:
         </ul>
       </section>
     {% endif %}
-  {% endfor %}
+
+{% endfor %}
 
 </div>

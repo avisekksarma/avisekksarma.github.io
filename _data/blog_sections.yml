@@ -1,5 +1,10 @@
-# Blog index sections. Each post should match exactly one section via `category`.
-# Order here controls display order on /blog/.
+# Blog index sections. Order here controls the nav and display order on /blog/.
+# `category` matches post.categories. `tag` matches post.tags (use one or the other).
+
+- id: systems
+  title: Systems
+  description: GPU serving, database internals, and what it costs to run these things on real hardware.
+  tag: systems
 
 - id: machine-learning
   title: Machine Learning
