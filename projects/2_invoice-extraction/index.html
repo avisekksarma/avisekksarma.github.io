@@ -57,15 +57,26 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-transformer-inference-arithmetic-a-worked-walkthrough",
+        },{id: "post-transformer-inference-arithmetic-part-2-tensor-parallelism-and-real-latency",
         
-          title: "Transformer Inference Arithmetic — A Worked Walkthrough",
+          title: "Transformer Inference Arithmetic, Part 2: Tensor Parallelism and Real Latency",
         
-        description: "A beginner-first but complete walkthrough of Transformer inference: what problem each mechanism solves, every derivation worked out on a single 52B example, and what the numbers mean when you serve it on four A100s.",
+        description: "Part 2 of the 52B walkthrough: tensor parallelism, a full decode-step latency model, the communication roofline, where FLOPs ≈ 2P comes from, and a 13B FasterTransformer check.",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/blog/2026/transformer-inference-arithmetic/";
+            window.location.href = "/blog/2026/transformer-inference-arithmetic-part-2/";
+          
+        },
+      },{id: "post-transformer-inference-arithmetic-part-1-memory-and-batching",
+        
+          title: "Transformer Inference Arithmetic, Part 1: Memory and Batching",
+        
+        description: "Notes on kipply&#39;s Transformer Inference Arithmetic, part 1: what a decode step does, why the KV cache exists, why small-batch decode waits on memory, and how many conversations actually fit.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/transformer-inference-arithmetic-part-1/";
           
         },
       },{id: "post-counting-transformer-parameters",
