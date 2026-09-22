@@ -265,11 +265,10 @@ cv:
         summary: Professional
 
     Interests:
-      - name: Backend systems
-        keywords: "APIs, databases, reliability"
-
-      - name: Applied ML
-        keywords: "document AI, LLMs, production systems"
-
-      - name: Teaching
-        keywords: "workshops, curriculum, mentorship"
+      - name: Distributed systems
+      - name: AI infrastructure and systems
+      - name: Databases
+      - name: High-performance computing
+      - name: Web technologies
+      - name: Cloud computing
+      - name: Applied machine learning
