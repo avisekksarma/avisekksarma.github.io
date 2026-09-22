@@ -10,8 +10,7 @@ profile:
   image: prof_pic.jpg
   image_circular: false
   more_info: >
-    <p>Founding Software Engineer, ZeroTB</p>
-    <p>Kathmandu, Nepal</p>
+    <p>Software Engineer</p>
     <p><a href="mailto:sharmabhishek1710@gmail.com">sharmabhishek1710@gmail.com</a></p>
 
 selected_papers: true
