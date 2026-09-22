@@ -8,7 +8,7 @@ tags: [machine-learning, llm, systems, transformers, inference, gpu]
 series: "Transformer Inference Arithmetic"
 series_part: 2
 reading_time: 26
-description: "Part 2 of the 52B walkthrough: tensor parallelism, a full decode-step latency model, the communication roofline, where FLOPs ≈ 2P comes from, and a 13B FasterTransformer check."
+description: "Once a 52B model is split across four A100s, each decode step also has to combine partial results. This post adds that communication to the memory and math from part 1, builds a full step latency, and checks why a real 13B benchmark is slower than the formulas."
 featured: true
 ---
 

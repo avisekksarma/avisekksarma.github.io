@@ -8,7 +8,7 @@ tags: [machine-learning, llm, systems, transformers, inference, gpu]
 series: "Transformer Inference Arithmetic"
 series_part: 1
 reading_time: 24
-description: "Notes on kipply's Transformer Inference Arithmetic, part 1: what a decode step does, why the KV cache exists, why small-batch decode waits on memory, and how many conversations actually fit."
+description: "A decode step streams the model weights for about one new token and rereads the KV cache. At small batches the GPU waits on memory, not math. This walkthrough uses a 52B model on four A100s to count that cost and see how many conversations still fit after the weights."
 featured: true
 ---
 
