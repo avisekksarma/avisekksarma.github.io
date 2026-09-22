@@ -677,7 +677,7 @@ ninja.data = [{
         
           title: "Batching LLM Inference",
         
-        description: "Step time is a + b·B. Continuous batching keeps slots full. KV-cache memory is what usually caps batch size.",
+        description: "A GPU streams the same weights whether it serves one request or many, so extra requests are cheap until compute catches up. Static batching still wastes seats on finished work. Continuous batching fills those seats every step, and KV-cache memory is usually what caps how large the batch can get.",
         section: "Posts",
         handler: () => {
           
@@ -699,7 +699,7 @@ ninja.data = [{
         
           title: "Transformer Inference Arithmetic, Part 2: Tensor Parallelism and Real Latency",
         
-        description: "Part 2 of the 52B walkthrough: tensor parallelism, a full decode-step latency model, the communication roofline, where FLOPs ≈ 2P comes from, and a 13B FasterTransformer check.",
+        description: "Once a 52B model is split across four A100s, each decode step also has to combine partial results. This post adds that communication to the memory and math from part 1, builds a full step latency, and checks why a real 13B benchmark is slower than the formulas.",
         section: "Posts",
         handler: () => {
           
@@ -710,7 +710,7 @@ ninja.data = [{
         
           title: "Transformer Inference Arithmetic, Part 1: Memory and Batching",
         
-        description: "Notes on kipply&#39;s Transformer Inference Arithmetic, part 1: what a decode step does, why the KV cache exists, why small-batch decode waits on memory, and how many conversations actually fit.",
+        description: "A decode step streams the model weights for about one new token and rereads the KV cache. At small batches the GPU waits on memory, not math. This walkthrough uses a 52B model on four A100s to count that cost and see how many conversations still fit after the weights.",
         section: "Posts",
         handler: () => {
           
