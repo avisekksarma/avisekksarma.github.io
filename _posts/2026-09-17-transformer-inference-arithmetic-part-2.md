@@ -8,7 +8,7 @@ tags: [machine-learning, llm, systems, transformers, inference, gpu]
 series: "Transformer Inference Arithmetic"
 series_part: 2
 reading_time: 26
-description: "Once a 52B model is split across four A100s, each decode step also has to combine partial results. This post adds that communication to the memory and math from part 1, builds a full step latency, and checks why a real 13B benchmark is slower than the formulas."
+description: "Once a model is split across GPUs, each decode step also has to combine partial results. Extra GPUs stop helping once communication, not compute, is the floor."
 featured: true
 ---
 

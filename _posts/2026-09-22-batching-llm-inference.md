@@ -6,7 +6,7 @@ date: 2026-09-22
 categories: [Tech, machine-learning, llm]
 tags: [machine-learning, llm, systems, inference, batching]
 reading_time: 12
-description: "A GPU streams the same weights whether it serves one request or many, so extra requests are cheap until compute catches up. Static batching still wastes seats on finished work. Continuous batching fills those seats every step, and KV-cache memory is usually what caps how large the batch can get."
+description: "A GPU streams the same weights for one request or many, so batching is cheap until compute catches up. Continuous batching keeps those slots full as requests finish. KV-cache memory is usually what caps the batch."
 featured: true
 ---
 
