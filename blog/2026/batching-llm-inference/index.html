@@ -1,4 +1,4 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Batching LLM Inference | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="A GPU streams the same weights whether it serves one request or many, so extra requests are cheap until compute catches up. Static batching still wastes seats on finished work. Continuous batching fills those seats every step, and KV-cache memory is usually what caps how large the batch can get."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Batching LLM Inference | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="A GPU streams the same weights for one request or many, so batching is cheap until compute catches up. Continuous batching keeps those slots full as requests finish. KV-cache memory is usually what caps the batch."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
   :root {
     --max-content-width: 930px;
   }
@@ -68,7 +68,7 @@ ninja.data = [{
         
           title: "Batching LLM Inference",
         
-        description: "A GPU streams the same weights whether it serves one request or many, so extra requests are cheap until compute catches up. Static batching still wastes seats on finished work. Continuous batching fills those seats every step, and KV-cache memory is usually what caps how large the batch can get.",
+        description: "A GPU streams the same weights for one request or many, so batching is cheap until compute catches up. Continuous batching keeps those slots full as requests finish. KV-cache memory is usually what caps the batch.",
         section: "Posts",
         handler: () => {
           
@@ -90,7 +90,7 @@ ninja.data = [{
         
           title: "Transformer Inference Arithmetic, Part 2: Tensor Parallelism and Real Latency",
         
-        description: "Once a 52B model is split across four A100s, each decode step also has to combine partial results. This post adds that communication to the memory and math from part 1, builds a full step latency, and checks why a real 13B benchmark is slower than the formulas.",
+        description: "Once a model is split across GPUs, each decode step also has to combine partial results. Extra GPUs stop helping once communication, not compute, is the floor.",
         section: "Posts",
         handler: () => {
           
@@ -101,7 +101,7 @@ ninja.data = [{
         
           title: "Transformer Inference Arithmetic, Part 1: Memory and Batching",
         
-        description: "A decode step streams the model weights for about one new token and rereads the KV cache. At small batches the GPU waits on memory, not math. This walkthrough uses a 52B model on four A100s to count that cost and see how many conversations still fit after the weights.",
+        description: "A decode step streams the model weights for about one new token and rereads the KV cache. At small batches the GPU waits on memory, not math.",
         section: "Posts",
         handler: () => {
           
