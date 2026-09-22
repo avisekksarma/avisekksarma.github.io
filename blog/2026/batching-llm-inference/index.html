@@ -1,0 +1,370 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Batching LLM Inference | Abhishek Sharma </title> <meta name="author" content="Abhishek Sharma"> <meta name="description" content="Step time is a + b·B. Continuous batching keeps slots full. KV-cache memory is what usually caps batch size."> <meta name="keywords" content="Abhishek Sharma, software engineering, backend systems, machine learning, portfolio"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="/assets/img/favicon.png?v=e254c71222a16b596b1a2429b539be0d"> <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=603eef51037927dcc5aa87187423f565"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://avisekksarma.github.io/blog/2026/batching-llm-inference/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav sticky-bottom-footer"> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Abhishek Sharma </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">Publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">Projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/">Teaching </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Writing <span class="sr-only">(current)</span> </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Batching LLM Inference</h1> <p class="post-meta"> Created on September 22, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/machine-learning"> <i class="fa-solid fa-hashtag fa-sm"></i> machine-learning</a>   <a href="/blog/tag/llm"> <i class="fa-solid fa-hashtag fa-sm"></i> llm</a>   <a href="/blog/tag/systems"> <i class="fa-solid fa-hashtag fa-sm"></i> systems</a>   <a href="/blog/tag/inference"> <i class="fa-solid fa-hashtag fa-sm"></i> inference</a>   <a href="/blog/tag/batching"> <i class="fa-solid fa-hashtag fa-sm"></i> batching</a>   ·   <a href="/blog/category/tech"> <i class="fa-solid fa-tag fa-sm"></i> Tech</a>   <a href="/blog/category/machine-learning"> <i class="fa-solid fa-tag fa-sm"></i> machine-learning</a>   <a href="/blog/category/llm"> <i class="fa-solid fa-tag fa-sm"></i> llm</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>You can’t serve an LLM one request at a time. That is too slow, and it leaves an expensive GPU idle. Production serving systems (vLLM, TensorRT-LLM, SGLang) exist mostly to keep the GPU busy across many requests without making any single one wait forever. The starting point is <strong>batching</strong>. How you batch changes the outcome a lot. Done well, you go from one request at a time to thousands of tokens per second.</p> <h2 id="two-workers-one-step">Two workers, one step</h2> <p>Every step of text generation produces one new token for every request currently being served. Two things happen inside the chip at once:</p> <ul> <li> <strong>The mover</strong> streams the model’s weights from memory to the compute units.</li> <li> <strong>The calculator</strong> does the actual arithmetic (matrix multiplications) using those weights.</li> </ul> <p>They run in parallel, so a step takes as long as whichever one is slower. That is why batching works.</p> <p>For one request, computing one layer means fetching a weight matrix <code class="language-plaintext highlighter-rouge">W</code> and multiplying it by a token vector. If you stack B requests’ token vectors into one matrix and multiply by the same <code class="language-plaintext highlighter-rouge">W</code>, the calculator does B times more work, but the mover fetches the same weights only once. Same trip whether you use the weights for one request or thirty.</p> <p>That gives a simple cost model for one decode step:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>step time ≈ a + b·B
+</code></pre></div></div> <p>where <strong>a</strong> is the (roughly fixed) cost of moving the weights, and <strong>b</strong> is the small extra cost each added request adds.</p> <h3 id="where-a-and-b-actually-come-from">Where a and b actually come from</h3> <p>Say the model has P parameters, stored in 16-bit precision (2 bytes each).</p> <ul> <li> <strong>Bytes the mover must carry per step:</strong> 2P (the weights), independent of B.</li> <li> <strong>FLOPs the calculator must do per token:</strong> about 2P (one multiply and one add per parameter), so 2P·B for a batch of B.</li> </ul> <p>So:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mover time      = 2P / memory_bandwidth        (flat, doesn't depend on B)
+calculator time = 2P·B / peak_FLOPs            (grows with B)
+step time       = whichever is larger
+</code></pre></div></div> <p><img src="/assets/img/batching-llm-inference/01-mover-calculator.svg" alt="Weights are read once per step by the mover; B token vectors add 2P·B FLOPs for the calculator. Step time is whichever is slower, about a + b·B." style="width: 100%; max-width: 54rem; height: auto; display: block; margin: 1.5rem auto;"></p> <p>At small B, the mover is the bottleneck and step time barely moves as B grows. Batching is nearly free. At large B, the calculator becomes the bottleneck and step time grows roughly in proportion to B. The two lines cross at a specific batch size:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2P / bandwidth = B* · 2P / peak_FLOPs
+        →  B* = peak_FLOPs / bandwidth
+</code></pre></div></div> <p>P cancels out. The crossover point depends only on the hardware, not the model. For an A100 (≈312 TFLOPS, ≈2 TB/s bandwidth), that’s B* ≈ 312e12 / 2e12 ≈ <strong>156</strong>. Below that, adding requests to a batch costs almost nothing in latency. Above it, each extra request costs close to its full price.</p> <p><img src="/assets/img/batching-llm-inference/05-crossover-chart.svg" alt="Mover time is a flat line. Calculator time rises with batch size B and crosses it at B*. Step time is whichever line is higher." style="width: 100%; max-width: 48rem; height: auto; display: block; margin: 1.5rem auto;"></p> <p>The flat line dominates early. That is the free-batching region. Once the rising line overtakes it (around B*), every extra request starts costing close to full price in step time.</p> <p><strong>Why not just push B into the thousands?</strong> Total throughput keeps climbing as B grows. It approaches a ceiling of <code class="language-plaintext highlighter-rouge">1/b</code> tokens/sec but never quite reaches it, since gains shrink with each doubling. Per-request speed is <code class="language-plaintext highlighter-rouge">1/(a + b·B)</code>, and that keeps falling as B gets larger. The operator sees more aggregate tokens/sec. Each user’s stream gets slower. In practice you stop well before that, usually because memory runs out first (more on that below), and because nobody wants their own response crawling so the aggregate number looks better.</p> <h2 id="the-static-batching-problem">The static batching problem</h2> <p>The naive way to batch is: collect N requests, run them together, and don’t return anything until every one has finished. This is <strong>static batching</strong>, and it wastes GPU time.</p> <p>Think of a bus that cannot let anyone off, or anyone new on, until every current passenger has reached their stop. The bus keeps driving and paying the fixed per-step cost, but seats of people who already arrived sit empty.</p> <p>If a batch’s requests have output lengths <code class="language-plaintext highlighter-rouge">L₁, L₂, ..., Lₙ</code>, the batch runs for <code class="language-plaintext highlighter-rouge">max(L)</code> steps, but only produces <code class="language-plaintext highlighter-rouge">mean(L)</code> steps’ worth of <em>useful</em> work per slot on average. So:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>slot utilization = mean(L) / max(L)
+</code></pre></div></div> <p>A mix of very short and very long requests (a <strong>bimodal</strong> mix) is the worst case. <code class="language-plaintext highlighter-rouge">max(L)</code> stays high because of the long outliers. <code class="language-plaintext highlighter-rouge">mean(L)</code> stays low because most requests finish quickly and then occupy a dead seat. A request that arrives right after a batch starts also has to wait for the <em>entire</em> batch to finish before it even begins. That is head-of-line blocking.</p> <p><strong>Continuous (iteration-level) batching</strong>, from the Orca paper, fixes this. At <em>every step</em>, the scheduler checks which requests just finished, evicts them, and admits new ones from the queue. People get on and off at every stop, not only at the end of the line.</p> <p>Here’s the same eight requests (four batch slots, lengths A=2, B=8, C=3, D=4 present at the start, E=3/F=2/G=4/H=2 arriving mid-flight) run both ways:</p> <p><img src="/assets/img/batching-llm-inference/02-static-batching.svg" alt="Static batching with four slots: idle red seats after A, C, and D finish, and requests E-H cannot start until B, the longest request, finishes at step 8. Twelve steps to clear eight requests." style="width: 100%; max-width: 54rem; height: auto; display: block; margin: 1.5rem auto;"></p> <p><img src="/assets/img/batching-llm-inference/03-continuous-batching.svg" alt="Continuous batching with the same eight requests and four slots: each new request fills a seat the moment it frees, and the queue clears in eight steps." style="width: 100%; max-width: 42rem; height: auto; display: block; margin: 1.5rem auto;"></p> <p><em>(Red bars are idle slots: GPU time paid for but wasted. Static batching can’t start E-H until B, the longest request, finishes. Continuous batching drops each new request into a slot the moment it frees up.)</em></p> <p>Same eight requests, four slots, same finish order. Continuous batching clears the queue a third faster by never leaving a slot empty when work is waiting.</p> <h2 id="why-continuous-batching-isnt-that-simple">Why continuous batching isn’t that simple</h2> <p>Swapping requests in and out mid-flight sounds easy until you look at what happens <em>inside</em> a step. The linear/MLP layers use the same shared weight matrices for every request, so they batch naturally: stack every request’s token into one matrix and do one matmul. <strong>Attention is different.</strong> Each request looks back at its own key/value cache, and every request has a different cache length by now, since they joined the batch at different times and have generated different numbers of tokens. You can’t concatenate ragged-length caches into one clean matrix operation.</p> <p>Orca’s answer is <strong>selective batching</strong>: batch what can be batched (the linear layers) and compute attention separately, per request, in the same step.</p> <p><img src="/assets/img/batching-llm-inference/04-selective-batching.svg" alt="Requests A, B, and C each contribute one new token. Linear layers and MLP batch all three against shared weights; attention runs separately on each request's own KV cache (5, 2, and 9 tokens); then linear layers batch again." style="width: 100%; max-width: 48rem; height: auto; display: block; margin: 1.5rem auto;"></p> <p>This split is what makes continuous batching possible. Every request can join or leave the batch at the linear-layer stage, because those layers don’t care about sequence length. Only attention needs each request’s own history, and that is handled request by request anyway.</p> <h2 id="the-limit-in-practice">The limit in practice</h2> <p>Aggregate throughput never technically falls, and the compute crossover B* is an inflection point, not a wall. So what actually stops a real system from cranking the batch size up?</p> <p><strong>Memory.</strong> Every request in the batch holds its own key/value cache, and that cache grows with every token generated. It has to sit in GPU memory the whole time the request is being served, and it is not shared between requests the way weights are. Long before compute becomes the bottleneck, the batch runs out of room to hold everyone’s cache. That is why memory management (allocating, sharing, and reclaiming that cache space) becomes the next design problem once batching is solved. There is a smaller wrinkle too: a newly admitted request has to process its entire prompt in one shot on its first step (called <em>prefill</em>), which is much heavier than a normal decode step and briefly slows down every other request sharing that step. Real systems have tricks for smoothing that out.</p> <p>Short version: batching is nearly free up to a point set by the ratio of your hardware’s compute speed to its memory bandwidth. Past that point every added request costs close to full price in latency. In nearly every real deployment, what caps batch size isn’t compute. It’s running out of memory for everyone’s growing cache.</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/prefill-vs-decode/">Prefill vs Decode</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/transformer-inference-arithmetic-part-2/">Transformer Inference Arithmetic, Part 2: Tensor Parallelism and Real Latency</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/transformer-inference-arithmetic-part-1/">Transformer Inference Arithmetic, Part 1: Memory and Batching</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/counting-transformer-parameters/">Counting Transformer Parameters</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/ar-vr-optics-explained-from-scratch/">AR/VR Optics, Explained From Scratch</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/ai-engineering-stack-from-prompts-to-agents/">The AI Engineering Stack in 2026</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/building-large-language-models/">Building Large Language Models</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/rumination-and-default-mode-network/">Rumination and the Default Mode Network</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/">Dopamine and Motivation</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/">Stress, the Amygdala, and the Prefrontal Cortex</a> </li> </ul> </div> </div> <footer class="sticky-bottom mt-5" role="contentinfo"> <div class="container"> <div class="footer-social" aria-label="Social links"> <a href="mailto:sharmabhishek1710@gmail.com" title="Email"><i class="fa-solid fa-envelope"></i></a> <a href="https://github.com/avisekksarma" title="Github username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-github"></i></a> <a href="https://www.linkedin.com/in/aviseksarma" title="Linkedin username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-linkedin"></i></a> <a href="https://twitter.com/abh_avisek" title="X username" rel="external nofollow noopener" target="_blank"><i class="fa-brands fa-x-twitter"></i></a> </div> <p class="footer-copy"> © Copyright 2026 Abhishek Sharma. </p> </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "About",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-publications",
+          title: "Publications",
+          description: "Peer-reviewed publications and conference papers.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/publications/";
+          },
+        },{id: "nav-projects",
+          title: "Projects",
+          description: "Selected research and engineering projects.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/projects/";
+          },
+        },{id: "nav-cv",
+          title: "CV",
+          description: "Curriculum vitae, education, experience, teaching, awards, and selected work.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-teaching",
+          title: "Teaching",
+          description: "Instruction, workshops, and mentoring in computer science and machine learning.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/teaching/";
+          },
+        },{id: "nav-writing",
+          title: "Writing",
+          description: "Essays and technical notes on machine learning, databases, neuroscience, and AR/VR.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "post-batching-llm-inference",
+        
+          title: "Batching LLM Inference",
+        
+        description: "Step time is a + b·B. Continuous batching keeps slots full. KV-cache memory is what usually caps batch size.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/batching-llm-inference/";
+          
+        },
+      },{id: "post-prefill-vs-decode",
+        
+          title: "Prefill vs Decode",
+        
+        description: "An LLM request splits into prefill and decode. Prefill shares the weight-stream cost across the prompt, so it is compute-bound. Decode pays it for about one token, so it is memory-bandwidth-bound.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/prefill-vs-decode/";
+          
+        },
+      },{id: "post-transformer-inference-arithmetic-part-2-tensor-parallelism-and-real-latency",
+        
+          title: "Transformer Inference Arithmetic, Part 2: Tensor Parallelism and Real Latency",
+        
+        description: "Part 2 of the 52B walkthrough: tensor parallelism, a full decode-step latency model, the communication roofline, where FLOPs ≈ 2P comes from, and a 13B FasterTransformer check.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/transformer-inference-arithmetic-part-2/";
+          
+        },
+      },{id: "post-transformer-inference-arithmetic-part-1-memory-and-batching",
+        
+          title: "Transformer Inference Arithmetic, Part 1: Memory and Batching",
+        
+        description: "Notes on kipply&#39;s Transformer Inference Arithmetic, part 1: what a decode step does, why the KV cache exists, why small-batch decode waits on memory, and how many conversations actually fit.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/transformer-inference-arithmetic-part-1/";
+          
+        },
+      },{id: "post-counting-transformer-parameters",
+        
+          title: "Counting Transformer Parameters",
+        
+        description: "How to count the parameters in a decoder-only Transformer: tokenizer vs embedding, 12 d_model² per block, a 7B example, and the difference between weight memory and KV-cache.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/counting-transformer-parameters/";
+          
+        },
+      },{id: "post-ar-vr-optics-explained-from-scratch",
+        
+          title: "AR/VR Optics, Explained From Scratch",
+        
+        description: "AR/VR display optics: field of view, eye-box, vergence-accommodation conflict, waveguides, holographic optical elements, metasurfaces, and pancake lenses.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/ar-vr-optics-explained-from-scratch/";
+          
+        },
+      },{id: "post-the-ai-engineering-stack-in-2026",
+        
+          title: "The AI Engineering Stack in 2026",
+        
+        description: "A practical map of current AI engineering vocabulary: prompt, context, harness, loop, agentic, and graph engineering, plus memory and evals.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/ai-engineering-stack-from-prompts-to-agents/";
+          
+        },
+      },{id: "post-building-large-language-models",
+        
+          title: "Building Large Language Models",
+        
+        description: "A self-contained guide to how modern LLMs are trained: pretraining, tokenization, evaluation, data pipelines, scaling laws, SFT, RLHF/DPO, and systems efficiency. Based on Stanford CS229 guest lecture notes.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/building-large-language-models/";
+          
+        },
+      },{id: "post-rumination-and-the-default-mode-network",
+        
+          title: "Rumination and the Default Mode Network",
+        
+        description: "A deep but beginner-friendly neuroscience guide to rumination, the default mode network, mind-wandering, self-referential thought, and practical ways to escape mental loops.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rumination-and-default-mode-network/";
+          
+        },
+      },{id: "post-dopamine-and-motivation",
+        
+          title: "Dopamine and Motivation",
+        
+        description: "A deep but beginner-friendly guide to dopamine and motivation: reward prediction error, wanting vs liking, effort, habits, addiction, procrastination, dopamine detox myths, and practical life design.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/dopamine-and-motivation-neuroscience-of-wanting-effort-reward-drive/";
+          
+        },
+      },{id: "post-stress-the-amygdala-and-the-prefrontal-cortex",
+        
+          title: "Stress, the Amygdala, and the Prefrontal Cortex",
+        
+        description: "A deep but beginner-friendly guide to how stress changes the brain, how the amygdala and prefrontal cortex interact, and how to use this knowledge in real life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/stress-amygdala-prefrontal-cortex-complete-guide/";
+          
+        },
+      },{id: "post-neuroplasticity-part-2-the-machinery-of-brain-change",
+        
+          title: "Neuroplasticity, Part 2: The Machinery of Brain Change",
+        
+        description: "An advanced but readable guide to neuroplasticity: synapses, dopamine, BDNF, myelin, critical periods, maladaptive plasticity, and self-directed brain change.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-2-the-machinery-of-brain-change/";
+          
+        },
+      },{id: "post-neuroplasticity-part-1-the-brain-learns-by-changing",
+        
+          title: "Neuroplasticity, Part 1: The Brain Learns by Changing",
+        
+        description: "A beginner-friendly but deep guide to neuroplasticity: how the brain changes, how learning works, why habits form, and how to use plasticity in daily life.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/neuroplasticity-part-1-the-brain-learns-by-changing/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-3-production-engineering",
+        
+          title: "Database Skills for Software Engineers, Part 3: Production Engineering",
+        
+        description: "MVCC internals, partitioning, zero-downtime migrations, cursor pagination, replication, and monitoring. The advanced layer that separates engineers who run databases from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-3-production/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-2-internals",
+        
+          title: "Database Skills for Software Engineers, Part 2: Internals",
+        
+        description: "Indexes, query planning, transactions, window functions, N+1, connection pooling, and locks. The intermediate layer that separates engineers who write queries from engineers who own them.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-2-internals/";
+          
+        },
+      },{id: "post-database-skills-for-software-engineers-part-1-foundations",
+        
+          title: "Database Skills for Software Engineers, Part 1: Foundations",
+        
+        description: "A practical, no-fluff guide to relational databases: the kind of depth that actually shows up in senior engineering interviews.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/database-skills-part-1-foundations/";
+          
+        },
+      },{id: "post-acid-properties-demystified",
+        
+          title: "ACID Properties Demystified",
+        
+        description: "Atomicity, Consistency, Isolation, Durability: explained clearly with real examples, all four anomalies, and a practical guide on which isolation level to actually use.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/acid-properties-demystified/";
+          
+        },
+      },{id: "books-the-godfather",
+          title: 'The Godfather',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_godfather/";
+            },},{id: "projects-topic-modeling-for-nepali-political-news",
+          title: 'Topic Modeling for Nepali Political News',
+          description: "Comparative evaluation of LDA, NMF, LSA, and BERTopic on Nepali political news, published at IEEE ICICT 2025.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/1_nepali-topic-modeling/";
+            },},{id: "projects-invoice-information-extraction",
+          title: 'Invoice Information Extraction',
+          description: "Layout-aware invoice extraction with YOLO, table transformers, and GPT-4 Vision. First place, LLM category, Kathmandu University AI Competition 2023.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/2_invoice-extraction/";
+            },},{id: "projects-videolize",
+          title: 'Videolize',
+          description: "Text-to-video generation by interpolating in Stable Diffusion latent space. First place, GenAI, LOCUS Hack-A-Week 2023.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/3_videolize/";
+            },},{id: "projects-summitseeker",
+          title: 'SummitSeeker',
+          description: "Django REST backend for a trekking app in Nepal, covering trails, guides, hiring, and reviews.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/4_summitseeker/";
+            },},{id: "projects-adversarial-search-for-checkers",
+          title: 'Adversarial Search for Checkers',
+          description: "A C++ checkers engine using Minimax search with alpha-beta pruning.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/5_checkers-ai/";
+            },},{id: "projects-procedural-terrain-generation",
+          title: 'Procedural Terrain Generation',
+          description: "Perlin-noise terrain in C++, drawn from scratch with clipping and a Z-buffer.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/6_procedural-terrain/";
+            },},{id: "projects-campus-network-design",
+          title: 'Campus Network Design',
+          description: "University campus network in Cisco Packet Tracer: hierarchical topology, VLANs, subnetting, and OSPF.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/7_university-network/";
+            },},{id: "projects-quasar-linearizable-replicated-key-value-store",
+          title: 'Quasar: Linearizable Replicated Key-Value Store',
+          description: "Raft replicated state machine with majority-quorum commit, crash-durable WAL, snapshot compaction, and linearizable reads.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/8_quasar/";
+            },},{id: "teachings-web-development-with-django",
+          title: 'Web Development with Django',
+          description: "Large-scale workshop series on Django application development",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/django-workshop/";
+            },},{id: "teachings-it-club-technical-programs",
+          title: 'IT Club Technical Programs',
+          description: "Campus technical community leadership and programming outreach",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/it-club-service/";
+            },},{id: "teachings-mathematical-foundations-of-machine-learning",
+          title: 'Mathematical Foundations of Machine Learning',
+          description: "LOCUS Fellowship instructor: core ML mathematics and algorithms",
+          section: "Teachings",handler: () => {
+              window.location.href = "/teachings/locus-fellowship/";
+            },},{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%73%68%61%72%6D%61%62%68%69%73%68%65%6B%31%37%31%30@%67%6D%61%69%6C.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/avisekksarma", "_blank");
+        },
+      },{
+        id: 'social-linkedin',
+        title: 'LinkedIn',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.linkedin.com/in/aviseksarma", "_blank");
+        },
+      },{
+        id: 'social-x',
+        title: 'X',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://twitter.com/abh_avisek", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
