@@ -35,10 +35,6 @@ I received a B.E. in Computer Engineering from [IOE Pulchowk Campus](https://pca
 
 ### Interests
 
-- Distributed systems
-- AI infrastructure and systems
-- Databases
-- High-performance computing
-- Web technologies
-- Cloud computing
-- Applied machine learning
+- Systems: distributed systems, databases, high-performance computing, and storage
+- AI infrastructure: applied machine learning and LLM serving
+- Cloud and web: web technologies, cloud computing, and APIs

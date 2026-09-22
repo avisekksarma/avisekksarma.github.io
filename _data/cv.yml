@@ -265,10 +265,11 @@ cv:
         summary: Professional
 
     Interests:
-      - name: Distributed systems
-      - name: AI infrastructure and systems
-      - name: Databases
-      - name: High-performance computing
-      - name: Web technologies
-      - name: Cloud computing
-      - name: Applied machine learning
+      - name: Systems
+        keywords: "distributed systems, databases, HPC, storage"
+
+      - name: AI infrastructure
+        keywords: "applied ML, LLM serving"
+
+      - name: Cloud and web
+        keywords: "web technologies, cloud computing, APIs"
