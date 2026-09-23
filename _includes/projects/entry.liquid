@@ -3,16 +3,12 @@
   {% assign proj_href = project.redirect %}
 {% endif %}
 {% assign proj_blurb = project.summary | default: project.description %}
-{% assign proj_year = project.dates | default: project.year %}
 
 <article class="proj-entry">
   <div class="proj-entry-head">
     <h3 class="proj-entry-title">
       <a href="{{ proj_href }}">{{ project.title }}</a>
     </h3>
-    {% unless proj_year == blank %}
-      <div class="proj-entry-year">{{ proj_year }}</div>
-    {% endunless %}
   </div>
 
   {% unless project.venue == blank %}

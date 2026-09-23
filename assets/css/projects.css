@@ -105,17 +105,6 @@
   color: var(--global-theme-color);
 }
 
-.proj-entry-year {
-  flex: 0 0 auto;
-  color: var(--global-text-color-light);
-  font-size: 0.86rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
-  line-height: 1.35;
-  text-align: right;
-  white-space: nowrap;
-}
-
 .proj-entry-meta {
   margin: 0.2rem 0 0;
   color: var(--global-text-color);
@@ -245,16 +234,6 @@
 }
 
 @media (max-width: 720px) {
-  .proj-entry-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.15rem;
-  }
-
-  .proj-entry-year {
-    text-align: left;
-  }
-
   .proj-entry-foot {
     flex-direction: column;
     align-items: flex-start;
