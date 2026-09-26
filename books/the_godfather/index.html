@@ -156,7 +156,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "post-batching-llm-inference",
+        },{id: "post-pagedattention-how-vllm-manages-kv-cache-memory-like-an-operating-system",
+        
+          title: "PagedAttention: How vLLM Manages KV-Cache Memory Like an Operating System",
+        
+        description: "Serving an LLM to many users is mostly a KV-cache memory problem. vLLM borrowed paging from operating systems so the cache grows in small blocks instead of worst-case chunks, which is why throughput goes up 2–4×.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/paged-attention/";
+          
+        },
+      },{id: "post-batching-llm-inference",
         
           title: "Batching LLM Inference",
         
