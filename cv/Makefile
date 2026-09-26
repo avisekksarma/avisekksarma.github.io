@@ -1,6 +1,6 @@
 # Primary résumé only (the one the site uses):
 #   make                    # cv/tex/main.tex → cv/pdf/main.pdf
-#   make pdf/academic.pdf   # academic CV variant (preview; not the site download)
+#   make pdf/Abhishek_Sharma_CV.pdf  # CV variant (preview; not the site download)
 #
 # Other .tex files in tex/ are for Cursor preview; do not need a PDF unless you
 # later want one on the site — then: make pdf/resume-uniA.pdf
