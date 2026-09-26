@@ -109,6 +109,6 @@ Orca solved the empty-seat problem. Its remaining flaw is that it reserves worst
 
 <img src="/assets/img/batching-llm-inference/06-orca-kv-reservation.svg" alt="Three requests each reserve 512 KV slots. Only 40, 300, and 120 slots are actually used. The empty reserved space blocks new admissions." style="width: 100%; max-width: 48rem; height: auto; display: block; margin: 1.5rem auto;" />
 
-[PagedAttention](https://arxiv.org/abs/2309.06180) (vLLM) is the next step: allocate KV in small blocks as the request grows, instead of reserving the worst case up front.
+[PagedAttention](/blog/2026/paged-attention/) (vLLM) is the next step: allocate KV in small blocks as the request grows, instead of reserving the worst case up front.
 
 Short version: batching is nearly free up to a point set by the ratio of your hardware's compute speed to its memory bandwidth. Past that point every added request costs close to full price in latency. In nearly every real deployment, what caps batch size isn't compute. It's running out of memory for everyone's growing cache. Orca keeps the seats full. PagedAttention is how the industry stopped paying for empty ones.

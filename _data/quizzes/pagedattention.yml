@@ -1,0 +1,119 @@
+# Quiz data for the PagedAttention post.
+# Jekyll: save as _data/quizzes/pagedattention.yml
+#
+# Each question works in two modes:
+#   - Multiple choice: `question` + `options` (answer = 0-based index of the correct option) + `explanation`
+#   - Flashcard:       `card_front` (falls back to `question` if missing) + `card_back`
+# `section` names the part of the post the question covers.
+
+id: pagedattention
+title: "Check your understanding: PagedAttention & KV-cache memory"
+description: "5 questions covering the whole post. Try multiple choice, or switch to flashcards to review."
+
+questions:
+
+  - id: contiguous-waste
+    section: "3. The old way: one contiguous chunk per request"
+    question: "A request reserved 12 contiguous KV slots (the max length). It has used 4 so far and will finish at 7 tokens. How are its 8 currently unused slots classified?"
+    options:
+      - "All 8 are external fragmentation"
+      - "5 are reserved for future tokens, 3 are internal fragmentation"
+      - "All 8 are internal fragmentation"
+      - "3 are reserved for future tokens, 5 are internal fragmentation"
+    answer: 3
+    explanation: >-
+      Slots 5–7 will eventually hold tokens but sit empty for now (reserved). Slots 8–12 will never be used
+      (internal fragmentation). External fragmentation is different: free gaps between different requests'
+      chunks that are each too small to use.
+    card_front: "Why is reserving max-length contiguous memory per request wasteful? Name the three kinds of waste."
+    card_back: >-
+      The KV cache grows one token per step and its final size is unknown, so older systems reserved the worst
+      case as one contiguous chunk. (1) Reserved: slots for future tokens, empty for most of the request's life.
+      (2) Internal fragmentation: slots past the real final length, never used. (3) External fragmentation:
+      free memory split into gaps between chunks, none big enough (e.g. gaps of 7 and 5 can't hold a request
+      needing 12). Only about 20–40% of KV memory held real data.
+
+  - id: paging-fix
+    section: "4. The fix: paging, borrowed from operating systems"
+    question: "With paged allocation and a block size of 16 tokens, what is the most KV memory a single request can waste?"
+    options:
+      - "None at all"
+      - "Fewer than 16 token slots, because only its last block can be partly empty"
+      - "Up to 16 blocks"
+      - "max_length minus its current length"
+    answer: 1
+    explanation: >-
+      Blocks are allocated one at a time as the previous one fills, so every block except the last is full.
+      Waste per request is always less than one block, versus up to ~2,000 slots with worst-case reservation.
+      The paper reports total waste under about 4%.
+    card_front: "How does paging fix KV-cache waste, and what is the OS analogy?"
+    card_back: >-
+      KV memory is cut into fixed-size blocks (e.g. 16 tokens). Each request has a block table mapping its
+      logical blocks to scattered physical blocks, like a page table maps a process's pages to physical frames.
+      Reserved waste: gone (allocate only when the last block fills). Internal fragmentation: under one block
+      per request. External fragmentation: gone (any free block fits any request). Tables also allow sharing
+      blocks between samples via reference counts and copy-on-write.
+
+  - id: decode-step
+    section: "5. How the PagedAttention algorithm works"
+    question: "Block size is 4 and a request has 8 tokens cached. Where is the next (9th) token's K/V written?"
+    options:
+      - "Slot 3 of logical block 1"
+      - "Slot 0 of a newly allocated block (logical block 2)"
+      - "Slot 4 of logical block 1"
+      - "It must wait until another request finishes"
+    answer: 1
+    explanation: >-
+      divmod(8, 4) = (2, 0): logical block 2, slot 0. Slot 0 means the previous block is exactly full, so a
+      free physical block is allocated and appended to the block table first, then the K/V is written into it.
+    card_front: "Walk through one decode step of PagedAttention for one request. Why is the result exact?"
+    card_back: >-
+      (1) Compute the new token's q, k, v. (2) logical_block, slot = divmod(n, block_size); if slot == 0,
+      allocate a new block; write k, v into block_table[logical_block] at slot. (3) Walk the block table: for
+      each block, load its K/V, compute scores q·Kᵀ/√d (masking empty slots), and update a running max m,
+      sum l and output o, rescaling l and o by exp(m_old − m_new) when the max grows (online softmax).
+      (4) Output = o / l. It is exact because attention's numerator and denominator are sums over tokens,
+      which can be split into per-block parts.
+
+  - id: preemption
+    section: "7. The catch: running out of blocks"
+    question: "vLLM runs out of free blocks mid-generation. Why does it evict ALL of the newest request's blocks instead of just one?"
+    options:
+      - "Because generating the next token needs the K/V of every previous token, so a request missing any block can't take a single step"
+      - "Because the free list can only release whole requests"
+      - "Because it is faster to free many blocks at once"
+      - "Because partial eviction would break the reference counts"
+    answer: 0
+    explanation: >-
+      Attention sums over all previous tokens. A request missing even one block is stuck while still holding
+      its other blocks, the worst of both outcomes. So eviction is all-or-nothing. The newest arrival is chosen
+      to keep first-come-first-served fairness.
+    card_front: "Why can vLLM run out of blocks, and what happens when it does?"
+    card_back: >-
+      vLLM allocates optimistically: only the prompt's blocks at admission, then one block at a time. That fits
+      far more requests than reserving the max (e.g. 5 vs 2 in 10 blocks), but blocks can run out mid-generation.
+      Then it preempts the newest request, freeing all its blocks; the victim goes to the front of the queue
+      with its token IDs kept. It returns by swap (copy KV to CPU and back) or recompute (re-run prefill on
+      prompt + generated tokens, cheap because prefill is one parallel pass while decode was one slow step per
+      token). If memory is too tight, repeated preemption causes thrashing and throughput collapses.
+
+  - id: throughput
+    section: "8. Results: why less waste means more throughput"
+    question: "Why does reducing KV-cache waste give vLLM 2–4× higher throughput at the same latency?"
+    options:
+      - "Paged attention kernels do fewer FLOPs per token"
+      - "More requests fit in memory, so batches are bigger, and each step's fixed cost of reading the weights is shared by more requests"
+      - "Less waste lets the model run in lower precision"
+      - "Each individual request generates tokens 2–4× faster"
+    answer: 1
+    explanation: >-
+      Step time ≈ a + b·B, where a (reading the weights) is paid once per step however many requests share it,
+      so throughput ≈ B / (a + b·B) rises with batch size B. Higher capacity means the system sustains a
+      higher request rate before latency shoots up.
+    card_front: "Trace the chain from 'less wasted memory' to '2–4× throughput at the same latency', with numbers."
+    card_back: >-
+      Less waste → more requests fit → bigger batch → more throughput. With ~15,000 tokens of KV budget,
+      reserving 2,048 per request fits ~7 requests; paging with ~500-token requests fits ~30. At a = 20 ms,
+      b = 0.5 ms that is ~300 vs ~860 tokens/s. "At the same latency" means: at a chosen latency target, vLLM
+      sustains 2–4× the request rate before latency blows up. It even beats an Orca variant that knows exact
+      lengths, because exact reservation still holds memory for future tokens and still fragments.

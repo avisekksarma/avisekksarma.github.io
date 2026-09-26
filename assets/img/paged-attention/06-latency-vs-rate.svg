@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 340" width="100%" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<text x="340" y="22" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor">Illustrative: comparing systems at the same latency</text>
+<line x1="80" y1="280" x2="620" y2="280" stroke="#999" stroke-width="1"/>
+<line x1="80" y1="40" x2="80" y2="280" stroke="#999" stroke-width="1"/>
+<g font-size="12" fill="currentColor" text-anchor="middle">
+<text x="80" y="298">0</text><text x="260" y="298">1</text><text x="440" y="298">2</text><text x="620" y="298">3</text>
+<text x="350" y="324">Request rate (requests / sec)</text>
+<text x="30" y="160" transform="rotate(-90 30 160)">Latency per output token</text>
+</g>
+<line x1="80" y1="232" x2="620" y2="232" stroke="#888" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="616" y="224" font-size="12" text-anchor="end" fill="currentColor">latency target</text>
+<path d="M80 260.8 L116 256 L152 248 L188 232 L206 216 L224 184 L233 152 L242 88 L245.6 40" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M80 260.8 L170 256 L260 248 L350 232 L395 216 L440 184 L462.5 152 L485 88 L494 40" fill="none" stroke="#1D9E75" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="188" y1="232" x2="188" y2="280" stroke="#D85A30" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="350" y1="232" x2="350" y2="280" stroke="#1D9E75" stroke-width="1" stroke-dasharray="3 3"/>
+<circle cx="188" cy="232" r="4.5" fill="#D85A30"/>
+<circle cx="350" cy="232" r="4.5" fill="#1D9E75"/>
+<text x="194" y="272" font-size="12" fill="#D85A30">0.6</text>
+<text x="356" y="272" font-size="12" fill="#1D9E75">1.5</text>
+<text x="252" y="60" font-size="14" font-weight="600" fill="#D85A30">Contiguous reservation</text>
+<text x="502" y="60" font-size="14" font-weight="600" fill="#1D9E75">Paged (vLLM)</text>
+</svg>

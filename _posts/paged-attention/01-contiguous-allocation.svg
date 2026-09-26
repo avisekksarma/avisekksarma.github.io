@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 232" width="100%" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<text x="40" y="24" font-size="14" font-weight="600" fill="currentColor">Contiguous allocation: each request reserves the max length (12 slots)</text>
+<g font-size="12" fill="currentColor" text-anchor="middle">
+<text x="115" y="48">Req A</text><text x="352.5" y="48">Req B</text><text x="565" y="48">Req C</text>
+<text x="233.75" y="110">free: 7</text><text x="458.75" y="110">free: 5</text>
+</g>
+<g fill="#9FE1CB" stroke="#0F6E56" stroke-width="1">
+<rect x="40" y="56" width="50" height="36" rx="3"/><rect x="277.5" y="56" width="75" height="36" rx="3"/><rect x="490" y="56" width="125" height="36" rx="3"/>
+</g>
+<g fill="#FAC775" stroke="#854F0B" stroke-width="1">
+<rect x="90" y="56" width="37.5" height="36" rx="3"/><rect x="352.5" y="56" width="25" height="36" rx="3"/><rect x="615" y="56" width="12.5" height="36" rx="3"/>
+</g>
+<g fill="#F5C4B3" stroke="#993C1D" stroke-width="1">
+<rect x="127.5" y="56" width="62.5" height="36" rx="3"/><rect x="377.5" y="56" width="50" height="36" rx="3"/><rect x="627.5" y="56" width="12.5" height="36" rx="3"/>
+</g>
+<g fill="none" stroke="#888" stroke-width="1" stroke-dasharray="4 3">
+<rect x="190" y="56" width="87.5" height="36" rx="3"/><rect x="427.5" y="56" width="62.5" height="36" rx="3"/>
+</g>
+<text x="40" y="142" font-size="14" font-weight="600" fill="currentColor">A new request arrives needing 12 contiguous slots</text>
+<rect x="40" y="152" width="150" height="28" rx="3" fill="#CECBF6" stroke="#534AB7"/>
+<text x="115" y="170" font-size="12" text-anchor="middle" fill="#26215C">needs 12</text>
+<text x="202" y="170" font-size="12" fill="currentColor">Free in total: 7 + 5 = 12. Largest gap: 7. Rejected.</text>
+<rect x="40" y="206" width="14" height="14" rx="3" fill="#9FE1CB" stroke="#0F6E56"/>
+<rect x="120" y="206" width="14" height="14" rx="3" fill="#FAC775" stroke="#854F0B"/>
+<rect x="275" y="206" width="14" height="14" rx="3" fill="#F5C4B3" stroke="#993C1D"/>
+<rect x="400" y="206" width="14" height="14" rx="3" fill="none" stroke="#888" stroke-dasharray="3 2"/>
+<g font-size="12" fill="currentColor">
+<text x="62" y="217">Used</text><text x="142" y="217">Reserved (future)</text><text x="297" y="217">Never used</text><text x="422" y="217">External fragmentation</text>
+</g>
+</svg>

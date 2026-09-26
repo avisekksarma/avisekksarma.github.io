@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 392" width="100%" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<defs><marker id="pa-algo-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<text x="30" y="24" font-size="14" font-weight="600" fill="currentColor">One decode step of PagedAttention for Req A (block size 4, 10 tokens cached)</text>
+<rect x="30" y="44" width="170" height="48" rx="8" fill="#D3D1C7" stroke="#5F5E5A"/>
+<text x="115" y="64" font-size="14" font-weight="600" text-anchor="middle" fill="#2C2C2A">New token</text>
+<text x="115" y="82" font-size="12" text-anchor="middle" fill="#2C2C2A">q, k, v from linear layers</text>
+<text x="30" y="128" font-size="12" fill="currentColor">Block table (Req A)</text>
+<g fill="none" stroke="#888" stroke-width="1">
+<rect x="30" y="138" width="170" height="26"/><rect x="30" y="164" width="170" height="26"/><rect x="30" y="190" width="170" height="26"/>
+</g>
+<g font-size="12" fill="currentColor" text-anchor="middle">
+<text x="115" y="155">logical 0 → #7</text><text x="115" y="181">logical 1 → #1</text><text x="115" y="207">logical 2 → #3</text>
+</g>
+<g stroke="#888" stroke-width="1" fill="none">
+<line x1="200" y1="151" x2="246" y2="89" marker-end="url(#pa-algo-arr)"/>
+<line x1="200" y1="177" x2="246" y2="159" marker-end="url(#pa-algo-arr)"/>
+<line x1="200" y1="203" x2="246" y2="229" marker-end="url(#pa-algo-arr)"/>
+</g>
+<g font-size="12" fill="currentColor">
+<text x="250" y="66">phys #7 (tokens 0–3)</text><text x="250" y="136">phys #1 (tokens 4–7)</text><text x="250" y="206">phys #3 (tokens 8–10)</text>
+</g>
+<g fill="#9FE1CB" stroke="#0F6E56" stroke-width="1">
+<rect x="250" y="72" width="34" height="34" rx="3"/><rect x="286" y="72" width="34" height="34" rx="3"/><rect x="322" y="72" width="34" height="34" rx="3"/><rect x="358" y="72" width="34" height="34" rx="3"/>
+<rect x="250" y="142" width="34" height="34" rx="3"/><rect x="286" y="142" width="34" height="34" rx="3"/><rect x="322" y="142" width="34" height="34" rx="3"/><rect x="358" y="142" width="34" height="34" rx="3"/>
+<rect x="250" y="212" width="34" height="34" rx="3"/><rect x="286" y="212" width="34" height="34" rx="3"/>
+</g>
+<rect x="322" y="212" width="34" height="34" rx="3" fill="#FAC775" stroke="#854F0B" stroke-width="1.5"/>
+<rect x="358" y="212" width="34" height="34" rx="3" fill="none" stroke="#888" stroke-dasharray="4 3"/>
+<text x="250" y="266" font-size="12" fill="currentColor">① new k, v written to slot 2 of #3</text>
+<g stroke="#888" stroke-width="1" fill="none">
+<line x1="394" y1="89" x2="428" y2="89" marker-end="url(#pa-algo-arr)"/>
+<line x1="394" y1="159" x2="428" y2="159" marker-end="url(#pa-algo-arr)"/>
+<line x1="394" y1="229" x2="428" y2="229" marker-end="url(#pa-algo-arr)"/>
+<line x1="540" y1="109" x2="540" y2="137" marker-end="url(#pa-algo-arr)"/>
+<line x1="540" y1="179" x2="540" y2="207" marker-end="url(#pa-algo-arr)"/>
+<line x1="540" y1="249" x2="540" y2="296" marker-end="url(#pa-algo-arr)"/>
+</g>
+<g fill="#CECBF6" stroke="#534AB7" stroke-width="1">
+<rect x="430" y="69" width="220" height="40" rx="6"/><rect x="430" y="139" width="220" height="40" rx="6"/><rect x="430" y="209" width="220" height="40" rx="6"/>
+</g>
+<g font-size="12" text-anchor="middle" fill="#26215C">
+<text x="540" y="86" font-weight="600">② block 0: scores q·Kᵀ/√d</text><text x="540" y="101">update running m, l, o</text>
+<text x="540" y="156" font-weight="600">② block 1: scores q·Kᵀ/√d</text><text x="540" y="171">update running m, l, o</text>
+<text x="540" y="226" font-weight="600">② block 2: scores (mask empty)</text><text x="540" y="241">update running m, l, o</text>
+</g>
+<g font-size="11" fill="currentColor"><text x="548" y="127">carry m, l, o</text><text x="548" y="197">carry m, l, o</text></g>
+<rect x="430" y="298" width="220" height="40" rx="6" fill="#9FE1CB" stroke="#0F6E56"/>
+<text x="540" y="323" font-size="14" font-weight="600" text-anchor="middle" fill="#04342C">③ output = o / l</text>
+<rect x="30" y="362" width="14" height="14" rx="3" fill="#9FE1CB" stroke="#0F6E56"/>
+<rect x="140" y="362" width="14" height="14" rx="3" fill="#FAC775" stroke="#854F0B"/>
+<rect x="290" y="362" width="14" height="14" rx="3" fill="none" stroke="#888" stroke-dasharray="4 3"/>
+<rect x="450" y="362" width="14" height="14" rx="3" fill="#CECBF6" stroke="#534AB7"/>
+<g font-size="12" fill="currentColor">
+<text x="52" y="373">Cached K/V</text><text x="162" y="373">New token's K/V</text><text x="312" y="373">Empty slot (masked)</text><text x="472" y="373">Per-block compute</text>
+</g>
+</svg>

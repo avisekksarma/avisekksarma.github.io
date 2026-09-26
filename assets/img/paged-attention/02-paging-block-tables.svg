@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 304" width="100%" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<g font-size="14" font-weight="600" fill="currentColor" text-anchor="middle">
+<text x="125" y="24">Logical blocks</text><text x="335" y="24">Block tables</text><text x="555" y="24">Physical GPU memory</text>
+</g>
+<g font-size="12" fill="currentColor">
+<text x="30" y="56">Req A (10 tokens)</text><text x="30" y="146">Req B (7 tokens)</text>
+<text x="260" y="56">A: logical → physical</text><text x="260" y="160">B: logical → physical</text>
+</g>
+<g fill="none" stroke="#888" stroke-width="1">
+<rect x="30" y="66" width="60" height="34" rx="4"/><rect x="95" y="66" width="60" height="34" rx="4"/><rect x="160" y="66" width="60" height="34" rx="4"/>
+<rect x="30" y="156" width="60" height="34" rx="4"/><rect x="95" y="156" width="60" height="34" rx="4"/>
+<rect x="260" y="66" width="150" height="24"/><rect x="260" y="90" width="150" height="24"/><rect x="260" y="114" width="150" height="24"/>
+<rect x="260" y="170" width="150" height="24"/><rect x="260" y="194" width="150" height="24"/>
+</g>
+<g fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8">
+<rect x="31" y="67" width="14" height="32" rx="2"/><rect x="46" y="67" width="14" height="32" rx="2"/><rect x="61" y="67" width="14" height="32" rx="2"/><rect x="76" y="67" width="13" height="32" rx="2"/>
+<rect x="96" y="67" width="14" height="32" rx="2"/><rect x="111" y="67" width="14" height="32" rx="2"/><rect x="126" y="67" width="14" height="32" rx="2"/><rect x="141" y="67" width="13" height="32" rx="2"/>
+<rect x="161" y="67" width="14" height="32" rx="2"/><rect x="176" y="67" width="14" height="32" rx="2"/>
+</g>
+<g fill="#CECBF6" stroke="#534AB7" stroke-width="0.8">
+<rect x="31" y="157" width="14" height="32" rx="2"/><rect x="46" y="157" width="14" height="32" rx="2"/><rect x="61" y="157" width="14" height="32" rx="2"/><rect x="76" y="157" width="13" height="32" rx="2"/>
+<rect x="96" y="157" width="14" height="32" rx="2"/><rect x="111" y="157" width="14" height="32" rx="2"/><rect x="126" y="157" width="14" height="32" rx="2"/>
+</g>
+<g font-size="12" fill="currentColor" text-anchor="middle">
+<text x="60" y="116">0</text><text x="125" y="116">1</text><text x="190" y="116">2</text>
+<text x="60" y="206">0</text><text x="125" y="206">1</text>
+<text x="335" y="82">0 → #7</text><text x="335" y="106">1 → #1</text><text x="335" y="130">2 → #3</text>
+<text x="335" y="186">0 → #5</text><text x="335" y="210">1 → #2</text>
+</g>
+<g fill="none" stroke="#888" stroke-width="1" stroke-dasharray="4 3">
+<rect x="455" y="42" width="95" height="40" rx="6"/><rect x="455" y="138" width="95" height="40" rx="6"/><rect x="455" y="186" width="95" height="40" rx="6"/>
+</g>
+<g font-size="12" fill="currentColor" text-anchor="middle">
+<text x="502.5" y="66">#0 free</text><text x="502.5" y="162">#4 free</text><text x="502.5" y="210">#6 free</text>
+</g>
+<g fill="#9FE1CB" stroke="#0F6E56" stroke-width="1">
+<rect x="560" y="42" width="95" height="40" rx="6"/><rect x="560" y="90" width="95" height="40" rx="6"/><rect x="560" y="186" width="95" height="40" rx="6"/>
+</g>
+<g fill="#CECBF6" stroke="#534AB7" stroke-width="1">
+<rect x="455" y="90" width="95" height="40" rx="6"/><rect x="560" y="138" width="95" height="40" rx="6"/>
+</g>
+<g text-anchor="middle" fill="#04342C">
+<text x="607.5" y="60" font-size="13" font-weight="600">A · blk 1</text><text x="607.5" y="75" font-size="11">#1</text>
+<text x="607.5" y="108" font-size="13" font-weight="600">A · blk 2</text><text x="607.5" y="123" font-size="11">#3</text>
+<text x="607.5" y="204" font-size="13" font-weight="600">A · blk 0</text><text x="607.5" y="219" font-size="11">#7</text>
+</g>
+<g text-anchor="middle" fill="#26215C">
+<text x="502.5" y="108" font-size="13" font-weight="600">B · blk 1</text><text x="502.5" y="123" font-size="11">#2</text>
+<text x="607.5" y="156" font-size="13" font-weight="600">B · blk 0</text><text x="607.5" y="171" font-size="11">#5</text>
+</g>
+<text x="340" y="258" font-size="12" text-anchor="middle" fill="currentColor">Blocks go anywhere free. Only a request's last block can be partly empty.</text>
+<rect x="150" y="278" width="14" height="14" rx="3" fill="#9FE1CB" stroke="#0F6E56"/>
+<rect x="260" y="278" width="14" height="14" rx="3" fill="#CECBF6" stroke="#534AB7"/>
+<rect x="370" y="278" width="14" height="14" rx="3" fill="none" stroke="#888" stroke-dasharray="3 2"/>
+<g font-size="12" fill="currentColor"><text x="172" y="289">Req A</text><text x="282" y="289">Req B</text><text x="392" y="289">Free block</text></g>
+</svg>

@@ -1,0 +1,31 @@
+{%- assign quiz = site.data.quizzes[include.quiz] -%} {%- if quiz == nil or quiz.questions == nil -%} {%- if jekyll.environment == "development" -%}
+<script>
+  console.warn("Quiz not found in _data/quizzes: " + {{ include.quiz | jsonify }});
+</script>
+{%- endif -%} {%- else -%}
+<section class="quiz" data-quiz-id="{{ quiz.id | default: include.quiz | escape }}" markdown="0">
+  <link rel="stylesheet" href="{{ '/assets/css/quiz.css' | relative_url | bust_file_cache }}" />
+  <div class="quiz-fallback">
+    <h2 class="quiz-title">{{ quiz.title | escape }}</h2>
+    {%- if quiz.description -%}
+    <p class="quiz-description">{{ quiz.description | escape }}</p>
+    {%- endif -%} {%- for q in quiz.questions -%}
+    <details class="quiz-fallback-item">
+      <summary>{{ q.question | escape }}</summary>
+      {%- if q.section -%}
+      <p class="quiz-section">{{ q.section | escape }}</p>
+      {%- endif -%}
+      <p><strong>Answer:</strong> {{ q.options[q.answer] | escape }}</p>
+      {%- if q.explanation -%}
+      <p>{{ q.explanation | escape }}</p>
+      {%- endif -%}
+    </details>
+    {%- endfor -%}
+  </div>
+  <div class="quiz-app"></div>
+  <script type="application/json" class="quiz-data">
+    {{ quiz | jsonify | replace: '</', '<\/' }}
+  </script>
+  <script src="{{ '/assets/js/quiz.js' | relative_url | bust_file_cache }}" defer></script>
+</section>
+{%- endif -%}

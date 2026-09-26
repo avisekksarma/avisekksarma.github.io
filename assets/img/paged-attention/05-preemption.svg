@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 310" width="100%" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<g font-size="14" font-weight="600" fill="currentColor">
+<text x="40" y="36">1. Five requests admitted: memory 100% full, all of it real data</text>
+<text x="40" y="124">2. C's last block is full. Its next token needs an 11th block. None free.</text>
+<text x="40" y="212">3. Preempt E (newest): free ALL its blocks. C takes one and continues.</text>
+</g>
+<g fill="#9FE1CB" stroke="#0F6E56"><rect x="40" y="46" width="52" height="36" rx="4"/><rect x="202" y="46" width="52" height="36" rx="4"/><rect x="418" y="46" width="52" height="36" rx="4"/><rect x="40" y="134" width="52" height="36" rx="4"/><rect x="202" y="134" width="52" height="36" rx="4"/><rect x="418" y="134" width="52" height="36" rx="4"/><rect x="40" y="222" width="52" height="36" rx="4"/><rect x="202" y="222" width="52" height="36" rx="4"/><rect x="418" y="222" width="52" height="36" rx="4"/></g>
+<g fill="#FAC775" stroke="#854F0B"><rect x="94" y="46" width="52" height="36" rx="4"/><rect x="364" y="46" width="52" height="36" rx="4"/><rect x="94" y="134" width="52" height="36" rx="4"/><rect x="364" y="134" width="52" height="36" rx="4"/><rect x="94" y="222" width="52" height="36" rx="4"/><rect x="364" y="222" width="52" height="36" rx="4"/></g>
+<rect x="310" y="222" width="52" height="36" rx="4" fill="#FAC775" stroke="#854F0B" stroke-width="2.5"/>
+<g fill="#B5D4F4" stroke="#185FA5"><rect x="148" y="46" width="52" height="36" rx="4"/><rect x="526" y="46" width="52" height="36" rx="4"/><rect x="148" y="134" width="52" height="36" rx="4"/><rect x="526" y="134" width="52" height="36" rx="4"/><rect x="148" y="222" width="52" height="36" rx="4"/><rect x="526" y="222" width="52" height="36" rx="4"/></g>
+<g fill="#CECBF6" stroke="#534AB7"><rect x="256" y="46" width="52" height="36" rx="4"/><rect x="472" y="46" width="52" height="36" rx="4"/><rect x="256" y="134" width="52" height="36" rx="4"/><rect x="472" y="134" width="52" height="36" rx="4"/><rect x="256" y="222" width="52" height="36" rx="4"/><rect x="472" y="222" width="52" height="36" rx="4"/></g>
+<g fill="#F5C4B3" stroke="#993C1D"><rect x="310" y="46" width="52" height="36" rx="4"/><rect x="310" y="134" width="52" height="36" rx="4"/><rect x="40" y="276" width="52" height="24" rx="4"/></g>
+<rect x="594" y="134" width="52" height="36" rx="4" fill="none" stroke="#888" stroke-dasharray="4 3"/>
+<g font-size="14" font-weight="600" text-anchor="middle">
+<g fill="#04342C"><text x="66" y="69">A</text><text x="228" y="69">A</text><text x="444" y="69">A</text><text x="66" y="157">A</text><text x="228" y="157">A</text><text x="444" y="157">A</text><text x="66" y="245">A</text><text x="228" y="245">A</text><text x="444" y="245">A</text></g>
+<g fill="#412402"><text x="120" y="69">C</text><text x="390" y="69">C</text><text x="120" y="157">C</text><text x="390" y="157">C</text><text x="120" y="245">C</text><text x="336" y="245">C</text><text x="390" y="245">C</text></g>
+<g fill="#042C53"><text x="174" y="69">B</text><text x="552" y="69">B</text><text x="174" y="157">B</text><text x="552" y="157">B</text><text x="174" y="245">B</text><text x="552" y="245">B</text></g>
+<g fill="#26215C"><text x="282" y="69">D</text><text x="498" y="69">D</text><text x="282" y="157">D</text><text x="498" y="157">D</text><text x="282" y="245">D</text><text x="498" y="245">D</text></g>
+<g fill="#4A1B0C"><text x="336" y="69">E</text><text x="336" y="157">E</text><text x="66" y="293">E</text></g>
+</g>
+<text x="620" y="157" font-size="12" text-anchor="middle" fill="currentColor">C ?</text>
+<text x="102" y="292" font-size="12" fill="currentColor">→ back to the front of the waiting queue (text kept, KV cache must be restored)</text>
+</svg>
